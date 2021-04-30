@@ -2,7 +2,7 @@ import './styles/border-toolbar.pcss';
 import svgPlusButton from './img/plus.svg';
 import {create} from './documentUtils';
 
-const CSS = {
+export const CSS = {
   highlightingLine: 'tc-toolbar',
   hidden: 'tc-toolbar--hidden',
   horizontalToolBar: 'tc-toolbar--hor',
@@ -63,15 +63,9 @@ class BorderToolBar {
    * @return {HTMLElement}
    */
   _generatePlusButton() {
-    const button = create('div', [CSS.plusButton]);
-
+    const button = create('div', [ CSS.plusButton ]);
+    
     button.innerHTML = svgPlusButton;
-    button.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const e = new CustomEvent('click', {'detail': {'x': event.pageX, 'y': event.pageY}, 'bubbles': true});
-
-      this._toolbar.dispatchEvent(e);
-    });
     return button;
   }
 
@@ -81,9 +75,10 @@ class BorderToolBar {
    * Generates line which сover border of _table
    */
   _generateHighlightingLine() {
-    const line = create('div', [CSS.highlightingLine]);
+    const line = create('div', [ CSS.highlightingLine ]);
 
     line.addEventListener('click', (event) => {
+      console.log('line.addEventListener')
       event.stopPropagation();
       const e = new CustomEvent('click', {'bubbles': true});
 
@@ -102,9 +97,8 @@ class BorderToolBar {
     const bar = create('div', [CSS.hidden], null, children);
 
     bar.addEventListener('mouseleave', (event) => {
-        this._recalcMousePos(event);
-      }
-    );
+      this._recalcMousePos(event);
+    });
 
     return bar;
   }

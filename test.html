@@ -1,39 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Test of Table</title>
+  <meta charset="UTF-8">
+  <title>Test of Table</title>
 
-    <style>
+  <style>
 
-        body, html {
-            margin: 0;
-        }
+      body, html {
+          margin: 0;
+      }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+      body {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
 
-        .block {
-            width: 800px;
-            margin-top: 10px;
-        }
+      #block {
+          width: 800px;
+          margin-top: 10px;
+      }
 
-    </style>
+  </style>
 
 </head>
 <body>
 
-<div class="block"></div>
+<div id="block"></div>
 
 <script src="dist/bundle.js"></script>
+<!-- Load Editor.js's Core -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
 <script>
-    const table = new Table({data: {}, config: {}, api: {}});
-    const block = document.querySelector(".block");
+  const data = {"time":1619784182164,"blocks":[{"id":"vz3Ki-Y5Ud","type":"table","data":{"content":[["1","3"],["2","4"]]}}],"version":"2.21.0"}
+  const editor = new EditorJS({
+    data: data,
+    holder: 'block',
+    tools: {
+      table: Table,
+    },
+    onChange: (s) => {
+      s.saver.save().then((r) => console.log(JSON.stringify(r)));
+    },
+    autofocus: true
+  })
 
-    block.appendChild(table.render());
+  // const table = new Table({data: {}, config: {}, api: {}});
+  // const block = document.querySelector(".block");
+  //
+  // block.appendChild(table.render());
 
 </script>
 

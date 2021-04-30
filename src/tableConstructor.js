@@ -1,6 +1,6 @@
 import './styles/table-constructor.pcss';
 import {create, getCoords, getSideByCoords} from './documentUtils';
-import {HorizontalBorderToolBar, VerticalBorderToolBar} from './borderToolBar';
+import {HorizontalBorderToolBar, VerticalBorderToolBar, CSS as BorderToolBarCss} from './borderToolBar';
 import {Table} from './table';
 
 const CSS = {
@@ -218,7 +218,18 @@ export class TableConstructor {
    * @return {boolean}
    */
   _isToolbar(elem) {
-    return !!(elem.closest('.' + CSS.toolBarHor) || elem.closest('.' + CSS.toolBarVer));
+    return elem && !!(elem.closest('.' + CSS.toolBarHor) || elem.closest('.' + CSS.toolBarVer));
+  }
+  
+  /**
+   * @private
+   *
+   * Checks elem is toolbar plus button
+   * @param {HTMLElement} elem - element
+   * @return {boolean}
+   */
+  _isToolbarPlus(elem) {
+    return elem && Boolean(elem.closest('.' + BorderToolBarCss.plusButton));
   }
 
   /**
@@ -259,7 +270,7 @@ export class TableConstructor {
    * @param {MouseEvent} event
    */
   _clickToolbar(event) {
-    if (!this._isToolbar(event.target)) {
+    if (!this._isToolbarPlus(event.target)) {
       return;
     }
     let typeCoord;
