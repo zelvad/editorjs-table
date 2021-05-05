@@ -11,13 +11,20 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.pcss$/,
-        use: ['style-loader', 'css-loader', 'postcss-loader']
+        test: /\.scss$/,
+        use: [
+          // Creates `style` nodes from JS strings
+          "style-loader",
+          // Translates CSS into CommonJS
+          "css-loader",
+          // Compiles Sass to CSS
+          "sass-loader",
+        ],
       },
       {
         test: /\.svg$/,
         loader: 'svg-inline-loader?removeSVGTagAttrs=false'
       }
     ]
-  }
+  },
 };

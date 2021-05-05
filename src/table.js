@@ -1,12 +1,16 @@
 import { create, getCoords, getSideByCoords } from './documentUtils';
-import './styles/table.pcss';
+import './styles/table.scss';
 
 const CSS = {
   table: 'tc-table',
   inputField: 'tc-table__inp',
   cell: 'tc-table__cell',
+  container: 'tc-table__container',
   wrapper: 'tc-table__wrap',
   area: 'tc-table__area',
+  addColumnVert: 'tc-table__add_column',
+  addRowHor: 'tc-table__add_row',
+  resizedColumn: 'tc-table__resize_column'
 };
 
 /**
@@ -41,9 +45,14 @@ export class Table {
     const rows = this._table.rows;
 
     for (let i = 0; i < rows.length; i++) {
+      // if (i === 0) {
+      //   cell = create('th');
+      //   rows[i].appendChild(cell);
+      // } else {
+      // }
       const cell = rows[i].insertCell(index);
-
-      this._fillCell(cell);
+      
+      this._fillCell(cell, index, i === 0);
     }
   };
 
@@ -56,7 +65,7 @@ export class Table {
   addRow(index = -1) {
     this._numberOfRows++;
     const row = this._table.insertRow(index);
-
+    
     this._fillRow(row);
 
     return row;
@@ -94,7 +103,9 @@ export class Table {
    * @returns {HTMLElement} tbody - where rows will be
    */
   _createTableWrapper() {
-    return create('div', [ CSS.wrapper ], null, [ create('table', [ CSS.table ]) ]);
+    return create('div', [ CSS.container ], null, [
+      create('div', [ CSS.wrapper ], null, [ create('table', [ CSS.table ]) ])
+    ]);
   }
 
   /**
@@ -104,16 +115,40 @@ export class Table {
   _createContenteditableArea() {
     return create('div', [ CSS.inputField ], { contenteditable: !this.readOnly });
   }
+  
+  createAddButton(cell, classNames) {
+    cell.appendChild(create('div', classNames, null, [
+      create('div'),
+      create('div')
+    ]));
+  }
 
   /**
    * @private
    * @param {HTMLElement} cell - empty cell
    */
-  _fillCell(cell) {
+  _fillCell(cell, index, isHeading = false) {
     cell.classList.add(CSS.cell);
     const content = this._createContenteditableArea();
 
     cell.appendChild(create('div', [ CSS.area ], null, [ content ]));
+    
+    // column
+    if (isHeading) {
+      this.createAddButton(cell, [ CSS.addColumnVert ]);
+      cell.appendChild(create('div', [ CSS.resizedColumn ]));
+    }
+    
+    // row
+    if (index === 0) {
+      this.createAddButton(cell, [ CSS.addRowHor ]);
+    }
+  
+    console.log(cell, this._numberOfColumns, index, isHeading);
+    const endColumn = this._numberOfColumns === index && isHeading;
+    if (endColumn) {
+      this.createAddButton(cell, [CSS.addColumnVert, `${CSS.addColumnVert}_end`]);
+    }
   }
 
   /**
@@ -124,7 +159,7 @@ export class Table {
     for (let i = 0; i < this._numberOfColumns; i++) {
       const cell = row.insertCell();
 
-      this._fillCell(cell);
+      this._fillCell(cell, i);
     }
   }
 

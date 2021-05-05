@@ -37,7 +37,10 @@
     data: data,
     holder: 'block',
     tools: {
-      table: Table,
+      table: {
+        class: Table,
+        inlineToolbar: true,
+      },
     },
     onChange: (s) => {
       s.saver.save().then((r) => console.log(JSON.stringify(r)));

@@ -1,4 +1,4 @@
-import './styles/table-constructor.pcss';
+import './styles/table-constructor.scss';
 import {create, getCoords, getSideByCoords} from './documentUtils';
 import {HorizontalBorderToolBar, VerticalBorderToolBar, CSS as BorderToolBarCss} from './borderToolBar';
 import {Table} from './table';
@@ -26,6 +26,7 @@ export class TableConstructor {
 
     /** creating table */
     this._table = new Table(readOnly);
+    console.log(this._table)
     const size = this._resizeTable(data, config);
 
     this._fillTable(data, size);
@@ -36,8 +37,8 @@ export class TableConstructor {
     /** creating ToolBars */
     this._verticalToolBar = new VerticalBorderToolBar();
     this._horizontalToolBar = new HorizontalBorderToolBar();
-    this._table.htmlElement.appendChild(this._horizontalToolBar.htmlElement);
-    this._table.htmlElement.appendChild(this._verticalToolBar.htmlElement);
+    // this._table.htmlElement.children[0].appendChild(this._horizontalToolBar.htmlElement);
+    // this._table.htmlElement.children[0].appendChild(this._verticalToolBar.htmlElement);
 
     /** Activated elements */
     this._hoveredCell = null;
@@ -101,18 +102,18 @@ export class TableConstructor {
     // value of config have to be positive number
     const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined;
     const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined;
-    const defaultRows = 2;
+    const defaultRows = 3;
     const defaultCols = 2;
     const rows = contentRows || configRows || defaultRows;
     const cols = contentCols || configCols || defaultCols;
 
     for (let i = 0; i < rows; i++) {
-      this._table.addRow();
+      this._table.addRow(i);
     }
     for (let i = 0; i < cols; i++) {
-      this._table.addColumn();
+      this._table.addColumn(i);
     }
-
+  
     return {
       rows: rows,
       cols: cols
