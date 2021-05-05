@@ -26,13 +26,12 @@ export class TableConstructor {
 
     /** creating table */
     this._table = new Table(readOnly);
-    console.log(this._table)
     const size = this._resizeTable(data, config);
 
     this._fillTable(data, size);
 
     /** creating container around table */
-    this._container = create('div', [CSS.editor, api.styles.block], null, [this._table.htmlElement]);
+    this._container = create('div', [CSS.editor, api.styles.block], null, [ this._table.htmlElement ]);
 
     /** creating ToolBars */
     this._verticalToolBar = new VerticalBorderToolBar();
@@ -108,12 +107,11 @@ export class TableConstructor {
     const cols = contentCols || configCols || defaultCols;
 
     for (let i = 0; i < rows; i++) {
-      this._table.addRow(i);
+      this._table.addRow(i, rows);
     }
     for (let i = 0; i < cols; i++) {
-      this._table.addColumn(i);
+      this._table.addColumn(i, cols);
     }
-  
     return {
       rows: rows,
       cols: cols
@@ -221,7 +219,7 @@ export class TableConstructor {
   _isToolbar(elem) {
     return elem && !!(elem.closest('.' + CSS.toolBarHor) || elem.closest('.' + CSS.toolBarVer));
   }
-  
+
   /**
    * @private
    *

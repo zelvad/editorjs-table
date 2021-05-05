@@ -94,7 +94,7 @@ class BorderToolBar {
    * @param {Element[]} children - child elements of toolbar
    */
   _generateToolBar(children) {
-    const bar = create('div', [CSS.hidden], null, children);
+    const bar = create('div', [ CSS.hidden ], null, children);
 
     bar.addEventListener('mouseleave', (event) => {
       this._recalcMousePos(event);

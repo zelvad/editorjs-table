@@ -1,4 +1,5 @@
 import { create, getCoords, getSideByCoords } from './documentUtils';
+import { Resize } from "./resize";
 import './styles/table.scss';
 
 const CSS = {
@@ -8,9 +9,8 @@ const CSS = {
   container: 'tc-table__container',
   wrapper: 'tc-table__wrap',
   area: 'tc-table__area',
-  addColumnVert: 'tc-table__add_column',
-  addRowHor: 'tc-table__add_row',
-  resizedColumn: 'tc-table__resize_column'
+  addColumn: 'tc-table__add_column',
+  addRow: 'tc-table__add_row',
 };
 
 /**
@@ -28,6 +28,9 @@ export class Table {
     this._numberOfRows = 0;
     this._element = this._createTableWrapper();
     this._table = this._element.querySelector('table');
+    this.totalColumns = 0;
+    this.totalRows = 0;
+    this.resize = new Resize(this._table);
 
     if (!this.readOnly) {
       this._hangEvents();
@@ -39,20 +42,16 @@ export class Table {
    *
    * @param {number} index - number in the array of columns, where new column to insert,-1 if insert at the end
    */
-  addColumn(index = -1) {
+  addColumn(index = -1, totalColumns) {
     this._numberOfColumns++;
+    this.totalColumns = totalColumns;
     /** Add cell in each row */
     const rows = this._table.rows;
 
     for (let i = 0; i < rows.length; i++) {
-      // if (i === 0) {
-      //   cell = create('th');
-      //   rows[i].appendChild(cell);
-      // } else {
-      // }
       const cell = rows[i].insertCell(index);
-      
-      this._fillCell(cell, index, i === 0);
+
+      this._fillCell(cell, index, i);
     }
   };
 
@@ -62,11 +61,12 @@ export class Table {
    * @param {number} index - number in the array of columns, where new column to insert,-1 if insert at the end
    * @returns {HTMLElement} row
    */
-  addRow(index = -1) {
+  addRow(index = -1, totalRows) {
+    this.totalRows = totalRows;
     this._numberOfRows++;
     const row = this._table.insertRow(index);
-    
-    this._fillRow(row);
+
+    this._fillRow(row, index);
 
     return row;
   };
@@ -112,10 +112,14 @@ export class Table {
    * @private
    * @returns {HTMLElement} - the area
    */
-  _createContenteditableArea() {
+  _createContentEditableArea() {
     return create('div', [ CSS.inputField ], { contenteditable: !this.readOnly });
   }
-  
+
+  /**
+   * @private
+   * @returns {HTMLElement} - the create col/row
+   */
   createAddButton(cell, classNames) {
     cell.appendChild(create('div', classNames, null, [
       create('div'),
@@ -127,27 +131,34 @@ export class Table {
    * @private
    * @param {HTMLElement} cell - empty cell
    */
-  _fillCell(cell, index, isHeading = false) {
+  _fillCell(cell, x, y) {
     cell.classList.add(CSS.cell);
-    const content = this._createContenteditableArea();
+    const content = this._createContentEditableArea();
 
     cell.appendChild(create('div', [ CSS.area ], null, [ content ]));
-    
+
     // column
-    if (isHeading) {
-      this.createAddButton(cell, [ CSS.addColumnVert ]);
-      cell.appendChild(create('div', [ CSS.resizedColumn ]));
+    if (y === 0) {
+      this.createAddButton(cell, [ CSS.addColumn ]);
+      if (x !== 0) {
+        const resizeElem = this.resize.createElem(x);
+        cell.appendChild(resizeElem);
+      }
     }
-    
+
     // row
-    if (index === 0) {
-      this.createAddButton(cell, [ CSS.addRowHor ]);
+    if (x === 0) {
+      this.createAddButton(cell, [ CSS.addRow ]);
     }
-  
-    console.log(cell, this._numberOfColumns, index, isHeading);
-    const endColumn = this._numberOfColumns === index && isHeading;
+
+    console.log('this.totalColumns', cell, x, y);
+    const endColumn = this.totalColumns === x + 1 && y === 0;
     if (endColumn) {
-      this.createAddButton(cell, [CSS.addColumnVert, `${CSS.addColumnVert}_end`]);
+      this.createAddButton(cell, [CSS.addColumn, `${CSS.addColumn}_end`]);
+    }
+    const endRow = this.totalRows === y + 1 && x === 0;
+    if (endRow) {
+      this.createAddButton(cell, [CSS.addRow, `${CSS.addRow}_end`]);
     }
   }
 
@@ -155,11 +166,11 @@ export class Table {
    * @private
    * @param row = the empty row
    */
-  _fillRow(row) {
+  _fillRow(row, index) {
     for (let i = 0; i < this._numberOfColumns; i++) {
       const cell = row.insertCell();
 
-      this._fillCell(cell, i);
+      this._fillCell(cell, i, index);
     }
   }
 
@@ -251,9 +262,9 @@ export class Table {
 
     event.target.dispatchEvent(new CustomEvent('mouseInActivatingArea', {
       detail: {
-        side: side,
+        side: side
       },
-      bubbles: true,
+      bubbles: true
     }));
   }
 }
