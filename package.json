@@ -29,7 +29,7 @@
     "css-loader": "^1.0.0",
     "cssnano": "^4.1.7",
     "eslint": "^5.8.0",
-    "eslint-config-codex": "github:codex-team/eslint-config",
+    "eslint-config-codex": "^1.6.1",
     "node-sass": "^5.0.0",
     "postcss-loader": "^3.0.0",
     "postcss-nested": "^4.1.0",

@@ -32,7 +32,7 @@
 <!-- Load Editor.js's Core -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
 <script>
-  const data = {"time":1619784182164,"blocks":[{"id":"vz3Ki-Y5Ud","type":"table","data":{"content":[["1","3"],["2","4"]]}}],"version":"2.21.0"}
+  const data = JSON.parse(localStorage.getItem('editorData') || "{}");
   const editor = new EditorJS({
     data: data,
     holder: 'block',
@@ -43,16 +43,12 @@
       },
     },
     onChange: (s) => {
-      s.saver.save().then((r) => console.log(JSON.stringify(r)));
+      s.saver.save().then((r) => {
+        localStorage.setItem('editorData', JSON.stringify(r));
+      });
     },
     autofocus: true
   })
-
-  // const table = new Table({data: {}, config: {}, api: {}});
-  // const block = document.querySelector(".block");
-  //
-  // block.appendChild(table.render());
-
 </script>
 
 </body>

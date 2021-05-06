@@ -81,6 +81,8 @@ class Table {
     const table = toolsContent.querySelector('table');
     const data = [];
     const rows = table.rows;
+    const sizes = [];
+    const width = table.offsetWidth;
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -88,6 +90,12 @@ class Table {
       const inputs = cols.map(cell => cell.querySelector('.' + CSS.input));
       const isWorthless = inputs.every(this._isEmpty);
 
+      if (i === 0) {
+        cols.forEach(c => {
+          sizes.push(c.offsetWidth / width);
+        })
+      }
+      
       if (isWorthless) {
         continue;
       }
@@ -95,6 +103,7 @@ class Table {
     }
 
     return {
+      settings: { sizes },
       content: data,
     };
   }

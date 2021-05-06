@@ -2,7 +2,7 @@ import { create, getCoords, getSideByCoords } from './documentUtils';
 import { Resize } from "./resize";
 import './styles/table.scss';
 
-const CSS = {
+export const CSS = {
   table: 'tc-table',
   inputField: 'tc-table__inp',
   cell: 'tc-table__cell',
@@ -36,6 +36,31 @@ export class Table {
       this._hangEvents();
     }
   }
+  
+  reCalcCoords() {
+    const cols = this._table.querySelectorAll(`.${CSS.addColumn}`)
+    for (let i = 0; i < cols.length; i += 1) {
+      cols[i].setAttribute('data-x', String(i));
+    }
+    const rows = this._table.querySelectorAll(`.${CSS.addRow}`)
+    for (let i = 0; i < rows.length; i += 1) {
+      rows[i].setAttribute('data-y', String(i));
+    }
+  }
+  
+  columnSizeReCalc() {
+    const cols = this._table.rows[0].children;
+    for (let i = 0; i < cols.length; i += 1) {
+      cols[i].style.width = `${100 / cols.length}%`;
+    }
+  }
+  
+  removeAddColumnButtons() {
+    const buttons = this._table.querySelectorAll(`.${CSS.addColumn}`)
+    for (let i = 0; i < buttons.length; i += 1) {
+      buttons[i].remove();
+    }
+  }
 
   /**
    * Add column in table on index place
@@ -53,6 +78,8 @@ export class Table {
 
       this._fillCell(cell, index, i);
     }
+    this.columnSizeReCalc();
+    this.reCalcCoords();
   };
 
   /**
@@ -66,8 +93,12 @@ export class Table {
     this._numberOfRows++;
     const row = this._table.insertRow(index);
 
+    if (index === 0) {
+      this.removeAddColumnButtons();
+    }
+    
     this._fillRow(row, index);
-
+    this.reCalcCoords();
     return row;
   };
 
@@ -120,11 +151,21 @@ export class Table {
    * @private
    * @returns {HTMLElement} - the create col/row
    */
-  createAddButton(cell, classNames) {
-    cell.appendChild(create('div', classNames, null, [
-      create('div'),
+  createAddButton(cell, classNames, coords) {
+    const plusButton = create('div');
+    const line = create('div', classNames, { 'data-x': coords.x, 'data-y': coords.y }, [
+      plusButton,
       create('div')
-    ]));
+    ]);
+  
+    plusButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const e = new CustomEvent('click', {'bubbles': true});
+  
+      line.dispatchEvent(e);
+    });
+    
+    cell.appendChild(line);
   }
 
   /**
@@ -139,7 +180,7 @@ export class Table {
 
     // column
     if (y === 0) {
-      this.createAddButton(cell, [ CSS.addColumn ]);
+      this.createAddButton(cell, [ CSS.addColumn ], { x, y });
       if (x !== 0) {
         const resizeElem = this.resize.createElem(x);
         cell.appendChild(resizeElem);
@@ -148,17 +189,16 @@ export class Table {
 
     // row
     if (x === 0) {
-      this.createAddButton(cell, [ CSS.addRow ]);
+      this.createAddButton(cell, [ CSS.addRow ], { x, y });
     }
 
-    console.log('this.totalColumns', cell, x, y);
     const endColumn = this.totalColumns === x + 1 && y === 0;
     if (endColumn) {
-      this.createAddButton(cell, [CSS.addColumn, `${CSS.addColumn}_end`]);
+      this.createAddButton(cell, [CSS.addColumn, `${CSS.addColumn}_end`], { x: x + 1, y });
     }
     const endRow = this.totalRows === y + 1 && x === 0;
     if (endRow) {
-      this.createAddButton(cell, [CSS.addRow, `${CSS.addRow}_end`]);
+      this.createAddButton(cell, [CSS.addRow, `${CSS.addRow}_end`], { x, y: y + 1 });
     }
   }
 
