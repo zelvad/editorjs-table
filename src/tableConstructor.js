@@ -24,10 +24,14 @@ export class TableConstructor {
     this.readOnly = readOnly;
 
     /** creating table */
-    this._table = new Table(readOnly);
-    const size = this._resizeTable(data, config);
 
-    this._fillTable(data, size);
+    try {
+      this._table = new Table(readOnly);
+      const size = this._resizeTable(data, config);
+      this._fillTable(data, size);
+    } catch (e) {
+      console.log(e)
+    }
 
     /** creating container around table */
     this._container = create('div', [CSS.editor, api.styles.block], null, [ this._table.htmlElement ]);
@@ -104,7 +108,7 @@ export class TableConstructor {
   
     if (settings && settings.sizes) {
       settings.sizes.forEach((size, i) => {
-        if (this._table.body.rows[0]) {
+        if (this._table.body.rows[0].children[i]) {
           this._table.body.rows[0].children[i].style.width = `${size * 100}%`;
         }
       })
@@ -139,24 +143,31 @@ export class TableConstructor {
    * @return {boolean}
    */
   _isToolbarPlus(elem) {
-    return elem && (Boolean(elem.closest('.' + TableCSS.addColumn)) || Boolean(elem.closest('.' + TableCSS.addRow)));
+    if (Boolean(elem.closest('.' + TableCSS.addColumn))) return 0;
+    if (Boolean(elem.closest('.' + TableCSS.addRow))) return 1;
+    return -1;
   }
 
   /**
    * @private
    *
    * handling clicks on toolbars
-   * @param {MouseEvent} event
+   * @param {MouseEvent} e
    */
-  _clickToolbar(event) {
-    if (!this._isToolbarPlus(event.target)) {
+  _clickToolbar(e) {
+    const index = this._isToolbarPlus(e.target);
+    if (index === -1) {
       return;
     }
-    console.log('event.target.dataset.x', event.target.dataset.x)
-    if (event.target.dataset.x === "0") {
-      this._addRow(event.target);
+  
+    if (e.target.closest(`.${TableCSS.addColumn}_end`) || e.target.closest(`.${TableCSS.addRow}_end`)) {
+      e.target.remove();
+    }
+    
+    if (index === 1) {
+      this._addRow(e.target.dataset.y);
     } else {
-      this._addColumn(event.target);
+      this._addColumn(e.target.dataset.x);
     }
   }
 
@@ -199,8 +210,7 @@ export class TableConstructor {
    * Adds row in table
    * @private
    */
-  _addRow(elem) {
-    const index = elem.dataset.y;
+  _addRow(index) {
     this._table.addRow(Number(index),  this._table.totalRows + 1);
   }
 
@@ -209,8 +219,7 @@ export class TableConstructor {
    *
    * Adds column in table
    */
-  _addColumn(elem) {
-    const index = elem.dataset.x;
+  _addColumn(index) {
     this._table.addColumn(Number(index), this._table.totalColumns + 1);
   }
 

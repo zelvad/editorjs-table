@@ -1,5 +1,6 @@
 import { create, getCoords, getSideByCoords } from './documentUtils';
 import { Resize } from "./resize";
+import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
 import './styles/table.scss';
 
 export const CSS = {
@@ -11,6 +12,8 @@ export const CSS = {
   area: 'tc-table__area',
   addColumn: 'tc-table__add_column',
   addRow: 'tc-table__add_row',
+  addColumnButton: 'tc-table__add_column_button',
+  addRowButton: 'tc-table__add_row_button',
 };
 
 /**
@@ -31,10 +34,19 @@ export class Table {
     this.totalColumns = 0;
     this.totalRows = 0;
     this.resize = new Resize(this._table);
+    this.selectLine = new SelectLine(this);
 
     if (!this.readOnly) {
       this._hangEvents();
     }
+  }
+  
+  refresh = () => {
+    this.totalColumns = this._table.rows[0].children.length
+    this.totalRows = this._table.rows.length
+    this.reCalcCoords();
+    this.addButtons();
+    this.columnSizeReCalc();
   }
   
   reCalcCoords() {
@@ -55,11 +67,60 @@ export class Table {
     }
   }
   
-  removeAddColumnButtons() {
-    const buttons = this._table.querySelectorAll(`.${CSS.addColumn}`)
-    for (let i = 0; i < buttons.length; i += 1) {
-      buttons[i].remove();
+  fillButtons = (cell, x, y) => {
+    // column
+    if (y === 0) {
+      this.createAddButton(cell, [ CSS.addColumn ], { x, y });
+      if (x !== 0) {
+        this.resize.createElem(cell);
+      }
     }
+  
+    // select line button
+    if (x === 0 || y === 0) {
+      this.selectLine.createElem(cell, Number(x === 0));
+      if (x === 0 && y === 0) {
+        this.selectLine.createElem(cell);
+      }
+    }
+  
+    // row
+    if (x === 0) {
+      this.createAddButton(cell, [ CSS.addRow ], { x, y });
+    }
+  
+    const endColumn = this.totalColumns === x + 1 && y === 0;
+    if (endColumn) {
+      this.createAddButton(cell, [CSS.addColumn, `${CSS.addColumn}_end`], { x: x + 1, y });
+    }
+    const endRow = this.totalRows === y + 1 && x === 0;
+    if (endRow) {
+      this.createAddButton(cell, [CSS.addRow, `${CSS.addRow}_end`], { x, y: y + 1 });
+    }
+  }
+  
+  addButtons = () => {
+    for (let i = 0; i < this._table.rows.length; i += 1) {
+      const row = this._table.rows[i];
+  
+      for (let r = 0; r < row.children.length; r += 1) {
+        const cell = row.children[r];
+        this.fillButtons(cell, r, i)
+      }
+    }
+  }
+  
+  removeButtons = (direction = 0) => {
+    const arr = [
+      [CSS.addColumn, CSSSelectLine.selectLineCol],
+      [CSS.addRow, CSSSelectLine.selectLineRow]
+    ]
+    arr[direction].forEach((className) => {
+      const elem1 = this._table.querySelectorAll(`.${className}`)
+      for (let i = 0; i < elem1.length; i += 1) {
+        elem1[i].remove();
+      }
+    })
   }
 
   /**
@@ -72,13 +133,17 @@ export class Table {
     this.totalColumns = totalColumns;
     /** Add cell in each row */
     const rows = this._table.rows;
+  
+    if (index === 0) {
+      this.removeButtons(1);
+    }
 
     for (let i = 0; i < rows.length; i++) {
       const cell = rows[i].insertCell(index);
-
-      this._fillCell(cell, index, i);
+      this._fillCell(cell);
     }
     this.columnSizeReCalc();
+    this.addButtons()
     this.reCalcCoords();
   };
 
@@ -94,10 +159,11 @@ export class Table {
     const row = this._table.insertRow(index);
 
     if (index === 0) {
-      this.removeAddColumnButtons();
+      this.removeButtons(0);
     }
     
     this._fillRow(row, index);
+    this.addButtons()
     this.reCalcCoords();
     return row;
   };
@@ -135,7 +201,9 @@ export class Table {
    */
   _createTableWrapper() {
     return create('div', [ CSS.container ], null, [
-      create('div', [ CSS.wrapper ], null, [ create('table', [ CSS.table ]) ])
+      create('div', [ CSS.wrapper ], null, [ create('table', [ CSS.table ]) ]),
+      create('div', [ CSS.addRowButton ]),
+      create('div', [ CSS.addColumnButton ]),
     ]);
   }
 
@@ -152,65 +220,44 @@ export class Table {
    * @returns {HTMLElement} - the create col/row
    */
   createAddButton(cell, classNames, coords) {
-    const plusButton = create('div');
-    const line = create('div', classNames, { 'data-x': coords.x, 'data-y': coords.y }, [
-      plusButton,
-      create('div')
-    ]);
+    if (!cell.querySelector(`.${classNames.join('.')}`)) {
+      const plusButton = create('div');
+      const line = create('div', classNames, { 'data-x': coords.x, 'data-y': coords.y }, [
+        plusButton,
+        create('div')
+      ]);
   
-    plusButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const e = new CustomEvent('click', {'bubbles': true});
-  
-      line.dispatchEvent(e);
-    });
+      plusButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const e = new CustomEvent('click', {'bubbles': true});
     
-    cell.appendChild(line);
+        line.dispatchEvent(e);
+      });
+  
+      cell.appendChild(line);
+    }
   }
 
   /**
    * @private
    * @param {HTMLElement} cell - empty cell
    */
-  _fillCell(cell, x, y) {
+  _fillCell(cell) {
     cell.classList.add(CSS.cell);
     const content = this._createContentEditableArea();
 
     cell.appendChild(create('div', [ CSS.area ], null, [ content ]));
-
-    // column
-    if (y === 0) {
-      this.createAddButton(cell, [ CSS.addColumn ], { x, y });
-      if (x !== 0) {
-        const resizeElem = this.resize.createElem(x);
-        cell.appendChild(resizeElem);
-      }
-    }
-
-    // row
-    if (x === 0) {
-      this.createAddButton(cell, [ CSS.addRow ], { x, y });
-    }
-
-    const endColumn = this.totalColumns === x + 1 && y === 0;
-    if (endColumn) {
-      this.createAddButton(cell, [CSS.addColumn, `${CSS.addColumn}_end`], { x: x + 1, y });
-    }
-    const endRow = this.totalRows === y + 1 && x === 0;
-    if (endRow) {
-      this.createAddButton(cell, [CSS.addRow, `${CSS.addRow}_end`], { x, y: y + 1 });
-    }
   }
 
   /**
    * @private
    * @param row = the empty row
    */
-  _fillRow(row, index) {
+  _fillRow(row) {
     for (let i = 0; i < this._numberOfColumns; i++) {
       const cell = row.insertCell();
 
-      this._fillCell(cell, i, index);
+      this._fillCell(cell);
     }
   }
 

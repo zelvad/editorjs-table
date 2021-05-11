@@ -4,8 +4,9 @@
   border-collapse: collapse;
   table-layout: fixed;
   &__container {
-    padding: 40px 11px 12px 40px;
+    padding: 40px 16px 16px 40px;
     overflow: hidden;
+    position: relative;
   }
   &__wrap {
     border: 1px solid #DBDBE2;
@@ -14,29 +15,70 @@
     width: 100%;
     box-sizing: border-box;
   }
+  &__tr_remove,
+  &__td_remove {
+    background-color: rgba(#d62c0b, 0.2);
+    transition: background-color 0.2s ease;
+  }
   &__cell {
     border: 1px solid #DBDBE2;
     padding: 0;
     vertical-align: top;
     position: relative;
   }
+  &__add_row_button,
+  &__add_column_button {
+    background-color: #dfe0e2;
+    height: 16px;
+    left: 25px;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    border-radius: 0 0 6px 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: opacity 0.2s ease;
+    &:after {
+      content: "+";
+      color: #4a525f;
+    }
+    &:hover {
+      background-color: #4a525f;
+      &:after {
+        color: #fff;
+      }
+    }
+  }
+  &__add_row_button {
+    border-radius: 0 6px 8px 0;
+    height: auto;
+    width: 16px;
+    left: auto;
+    right: 0;
+    top: 25px;
+    bottom: 0;
+  }
   &__add_row,
   &__add_column {
     flex-direction: column;
     left: -11px;
-    top: -26px;
+    top: -38px;
     position: absolute;
-    z-index: 1;
     align-items: center;
     display: flex;
     height: 4000px;
-    width: 22px;
+    width: 20px;
+    pointer-events: none;
     > div:first-child {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       align-items: center;
       justify-content: center;
       display: flex;
+      pointer-events: all;
       &:before {
         content: "";
         display: block;
@@ -47,8 +89,8 @@
       }
       &:after {
         content: "+";
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
         background-color: #72b6ec;
         border-radius: 50%;
         color: #fff;
@@ -76,40 +118,41 @@
       width: 3px;
       height: 100%;
       background-color: #72b6ec;
-      margin-top: 3px;
+      margin-top: 18px;
       opacity: 0;
     }
   }
   &__add_row {
     flex-direction: row;
-    left: -26px;
-    top: -13px;
+    left: -37px;
+    top: -11px;
     justify-content: center;
-    height: 22px;
+    height: 20px;
     width: 4000px;
     > div:last-child {
       width: 100%;
       height: 3px;
-      margin-left: 3px;
+      margin-left: 17px;
+      margin-top: 0;
     }
   }
   &__add_column {
     &_end {
       left: auto;
-      right: -12px;
+      right: -9px;
     }
   }
   &__add_row {
     &_end {
       top: auto;
-      bottom: -11px;
+      bottom: -9px;
     }
   }
   &__resize_column {
     position: absolute;
     top: -1px;
     height: 4000px;
-    left: -1.5px;
+    left: -2px;
     width: 3px;
     background-color: #4a525f;
     cursor: col-resize;
@@ -119,6 +162,28 @@
     &:hover {
       opacity: 1;
     }
+  }
+  &__select_line_col,
+  &__select_line_row {
+    position: absolute;
+    height: 16px;
+    top: -16px;
+    left: -1px;
+    right: -1px;
+    background-color: rgba(#4a525f, 0.2);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    &:hover {
+      background-color: #d62c0b;
+    }
+  }
+  &__select_line_row {
+    height: auto;
+    width: 16px;
+    left: -16px;
+    top: -1px;
+    bottom: -1px;
+    right: auto;
   }
   &__area {
     padding: 10px;

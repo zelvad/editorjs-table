@@ -20,13 +20,26 @@ export class Resize {
     document.addEventListener('mouseup', this.onDragEnd, false);
   }
   
-  createElem(index) {
-    const elem = create('div', [ CSS.resizedColumn ]);
-    elem.addEventListener('mousedown', this.onDragStart(index), false);
-    return elem;
+  createElem(cell) {
+    if (!cell.querySelector(`.${CSS.resizedColumn}`)) {
+      const elem = create('div', [ CSS.resizedColumn ]);
+      elem.addEventListener('mousedown', this.onDragStart, false);
+      cell.appendChild(elem);
+    }
   }
   
-  onDragStart = (index) => (e) => {
+  getIndex = (e) => {
+    const items = this.table.querySelectorAll(`.${CSS.resizedColumn}`);
+    for (let i = 0; i < items.length; i += 1) {
+      if (items[i] === e.target) {
+        return i
+      }
+    }
+    return -1;
+  }
+  
+  onDragStart = (e) => {
+    const index = this.getIndex(e);
     this.startX = e.pageX;
     this.active = e.target;
     this.activeIndex = index;
@@ -60,8 +73,8 @@ export class Resize {
   
   getCols = () => {
     const cells = this.table.rows[0].children;
-    const first = cells[this.activeIndex - 1];
-    const second = cells[this.activeIndex];
+    const first = cells[this.activeIndex];
+    const second = cells[this.activeIndex + 1];
     return [first, second];
   }
   
