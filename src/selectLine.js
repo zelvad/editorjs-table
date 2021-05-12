@@ -9,8 +9,7 @@ export const CSS = {
 
 export class SelectLine {
   constructor(table) {
-    this.table = table._table;
-    this.tableClass = table;
+    this.table = table;
   }
   
   createElem(cell, direction = 0) {
@@ -33,9 +32,9 @@ export class SelectLine {
   onMouseEnter = (e) => {
     if (this.getDirection(e) === 0) {
       const index = this.getIndex(e)
-      for (let i = 0; i < this.table.rows.length; i += 1) {
-        if (this.table.rows[i].children[index]) {
-          this.table.rows[i].children[index].classList.add(CSS.tdRemove);
+      for (let i = 0; i < this.table.body.rows.length; i += 1) {
+        if (this.table.body.rows[i].children[index]) {
+          this.table.body.rows[i].children[index].classList.add(CSS.tdRemove);
         }
       }
     } else {
@@ -47,7 +46,7 @@ export class SelectLine {
   onMouseLeave = (e) => {
     if (e.target) {
       if (this.getDirection(e) === 0) {
-        const tds = this.table.querySelectorAll(`.${CSS.tdRemove}`);
+        const tds = this.table.body.querySelectorAll(`.${CSS.tdRemove}`);
         tds.forEach(td => {
           td.classList.remove(CSS.tdRemove);
         })
@@ -59,7 +58,7 @@ export class SelectLine {
   }
   
   getIndex = (e) => {
-    const items = this.table.querySelectorAll(`.${e.target.className}`);
+    const items = this.table.body.querySelectorAll(`.${e.target.className}`);
     for (let i = 0; i < items.length; i += 1) {
       if (items[i] === e.target) {
         return i
@@ -71,12 +70,9 @@ export class SelectLine {
   onClick = (e) => {
     const index = this.getIndex(e);
     if (this.getDirection(e) === 0) {
-      for (let i = 0; i < this.table.rows.length; i += 1) {
-        this.table.rows[i].deleteCell(index);
-      }
+      this.table.removeColumn(index);
     } else {
-      this.table.rows[index].remove();
+      this.table.removeRow(index);
     }
-    this.tableClass.refresh();
   }
 }

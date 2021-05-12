@@ -29,7 +29,7 @@ export class Resize {
   }
   
   getIndex = (e) => {
-    const items = this.table.querySelectorAll(`.${CSS.resizedColumn}`);
+    const items = this.table.body.querySelectorAll(`.${CSS.resizedColumn}`);
     for (let i = 0; i < items.length; i += 1) {
       if (items[i] === e.target) {
         return i
@@ -43,7 +43,7 @@ export class Resize {
     this.startX = e.pageX;
     this.active = e.target;
     this.activeIndex = index;
-    this.width = this.table.offsetWidth;
+    this.width = this.table.body.offsetWidth;
     const [w1, w2] = this.getWidthCols();
     this.widthFirst = w1;
     this.widthSecond = w2;
@@ -72,14 +72,18 @@ export class Resize {
   }
   
   getCols = () => {
-    const cells = this.table.rows[0].children;
-    const first = cells[this.activeIndex];
-    const second = cells[this.activeIndex + 1];
+    const cols = this.table.colgroup.children;
+    const first = cols[this.activeIndex];
+    const second = cols[this.activeIndex + 1];
     return [first, second];
+  }
+  
+  parseWidth = (e) => {
+    return Number.parseFloat(e.style.width) / 100 * this.width;
   }
   
   getWidthCols = () => {
     const [first, second] = this.getCols()
-    return [first.offsetWidth, second.offsetWidth];
+    return [this.parseWidth(first), this.parseWidth(second)];
   }
 }

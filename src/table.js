@@ -1,6 +1,7 @@
 import { create, getCoords, getSideByCoords } from './documentUtils';
 import { Resize } from "./resize";
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
+import { CreateLine } from "./createLine";
 import './styles/table.scss';
 
 export const CSS = {
@@ -31,37 +32,19 @@ export class Table {
     this._numberOfRows = 0;
     this._element = this._createTableWrapper();
     this._table = this._element.querySelector('table');
-    this.totalColumns = 0;
-    this.totalRows = 0;
-    this.resize = new Resize(this._table);
+    this.colgroup = this._table.querySelector('colgroup');
+    
+    this.resize = new Resize(this);
     this.selectLine = new SelectLine(this);
+    this.createLine = new CreateLine(this);
 
     if (!this.readOnly) {
       this._hangEvents();
     }
   }
   
-  refresh = () => {
-    this.totalColumns = this._table.rows[0].children.length
-    this.totalRows = this._table.rows.length
-    this.reCalcCoords();
-    this.addButtons();
-    this.columnSizeReCalc();
-  }
-  
-  reCalcCoords() {
-    const cols = this._table.querySelectorAll(`.${CSS.addColumn}`)
-    for (let i = 0; i < cols.length; i += 1) {
-      cols[i].setAttribute('data-x', String(i));
-    }
-    const rows = this._table.querySelectorAll(`.${CSS.addRow}`)
-    for (let i = 0; i < rows.length; i += 1) {
-      rows[i].setAttribute('data-y', String(i));
-    }
-  }
-  
   columnSizeReCalc() {
-    const cols = this._table.rows[0].children;
+    const cols = this.colgroup.children;
     for (let i = 0; i < cols.length; i += 1) {
       cols[i].style.width = `${100 / cols.length}%`;
     }
@@ -70,7 +53,7 @@ export class Table {
   fillButtons = (cell, x, y) => {
     // column
     if (y === 0) {
-      this.createAddButton(cell, [ CSS.addColumn ], { x, y });
+      this.createLine.createElem(cell);
       if (x !== 0) {
         this.resize.createElem(cell);
       }
@@ -86,20 +69,11 @@ export class Table {
   
     // row
     if (x === 0) {
-      this.createAddButton(cell, [ CSS.addRow ], { x, y });
-    }
-  
-    const endColumn = this.totalColumns === x + 1 && y === 0;
-    if (endColumn) {
-      this.createAddButton(cell, [CSS.addColumn, `${CSS.addColumn}_end`], { x: x + 1, y });
-    }
-    const endRow = this.totalRows === y + 1 && x === 0;
-    if (endRow) {
-      this.createAddButton(cell, [CSS.addRow, `${CSS.addRow}_end`], { x, y: y + 1 });
+      this.createLine.createElem(cell, 1);
     }
   }
   
-  addButtons = () => {
+  updateButtons = () => {
     for (let i = 0; i < this._table.rows.length; i += 1) {
       const row = this._table.rows[i];
   
@@ -122,15 +96,22 @@ export class Table {
       }
     })
   }
+  
+  insertCol(index) {
+    this.colgroup.insertBefore(create('col', [], { span: 1 }), this.colgroup.children[index]);
+  }
+  
+  removeCol(index) {
+    this.body.querySelector('colgroup').children[index].remove();
+  }
 
   /**
    * Add column in table on index place
    *
    * @param {number} index - number in the array of columns, where new column to insert,-1 if insert at the end
    */
-  addColumn(index = -1, totalColumns) {
+  addColumn(index = -1) {
     this._numberOfColumns++;
-    this.totalColumns = totalColumns;
     /** Add cell in each row */
     const rows = this._table.rows;
   
@@ -138,14 +119,23 @@ export class Table {
       this.removeButtons(1);
     }
 
+    this.insertCol(index)
     for (let i = 0; i < rows.length; i++) {
       const cell = rows[i].insertCell(index);
       this._fillCell(cell);
     }
     this.columnSizeReCalc();
-    this.addButtons()
-    this.reCalcCoords();
+    this.updateButtons();
   };
+  
+  removeColumn(index) {
+    this._numberOfColumns--;
+    for (let i = 0; i < this._table.rows.length; i += 1) {
+      this._table.rows[i].deleteCell(index);
+    }
+    this.removeCol(index);
+    this.columnSizeReCalc();
+  }
 
   /**
    * Add row in table on index place
@@ -153,8 +143,7 @@ export class Table {
    * @param {number} index - number in the array of columns, where new column to insert,-1 if insert at the end
    * @returns {HTMLElement} row
    */
-  addRow(index = -1, totalRows) {
-    this.totalRows = totalRows;
+  addRow(index = -1) {
     this._numberOfRows++;
     const row = this._table.insertRow(index);
 
@@ -163,10 +152,15 @@ export class Table {
     }
     
     this._fillRow(row, index);
-    this.addButtons()
-    this.reCalcCoords();
+    this.updateButtons();
     return row;
   };
+  
+  removeRow(index) {
+    this._numberOfRows--;
+    this._table.rows[index].remove();
+    this.updateButtons();
+  }
 
   /**
    * get html element of table
@@ -201,7 +195,12 @@ export class Table {
    */
   _createTableWrapper() {
     return create('div', [ CSS.container ], null, [
-      create('div', [ CSS.wrapper ], null, [ create('table', [ CSS.table ]) ]),
+      create('div', [ CSS.wrapper ], null, [
+        create('table', [ CSS.table ], null, [
+          create('colgroup'),
+          create('tbody'),
+        ])
+      ]),
       create('div', [ CSS.addRowButton ]),
       create('div', [ CSS.addColumnButton ]),
     ]);
@@ -213,29 +212,6 @@ export class Table {
    */
   _createContentEditableArea() {
     return create('div', [ CSS.inputField ], { contenteditable: !this.readOnly });
-  }
-
-  /**
-   * @private
-   * @returns {HTMLElement} - the create col/row
-   */
-  createAddButton(cell, classNames, coords) {
-    if (!cell.querySelector(`.${classNames.join('.')}`)) {
-      const plusButton = create('div');
-      const line = create('div', classNames, { 'data-x': coords.x, 'data-y': coords.y }, [
-        plusButton,
-        create('div')
-      ]);
-  
-      plusButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const e = new CustomEvent('click', {'bubbles': true});
-    
-        line.dispatchEvent(e);
-      });
-  
-      cell.appendChild(line);
-    }
   }
 
   /**

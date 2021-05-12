@@ -64,7 +64,7 @@
   &__add_row,
   &__add_column {
     flex-direction: column;
-    left: -11px;
+    left: -10px;
     top: -38px;
     position: absolute;
     align-items: center;
@@ -156,7 +156,7 @@
     width: 3px;
     background-color: #4a525f;
     cursor: col-resize;
-    z-index: 2;
+    z-index: 1;
     opacity: 0;
     transition: opacity 0.2s ease;
     &:hover {

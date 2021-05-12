@@ -1,11 +1,9 @@
 import './styles/table-constructor.scss';
-import {create} from './documentUtils';
-import {Table, CSS as TableCSS} from './table';
+import { create } from './documentUtils';
+import { Table } from './table';
 
 const CSS = {
   editor: 'tc-editor',
-  toolBarHor: 'tc-toolbar--hor',
-  toolBarVer: 'tc-toolbar--ver',
   inputField: 'tc-table__inp'
 };
 
@@ -100,16 +98,16 @@ export class TableConstructor {
     const cols = contentCols || configCols || defaultCols;
 
     for (let i = 0; i < rows; i++) {
-      this._table.addRow(i, rows);
+      this._table.addRow(i);
     }
     for (let i = 0; i < cols; i++) {
-      this._table.addColumn(i, cols);
+      this._table.addColumn(i);
     }
   
     if (settings && settings.sizes) {
       settings.sizes.forEach((size, i) => {
-        if (this._table.body.rows[0].children[i]) {
-          this._table.body.rows[0].children[i].style.width = `${size * 100}%`;
+        if (this._table.colgroup.children[i]) {
+          this._table.colgroup.children[i].style.width = `${size * 100}%`;
         }
       })
     }
@@ -126,49 +124,9 @@ export class TableConstructor {
    * hang necessary events
    */
   _hangEvents() {
-    this._container.addEventListener('click', (event) => {
-      this._clickToolbar(event);
-    });
-
     this._container.addEventListener('keydown', (event) => {
       this._containerKeydown(event);
     });
-  }
-
-  /**
-   * @private
-   *
-   * Checks elem is toolbar plus button
-   * @param {HTMLElement} elem - element
-   * @return {boolean}
-   */
-  _isToolbarPlus(elem) {
-    if (Boolean(elem.closest('.' + TableCSS.addColumn))) return 0;
-    if (Boolean(elem.closest('.' + TableCSS.addRow))) return 1;
-    return -1;
-  }
-
-  /**
-   * @private
-   *
-   * handling clicks on toolbars
-   * @param {MouseEvent} e
-   */
-  _clickToolbar(e) {
-    const index = this._isToolbarPlus(e.target);
-    if (index === -1) {
-      return;
-    }
-  
-    if (e.target.closest(`.${TableCSS.addColumn}_end`) || e.target.closest(`.${TableCSS.addRow}_end`)) {
-      e.target.remove();
-    }
-    
-    if (index === 1) {
-      this._addRow(e.target.dataset.y);
-    } else {
-      this._addColumn(e.target.dataset.x);
-    }
   }
 
   /**
@@ -204,23 +162,6 @@ export class TableConstructor {
    */
   _isBottomOrRight() {
     return this._hoveredCellSide === 'bottom' || this._hoveredCellSide === 'right';
-  }
-
-  /**
-   * Adds row in table
-   * @private
-   */
-  _addRow(index) {
-    this._table.addRow(Number(index),  this._table.totalRows + 1);
-  }
-
-  /**
-   * @private
-   *
-   * Adds column in table
-   */
-  _addColumn(index) {
-    this._table.addColumn(Number(index), this._table.totalColumns + 1);
   }
 
   /**
