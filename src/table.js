@@ -124,8 +124,10 @@ export class Table {
       const cell = rows[i].insertCell(index);
       this._fillCell(cell);
     }
-    this.columnSizeReCalc();
-    this.updateButtons();
+    if (!this.readOnly) {
+      this.columnSizeReCalc();
+      this.updateButtons();
+    }
   };
   
   removeColumn(index) {
@@ -133,9 +135,12 @@ export class Table {
     for (let i = 0; i < this._table.rows.length; i += 1) {
       this._table.rows[i].deleteCell(index);
     }
-    this.removeCol(index);
-    this.columnSizeReCalc();
-    this.updateButtons();
+    
+    if (!this.readOnly) {
+      this.removeCol(index);
+      this.columnSizeReCalc();
+      this.updateButtons();
+    }
   }
 
   /**
@@ -195,28 +200,33 @@ export class Table {
    * @returns {HTMLElement} tbody - where rows will be
    */
   _createTableWrapper() {
-    const addRowButton = create('div', [ CSS.addRowButton ]);
-    const addColumnButton = create('div', [ CSS.addColumnButton ]);
-  
-    addRowButton.addEventListener('click', () =>
-      this.addColumn(this._numberOfColumns),
-      true
-    );
-    addColumnButton.addEventListener('click', () =>
-      this.addRow(this._numberOfRows),
-      true
-    );
-    
-    return create('div', [ CSS.container ], null, [
+    const wrapper = create('div', [ CSS.container ], null, [
       create('div', [ CSS.wrapper ], null, [
         create('table', [ CSS.table ], null, [
           create('colgroup'),
           create('tbody'),
         ])
       ]),
-      addRowButton,
-      addColumnButton,
     ]);
+    
+    if (!this.readOnly) {
+      const addRowButton = create('div', [ CSS.addRowButton ]);
+      const addColumnButton = create('div', [ CSS.addColumnButton ]);
+  
+      addRowButton.addEventListener('click', () =>
+          this.addColumn(this._numberOfColumns),
+        true
+      );
+      addColumnButton.addEventListener('click', () =>
+          this.addRow(this._numberOfRows),
+        true
+      );
+      
+      wrapper.appendChild(addRowButton)
+      wrapper.appendChild(addColumnButton)
+    }
+    
+    return wrapper;
   }
 
   /**

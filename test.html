@@ -30,12 +30,16 @@
 
 <div id="block"></div>
 
+<button id="toggleReadOnlyButton">Toggle readOnly</button>
+
 <script src="dist/bundle.js"></script>
 <!-- Load Editor.js's Core -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
 <script>
+  let readOnly = true;
   const data = JSON.parse(localStorage.getItem('editorData') || "{}");
   const editor = new EditorJS({
+    readOnly,
     data: data,
     holder: 'block',
     tools: {
@@ -45,12 +49,22 @@
       },
     },
     onChange: (s) => {
-      s.saver.save().then((r) => {
-        localStorage.setItem('editorData', JSON.stringify(r));
-      });
+      if (!readOnly) {
+        s.saver.save().then((r) => {
+          localStorage.setItem('editorData', JSON.stringify(r));
+        });
+      }
     },
     autofocus: true
   })
+
+  const toggleReadOnlyButton = document.getElementById('toggleReadOnlyButton');
+
+  toggleReadOnlyButton.addEventListener('click', async () => {
+    readOnly = await editor.readOnly.toggle();
+    // readOnlyIndicator.textContent = readOnlyState ? 'On' : 'Off';
+  });
+
 </script>
 
 </body>
