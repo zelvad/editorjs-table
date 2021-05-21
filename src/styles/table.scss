@@ -5,8 +5,13 @@
   table-layout: fixed;
   &__container {
     padding: 40px 16px 16px 40px;
+    margin: -24px 0 0 -24px;
     overflow: hidden;
     position: relative;
+    &_readonly {
+      padding: 16px 0;
+      margin: 0;
+    }
   }
   &__wrap {
     border: 1px solid #DBDBE2;
@@ -34,6 +39,7 @@
     right: 0;
     bottom: 0;
     position: absolute;
+    z-index: 1;
     border-radius: 0 0 6px 6px;
     cursor: pointer;
     display: flex;

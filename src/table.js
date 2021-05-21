@@ -9,6 +9,7 @@ export const CSS = {
   inputField: 'tc-table__inp',
   cell: 'tc-table__cell',
   container: 'tc-table__container',
+  containerReadOnly: 'tc-table__container_readonly',
   wrapper: 'tc-table__wrap',
   area: 'tc-table__area',
   addColumn: 'tc-table__add_column',
@@ -200,7 +201,8 @@ export class Table {
    * @returns {HTMLElement} tbody - where rows will be
    */
   _createTableWrapper() {
-    const wrapper = create('div', [ CSS.container ], null, [
+    const className = this.readOnly ? CSS.containerReadOnly : CSS.container;
+    const wrapper = create('div', [ className ], null, [
       create('div', [ CSS.wrapper ], null, [
         create('table', [ CSS.table ], null, [
           create('colgroup'),
