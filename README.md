@@ -1,9 +1,9 @@
 ![](https://badgen.net/badge/Editor.js/v2.0/blue)
 
 # Table tool
-Table Block for the [Editor.js](https://editorjs.io).
+Resizable Table Block for the [Editor.js](https://editorjs.io).
 
-![](https://capella.pics/870d30f0-ef73-423e-b56c-bb4f98e36e73.jpg)
+![](https://res.cloudinary.com/ddulqhyfu/image/upload/v1621586778/github/editorjs-resizable-table-1.png)
 
 ## Installation
 
@@ -12,17 +12,17 @@ Table Block for the [Editor.js](https://editorjs.io).
 Get the package
 
 ```shell
-npm i --save-dev @editorjs/table
+npm i --save-dev @8ui/editorjs-resizable-table
 ```
 or
 ```shell
-yarn add @editorjs/table --dev
+yarn add @8ui/editorjs-resizable-table --dev
 ```
 
 Include module in your application
 
 ```javascript
-const Table = require('@editorjs/table');
+const Table = require('@8ui/editorjs-resizable-table');
 ```
 
 ### Upload to your project's source dir
@@ -87,7 +87,10 @@ This Tool returns `data` with following format
 {
     "type" : "table",
     "data" : {
-        "content" : [ ["Kine", "1 pcs", "100$"], ["Pigs", "3 pcs", "200$"], ["Chickens", "12 pcs", "150$"] ]
+        "content" : [ ["Kine", "1 pcs", "100$"], ["Pigs", "3 pcs", "200$"], ["Chickens", "12 pcs", "150$"] ],
+        "settings": {
+          "sizes": [0.5, 0.25, 0.25]
+        }
     }
 }
 ```

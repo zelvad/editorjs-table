@@ -135,6 +135,7 @@ export class Table {
     }
     this.removeCol(index);
     this.columnSizeReCalc();
+    this.updateButtons();
   }
 
   /**
@@ -194,6 +195,18 @@ export class Table {
    * @returns {HTMLElement} tbody - where rows will be
    */
   _createTableWrapper() {
+    const addRowButton = create('div', [ CSS.addRowButton ]);
+    const addColumnButton = create('div', [ CSS.addColumnButton ]);
+  
+    addRowButton.addEventListener('click', () =>
+      this.addColumn(this._numberOfColumns),
+      true
+    );
+    addColumnButton.addEventListener('click', () =>
+      this.addRow(this._numberOfRows),
+      true
+    );
+    
     return create('div', [ CSS.container ], null, [
       create('div', [ CSS.wrapper ], null, [
         create('table', [ CSS.table ], null, [
@@ -201,8 +214,8 @@ export class Table {
           create('tbody'),
         ])
       ]),
-      create('div', [ CSS.addRowButton ]),
-      create('div', [ CSS.addColumnButton ]),
+      addRowButton,
+      addColumnButton,
     ]);
   }
 

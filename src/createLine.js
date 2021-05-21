@@ -26,7 +26,6 @@ export class CreateLine {
       ]);
       
       cell.appendChild(line);
-      console.log('line', className, line)
       return line;
     }
   }
