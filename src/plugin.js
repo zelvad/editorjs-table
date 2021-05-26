@@ -1,9 +1,6 @@
 const TableConstructor = require('./tableConstructor').TableConstructor;
 const svgIcon = require('./img/toolboxIcon.svg');
-
-const CSS = {
-  input: 'tc-table__inp',
-};
+const borderIcon = require('./img/border.svg');
 
 /**
  *  Tool for table's creating
@@ -58,6 +55,14 @@ class Table {
     this.readOnly = readOnly;
 
     this._tableConstructor = new TableConstructor(data, config, api, readOnly);
+  
+    this._CSS = {
+      input: 'tc-table__inp',
+      settingsButton: this.api.styles.settingsButton,
+      settingsButtonActive: this.api.styles.settingsButtonActive,
+    };
+
+    this.borderActive = data.settings?.withBorder;
   }
 
   /**
@@ -87,7 +92,7 @@ class Table {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const cols = Array.from(row.cells);
-      const inputs = cols.map(cell => cell.querySelector('.' + CSS.input));
+      const inputs = cols.map(cell => cell.querySelector('.' + this._CSS.input));
       // const isWorthless = inputs.every(this._isEmpty);
       
       // if (isWorthless) {
@@ -102,9 +107,12 @@ class Table {
       
       data.push(inputs.map(input => input.innerHTML));
     }
-
+  
     return {
-      settings: { sizes },
+      settings: {
+        sizes,
+        withBorder: this.borderActive,
+      },
       content: data,
     };
   }
@@ -116,6 +124,62 @@ class Table {
    */
   _isEmpty(input) {
     return !input.textContent.trim();
+  }
+  
+  toggleBorder = () => {
+    this.borderActive = !this.borderActive;
+    this.toggleBorderButton.classList.toggle(this._CSS.settingsButtonActive, this.borderActive);
+    this._tableConstructor._container.classList.toggle(this._tableConstructor._CSS.withBorder, this.borderActive)
+  }
+  
+  /**
+   * Create Block's settings block
+   *
+   * @returns {HTMLElement}
+   */
+  renderSettings() {
+    const holder = document.createElement('DIV');
+    
+    /** Add border toggle */
+    const toggleBorderButton = document.createElement('SPAN');
+    
+    toggleBorderButton.classList.add(this._CSS.settingsButton);
+    
+    /**
+     * Highlight current level button
+     */
+    if (this.borderActive) {
+      toggleBorderButton.classList.add(this._CSS.settingsButtonActive);
+    }
+    
+    /**
+     * Add SVG icon
+     */
+    toggleBorderButton.innerHTML = borderIcon;
+    
+    /**
+     * Save level to its button
+     */
+    toggleBorderButton.dataset.active = this.borderActive;
+    
+    /**
+     * Set up click handler
+     */
+    toggleBorderButton.addEventListener('click', () => {
+      this.toggleBorder();
+    });
+    
+    /**
+     * Append settings button to holder
+     */
+    holder.appendChild(toggleBorderButton);
+    
+    /**
+     * Save settings buttons
+     */
+    this.toggleBorderButton = toggleBorderButton;
+    
+    return holder;
   }
 }
 

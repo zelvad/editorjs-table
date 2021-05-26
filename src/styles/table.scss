@@ -13,8 +13,16 @@
       margin: 0;
     }
   }
+  &__with_border {
+    .tc-table__wrap {
+      border-color: #DBDBE2;
+    }
+    .tc-table__cell {
+      border-color: #DBDBE2;
+    }
+  }
   &__wrap {
-    border: 1px solid #DBDBE2;
+    border: 1px solid transparent;
     position: relative;
     height: 100%;
     width: 100%;
@@ -26,7 +34,7 @@
     transition: background-color 0.2s ease;
   }
   &__cell {
-    border: 1px solid #DBDBE2;
+    border: 1px solid transparent;
     padding: 0;
     vertical-align: top;
     position: relative;

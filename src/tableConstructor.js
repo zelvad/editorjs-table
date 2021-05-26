@@ -2,11 +2,6 @@ import './styles/table-constructor.scss';
 import { create } from './documentUtils';
 import { Table } from './table';
 
-const CSS = {
-  editor: 'tc-editor',
-  inputField: 'tc-table__inp'
-};
-
 /**
  * Entry point. Controls table and give API to user
  */
@@ -20,7 +15,13 @@ export class TableConstructor {
    */
   constructor(data, config, api, readOnly) {
     this.readOnly = readOnly;
-
+  
+    this._CSS = {
+      editor: 'tc-editor',
+      inputField: 'tc-table__inp',
+      withBorder: 'tc-table__with_border'
+    };
+    
     /** creating table */
 
     try {
@@ -32,7 +33,7 @@ export class TableConstructor {
     }
 
     /** creating container around table */
-    this._container = create('div', [CSS.editor, api.styles.block], null, [ this._table.htmlElement ]);
+    this._container = create('div', [this._CSS.editor, api.styles.block], null, [ this._table.htmlElement ]);
 
     /** Activated elements */
     this._hoveredCell = null;
@@ -63,7 +64,7 @@ export class TableConstructor {
       for (let i = 0; i < size.rows && i < data.content.length; i++) {
         for (let j = 0; j < size.cols && j < data.content[i].length; j++) {
           // get current cell and her editable part
-          const input = this._table.body.rows[i].cells[j].querySelector('.' + CSS.inputField);
+          const input = this._table.body.rows[i].cells[j].querySelector('.' + this._CSS.inputField);
 
           input.innerHTML = data.content[i][j];
         }
@@ -104,12 +105,17 @@ export class TableConstructor {
       this._table.addColumn(i);
     }
   
-    if (settings && settings.sizes) {
-      settings.sizes.forEach((size, i) => {
-        if (this._table.colgroup.children[i]) {
-          this._table.colgroup.children[i].style.width = `${size * 100}%`;
-        }
-      })
+    if (settings) {
+      if (settings.sizes) {
+        settings.sizes.forEach((size, i) => {
+          if (this._table.colgroup.children[i]) {
+            this._table.colgroup.children[i].style.width = `${size * 100}%`;
+          }
+        })
+      }
+      if (settings.withBorder !== undefined) {
+        this._table.htmlElement.classList.toggle(this._CSS.withBorder, settings.withBorder);
+      }
     }
     
     return {
