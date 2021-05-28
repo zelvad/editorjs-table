@@ -111,7 +111,7 @@ class Table {
     return {
       settings: {
         sizes,
-        withBorder: this.borderActive,
+        withBorder: this.borderActive === undefined ? true : this.borderActive,
       },
       content: data,
     };
@@ -129,7 +129,7 @@ class Table {
   toggleBorder = () => {
     this.borderActive = !this.borderActive;
     this.toggleBorderButton.classList.toggle(this._CSS.settingsButtonActive, this.borderActive);
-    this._tableConstructor._container.classList.toggle(this._tableConstructor._CSS.withBorder, this.borderActive)
+    this._tableConstructor._table._element.classList.toggle(this._tableConstructor._CSS.withBorder, this.borderActive)
   }
   
   /**

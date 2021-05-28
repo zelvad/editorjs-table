@@ -1,4 +1,10 @@
 const path = require('path');
+const multer = require('multer');
+const uploadImage = require('./node/uploadImage');
+
+const upload = multer({
+  dest: __dirname + '/uploads/'
+})
 
 module.exports = {
   entry: './src/plugin.js',
@@ -7,6 +13,14 @@ module.exports = {
     path: __dirname + '/dist/',
     library: 'Table',
     libraryTarget: 'umd'
+  },
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    compress: true,
+    port: 9000,
+    before: (app, server) => {
+      app.post('/upload_image', upload.array('upfile'), uploadImage);
+    }
   },
   module: {
     rules: [

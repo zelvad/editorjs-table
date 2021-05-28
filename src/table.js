@@ -2,6 +2,7 @@ import { create, getCoords, getSideByCoords } from './documentUtils';
 import { Resize } from "./resize";
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
 import { CreateLine } from "./createLine";
+import { ImageUpload } from "./imageUpload";
 import './styles/table.scss';
 
 export const CSS = {
@@ -31,13 +32,15 @@ export class Table {
     this.readOnly = readOnly;
     this._numberOfColumns = 0;
     this._numberOfRows = 0;
-    this._element = this._createTableWrapper();
-    this._table = this._element.querySelector('table');
-    this.colgroup = this._table.querySelector('colgroup');
     
     this.resize = new Resize(this);
     this.selectLine = new SelectLine(this);
     this.createLine = new CreateLine(this);
+    this.imageUpload = new ImageUpload(this);
+    
+    this._element = this._createTableWrapper();
+    this._table = this._element.querySelector('table');
+    this.colgroup = this._table.querySelector('colgroup');
 
     if (!this.readOnly) {
       this._hangEvents();
@@ -195,6 +198,10 @@ export class Table {
   get selectedCell() {
     return this._selectedCell;
   }
+  
+  get withBorder() {
+    return
+  }
 
   /**
    * @private
@@ -212,6 +219,8 @@ export class Table {
     ]);
     
     if (!this.readOnly) {
+      this.imageUpload.createElem(wrapper);
+      
       const addRowButton = create('div', [ CSS.addRowButton ]);
       const addColumnButton = create('div', [ CSS.addColumnButton ]);
   
@@ -297,6 +306,7 @@ export class Table {
       return;
     }
     this._selectedCell = event.target.closest('.' + CSS.cell);
+    this.imageUpload.onToggle(true);
   }
 
   /**
@@ -308,6 +318,7 @@ export class Table {
       return;
     }
     this._selectedCell = null;
+    this.imageUpload.onToggle(false);
   }
 
   /**

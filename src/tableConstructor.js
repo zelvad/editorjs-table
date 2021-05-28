@@ -113,10 +113,11 @@ export class TableConstructor {
           }
         })
       }
-      if (settings.withBorder !== undefined) {
-        this._table.htmlElement.classList.toggle(this._CSS.withBorder, settings.withBorder);
-      }
     }
+    this._table.htmlElement.classList.toggle(
+      this._CSS.withBorder,
+      settings?.withBorder === undefined ? true : settings?.withBorder
+    );
     
     return {
       rows: rows,
