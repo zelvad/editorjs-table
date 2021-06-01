@@ -1,4 +1,5 @@
 import {create} from "./documentUtils";
+const imageUploadIcon = require('./img/image-solid.svg');
 import './styles/image-upload.scss'
 
 const IMAGE_UPLOAD_URL = '/upload_image'
@@ -6,10 +7,12 @@ const IMAGE_UPLOAD_URL = '/upload_image'
 export const CSS = {
   imageUploadButton: 'tc-table__image_upload_button',
   imageUploadButtonVisible: 'tc-table__image_upload_button_visible',
+  image: 'tc-table__image',
 };
 
 export class ImageUpload {
   constructor(table) {
+    this.buttonText = 'Добавить изображение'
     this.table = table;
     this.visible = false;
     this.cell = null;
@@ -21,13 +24,12 @@ export class ImageUpload {
    * @returns {HTMLElement} - the create col/row
    */
   createElem = (wrapper) => {
-    console.log('wrapper', wrapper)
     if (!wrapper.querySelector(`.${CSS.imageUploadButton}`)) {
       const fileInput = create('input', [], { type: 'file' });
-      const button = create('button');
-      button.innerText = 'Загрузить изображение'
+      const button = create('span');
+      button.innerHTML = imageUploadIcon
   
-      this.Button = create('div', [CSS.imageUploadButton], null, [
+      this.Button = create('label', [CSS.imageUploadButton], { title: this.buttonText }, [
         fileInput,
         button,
       ]);
@@ -52,26 +54,31 @@ export class ImageUpload {
         if (!this.table._selectedCell) {
           this.Button.classList.remove(CSS.imageUploadButtonVisible);
         }
-      }, 200)
+      }, 200);
     }
+  }
+  
+  createImage = (cell, src) => {
+    const image = create('img', [CSS.image], { src })
+    cell.children[0].innerHTML = image.outerHTML;
   }
   
   onChange = async(e) => {
     this.image = e.target.files[0];
-    await this.onUploadImage();
+    const { url } = await this.onUploadImage();
+    if (url) {
+      this.createImage(this.cell, url)
+    }
   }
   
   onUploadImage = async() => {
     const fd = new FormData()
-    console.log('this.image', this.image)
     fd.append('upfile', this.image);
   
     const r = await fetch(IMAGE_UPLOAD_URL, {
       method: 'POST',
       body: fd,
-    });
-  
-    console.log(r)
+    }).then(r => r.json());
     
     return r;
   }

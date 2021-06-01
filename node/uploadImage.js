@@ -1,7 +1,7 @@
 const fs = require('fs');
 const request = require('request');
 
-function guid(){
+function guid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
     return v.toString(16);
@@ -11,7 +11,7 @@ function guid(){
 function upload(req, res) {
   const File = req.files[0];
   
-  if (File.mimetype.indexOf('image') > -1) {
+  if (File.mimetype.indexOf('image') === -1) {
     res.send({
       status: false,
       url: null,

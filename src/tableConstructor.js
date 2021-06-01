@@ -63,10 +63,17 @@ export class TableConstructor {
     if (data.content !== undefined) {
       for (let i = 0; i < size.rows && i < data.content.length; i++) {
         for (let j = 0; j < size.cols && j < data.content[i].length; j++) {
+          const [content] = data.content[i];
+          const [cell] = this._table.body.rows[i].cells;
           // get current cell and her editable part
-          const input = this._table.body.rows[i].cells[j].querySelector('.' + this._CSS.inputField);
-
-          input.innerHTML = data.content[i][j];
+          if (typeof content === 'string') {
+            const input = cell.querySelector('.' + this._CSS.inputField);
+            input.innerHTML = content;
+          } else if (content?.type === 'image') {
+            // const image = cell.querySelector('img');
+            // image.setAttribute('src', content.src)
+            this._table.imageUpload.createImage(cell, content.src);
+          }
         }
       }
     }

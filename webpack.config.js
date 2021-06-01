@@ -14,6 +14,8 @@ module.exports = {
     library: 'Table',
     libraryTarget: 'umd'
   },
+  mode: 'production',
+  devtool: "source-map",
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
     compress: true,

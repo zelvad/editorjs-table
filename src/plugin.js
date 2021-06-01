@@ -1,6 +1,7 @@
 const TableConstructor = require('./tableConstructor').TableConstructor;
 const svgIcon = require('./img/toolboxIcon.svg');
 const borderIcon = require('./img/border.svg');
+const { CSS: imageCSS } = require('./imageUpload');
 
 /**
  *  Tool for table's creating
@@ -93,6 +94,12 @@ class Table {
       const row = rows[i];
       const cols = Array.from(row.cells);
       const inputs = cols.map(cell => cell.querySelector('.' + this._CSS.input));
+      const images = cols.map(cell => cell.querySelector('.' + imageCSS.image));
+      const result = cols.map((item, i) => {
+        if (inputs[i]) return { type: 'input', text: inputs[i].innerHTML }
+        else if (images[i]) return { type: 'image', src: images[i].getAttribute('src') }
+        return undefined;
+      })
       // const isWorthless = inputs.every(this._isEmpty);
       
       // if (isWorthless) {
@@ -105,7 +112,20 @@ class Table {
         })
       }
       
-      data.push(inputs.map(input => input.innerHTML));
+      data.push(result.map((res, i) => {
+        if (res) {
+          switch (res.type) {
+            case 'input': {
+              return res.text;
+            }
+            case 'image': {
+              return res;
+            }
+            default:
+          }
+        }
+        return ""
+      }));
     }
   
     return {
