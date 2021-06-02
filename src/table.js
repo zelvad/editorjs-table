@@ -2,7 +2,7 @@ import { create, getCoords, getSideByCoords } from './documentUtils';
 import { Resize } from "./resize";
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
 import { CreateLine } from "./createLine";
-import { ImageUpload } from "./imageUpload";
+import { ImageUpload, CSS as imageUploadCSS } from "./imageUpload";
 import './styles/table.scss';
 
 export const CSS = {
@@ -219,8 +219,6 @@ export class Table {
     ]);
     
     if (!this.readOnly) {
-      this.imageUpload.createElem(wrapper);
-      
       const addRowButton = create('div', [ CSS.addRowButton ]);
       const addColumnButton = create('div', [ CSS.addColumnButton ]);
   
@@ -339,12 +337,15 @@ export class Table {
    * @param {MouseEvent} event
    */
   _clickedOnCell(event) {
-    if (!event.target.classList.contains(CSS.cell)) {
-      return;
-    }
-    const content = event.target.querySelector('.' + CSS.inputField);
+    const isImageDeleteButton = event.target.classList.contains(imageUploadCSS.buttonDelete);
 
-    content.focus();
+    if (isImageDeleteButton === false) {
+      if (!event.target.classList.contains(CSS.cell)) {
+        return;
+      }
+      const content = event.target.querySelector('.' + CSS.inputField);
+      content.focus();
+    }
   }
 
   /**

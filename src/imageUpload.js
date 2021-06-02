@@ -8,6 +8,8 @@ export const CSS = {
   imageUploadButton: 'tc-table__image_upload_button',
   imageUploadButtonVisible: 'tc-table__image_upload_button_visible',
   image: 'tc-table__image',
+  wrapper: 'tc-table__wrapper_image',
+  buttonDelete: 'tc-table__wrapper_image_button',
 };
 
 export class ImageUpload {
@@ -59,8 +61,22 @@ export class ImageUpload {
   }
   
   createImage = (cell, src) => {
+    const [elem] = cell.children[0].children;
     const image = create('img', [CSS.image], { src })
-    cell.children[0].innerHTML = image.outerHTML;
+    if (this.table.readOnly) {
+      elem.replaceWith(image);
+    } else {
+      const button = create('div', [CSS.buttonDelete]);
+      const wrapper = create('div', [CSS.wrapper], null, [image, button]);
+      
+      button.addEventListener('click', this.removeImage);
+      elem.replaceWith(wrapper);
+    }
+  }
+  
+  removeImage = (event) => {
+    const wrapper = event.target.closest(`.${CSS.wrapper}`);
+    wrapper.replaceWith(this.table._createContentEditableArea());
   }
   
   onChange = async(e) => {
