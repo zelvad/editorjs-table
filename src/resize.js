@@ -67,8 +67,13 @@ export class Resize {
   
   move = (delta) => {
     const [first, second] = this.getCols();
-    first.style.width = `${((this.widthFirst / this.width) + (delta / this.width)) * 100}%`
-    second.style.width = `${((this.widthSecond / this.width) - (delta / this.width)) * 100}%`
+    let w1 = ((this.widthFirst / this.width) + (delta / this.width)) * 100;
+    let w2 = ((this.widthSecond / this.width) - (delta / this.width)) * 100;
+    
+    if (w1 >= 5 && w2 >= 5) {
+      first.style.width = `${w1}%`;
+      second.style.width = `${w2}%`;
+    }
   }
   
   getCols = () => {

@@ -66,7 +66,8 @@ export class ImageUpload {
     if (this.table.readOnly) {
       elem.replaceWith(image);
     } else {
-      const button = create('div', [CSS.buttonDelete]);
+      const X = create('div')
+      const button = create('div', [CSS.buttonDelete], null, [X]);
       const wrapper = create('div', [CSS.wrapper], null, [image, button]);
       
       button.addEventListener('click', this.removeImage);

@@ -3,41 +3,55 @@
     position: relative;
     &:hover {
       & > div {
-        display: flex;
+        display: block;
       }
     }
   }
   &__wrapper_image_button {
     position: absolute;
     width: 50px;
-    height: 50px;
+    overflow: hidden;
+    max-width: 100%;
     border-radius: 50%;
     top: 50%;
     left: 50%;
-    margin: -25px 0 0 -25px;
+    transform: translate(-50%, -50%);
     border: 2px solid red;
     cursor: pointer;
     background-color: rgba(red, 0.2);
     display: none;
-    align-items: center;
-    justify-content: center;
-    &:after, &:before {
-      content: '';
-      transform: rotate(45deg);
-      position: absolute;
-      height: 2px;
-      width: 70%;
-      border-radius: 1px;
-      display: block;
-      background-color: red;
-    }
     &:before {
-      transform: rotate(-45deg);
+      content: '';
+      display: block;
+      padding-bottom: 100%;
     }
-    &:hover {
-      background-color: red;
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       &:after, &:before {
-        background-color: white;
+        content: '';
+        transform: rotate(45deg);
+        position: absolute;
+        height: 2px;
+        width: 70%;
+        border-radius: 1px;
+        display: block;
+        background-color: red;
+      }
+      &:before {
+        transform: rotate(-45deg);
+      }
+      &:hover {
+        background-color: red;
+        &:after, &:before {
+          background-color: white;
+        }
       }
     }
   }
