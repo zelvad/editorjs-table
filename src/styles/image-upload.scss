@@ -9,17 +9,20 @@
   }
   &__wrapper_image_button {
     position: absolute;
-    width: 50px;
+    padding: 20px;
     overflow: hidden;
     max-width: 100%;
-    border-radius: 50%;
+    border-radius: 8px;
+    transform: translate(-50%, -50%);
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    border: 2px solid red;
     cursor: pointer;
-    background-color: rgba(red, 0.2);
     display: none;
+    background-color: red;
+    box-shadow: 0 0 10px rgba(black, 0.3);
+    &:hover {
+      box-shadow: 0 0 20px rgba(black, 0.5);
+    }
     &:before {
       content: '';
       display: block;
@@ -27,31 +30,18 @@
     }
     div {
       display: flex;
-      align-items: center;
+      align-content: center;
       justify-content: center;
       position: absolute;
+      padding: 5px;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      &:after, &:before {
-        content: '';
-        transform: rotate(45deg);
-        position: absolute;
-        height: 2px;
-        width: 70%;
-        border-radius: 1px;
-        display: block;
-        background-color: red;
-      }
-      &:before {
-        transform: rotate(-45deg);
-      }
-      &:hover {
-        background-color: red;
-        &:after, &:before {
-          background-color: white;
-        }
+      svg {
+        color: white;
+        width: 32px;
+        height: 32px;
       }
     }
   }
@@ -73,7 +63,7 @@
       color: white;
       font-weight: bold;
       border: none;
-      border-radius: 50%;
+      border-radius: 8px;
       background-color: white;
       box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
       transition: box-shadow 0.2s ease;
@@ -89,8 +79,8 @@
       }
       svg {
         color: #368be6;
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
       }
     }
     input {

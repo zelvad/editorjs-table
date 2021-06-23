@@ -1,5 +1,6 @@
 import {create} from "./documentUtils";
-const imageUploadIcon = require('./img/image-solid.svg');
+const imageUploadIcon = require('./img/image-upload.svg');
+const imageDeleteIcon = require('./img/image-delete.svg');
 import './styles/image-upload.scss'
 
 const IMAGE_UPLOAD_URL = '/upload_image'
@@ -67,6 +68,7 @@ export class ImageUpload {
       elem.replaceWith(image);
     } else {
       const X = create('div')
+      X.innerHTML = imageDeleteIcon;
       const button = create('div', [CSS.buttonDelete], null, [X]);
       const wrapper = create('div', [CSS.wrapper], null, [image, button]);
       

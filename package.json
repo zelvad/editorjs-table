@@ -6,7 +6,7 @@
   "main": "./dist/bundle.js",
   "scripts": {
     "build": "webpack --mode production",
-    "build:dev": "webpack serve",
+    "build:dev": "webpack serve --mode development",
     "lint": "./node_modules/.bin/eslint"
   },
   "repository": "https://github.com/8ui/table",
