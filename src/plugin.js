@@ -35,6 +35,7 @@ class Table {
   static get sanitize() {
     return {
       br: true,
+      mark: true,
     };
   }
 
