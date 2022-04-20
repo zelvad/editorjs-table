@@ -30,6 +30,15 @@ class Table {
   }
 
   /**
+   * Sanitizer rules
+   */
+  static get sanitize() {
+    return {
+      br: true,
+    };
+  }
+
+  /**
    * Get Tool toolbox settings
    * icon - Tool icon's SVG
    * title - title to show in toolbox
@@ -127,7 +136,7 @@ class Table {
         return ""
       }));
     }
-  
+
     return {
       settings: {
         sizes,
