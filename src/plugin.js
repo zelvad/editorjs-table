@@ -140,8 +140,8 @@ class Table {
 
     return {
       settings: {
-        sizes,
-        withBorder: this.borderActive === undefined ? true : this.borderActive,
+        sizes
+        // withBorder: this.borderActive === undefined ? true : this.borderActive,
       },
       content: data,
     };
@@ -202,7 +202,7 @@ class Table {
     /**
      * Append settings button to holder
      */
-    holder.appendChild(toggleBorderButton);
+    // holder.appendChild(toggleBorderButton);
     
     /**
      * Save settings buttons
