@@ -139,10 +139,7 @@ class Table {
     }
 
     return {
-      settings: {
-        sizes
-        // withBorder: this.borderActive === undefined ? true : this.borderActive,
-      },
+      columnWidths: sizes,
       content: data,
     };
   }
