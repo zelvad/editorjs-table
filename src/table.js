@@ -304,7 +304,7 @@ export class Table {
       return;
     }
     this._selectedCell = event.target.closest('.' + CSS.cell);
-    this.imageUpload.onToggle(true);
+    // this.imageUpload.onToggle(true);
   }
 
   /**
@@ -316,7 +316,7 @@ export class Table {
       return;
     }
     this._selectedCell = null;
-    this.imageUpload.onToggle(false);
+    // this.imageUpload.onToggle(false);
   }
 
   /**
@@ -337,15 +337,15 @@ export class Table {
    * @param {MouseEvent} event
    */
   _clickedOnCell(event) {
-    const isImageDeleteButton = event.target.classList.contains(imageUploadCSS.buttonDelete);
+    // const isImageDeleteButton = event.target.classList.contains(imageUploadCSS.buttonDelete);
 
-    if (isImageDeleteButton === false) {
-      if (!event.target.classList.contains(CSS.cell)) {
-        return;
-      }
-      const content = event.target.querySelector('.' + CSS.inputField);
-      content.focus();
-    }
+    // if (isImageDeleteButton === false) {
+    //   if (!event.target.classList.contains(CSS.cell)) {
+    //     return;
+    //   }
+    //   const content = event.target.querySelector('.' + CSS.inputField);
+    //   content.focus();
+    // }
   }
 
   /**
