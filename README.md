@@ -12,17 +12,17 @@ Resizable Table Block for the [Editor.js](https://editorjs.io).
 Get the package
 
 ```shell
-npm i --save-dev @8ui/editorjs-resizable-table
+npm i --save-dev @medistream/editorjs-table
 ```
 or
 ```shell
-yarn add @8ui/editorjs-resizable-table --dev
+yarn add @medistream/editorjs-table --dev
 ```
 
 Include module in your application
 
 ```javascript
-const Table = require('@8ui/editorjs-resizable-table');
+const Table = require('@medistream/editorjs-table');
 ```
 
 ### Upload to your project's source dir
