@@ -99,6 +99,8 @@ class Table {
     const rows = table.rows;
     const sizes = [];
     const width = table.offsetWidth;
+    const colSpans = [];
+    const rowSpans = [];
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -106,10 +108,11 @@ class Table {
       const inputs = cols.map(cell => cell.querySelector('.' + this._CSS.input));
       const images = cols.map(cell => cell.querySelector('.' + imageCSS.image));
       const result = cols.map((item, i) => {
-        if (inputs[i]) return { type: 'input', text: inputs[i].innerHTML }
-        else if (images[i]) return { type: 'image', src: images[i].getAttribute('src') }
-        return undefined;
+        if (inputs[i]) return { type: 'input', text: inputs[i].innerHTML };
+        if (images[i]) return { type: 'image', src: images[i].getAttribute('src') };
       })
+      const colSpansInRow = [];
+      const rowSpansInRow = [];
       // const isWorthless = inputs.every(this._isEmpty);
       
       // if (isWorthless) {
@@ -121,6 +124,14 @@ class Table {
           sizes.push(c.offsetWidth / width);
         })
       }
+
+      cols.forEach((cell) => {
+        colSpansInRow.push(cell.colSpan);
+        rowSpansInRow.push(cell.rowSpan);
+      })
+
+      colSpans.push(colSpansInRow);
+      rowSpans.push(rowSpansInRow);
       
       data.push(result.map((res, i) => {
         if (res) {
@@ -141,6 +152,8 @@ class Table {
     return {
       columnWidths: sizes,
       content: data,
+      colSpans: colSpans,
+      rowSpans: rowSpans
     };
   }
 

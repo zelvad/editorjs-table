@@ -237,4 +237,30 @@
       border-left: none;
     }
   }
+
+  .tc-table__cell.selected {
+    background-color: #eef7ff;
+  }
+  .context-menu {
+    position: fixed;
+    width: 200px;
+    height: auto;
+    z-index: 99;
+    background-color: #efefef;
+
+    &:hover {
+      background-color: #eae6e6;
+    }
+
+    &__button {
+      width: calc(100% - 20px);
+      height: 40px;
+      border-bottom: 1px solid lightgray;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+  }
 }
