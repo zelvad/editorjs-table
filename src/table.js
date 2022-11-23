@@ -173,34 +173,6 @@ export class Table {
     this._table.rows[index].remove();
     this.updateButtons();
   }
-
-  mergeCells() {
-    const table = this._table;
-    const everyCell = table.querySelectorAll('td')
-    const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
-
-    // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
-    if (selectedCells.some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
-      return;
-    }
-    
-    const topLeftCell = selectedCells[0];
-    const bottomRightCell = selectedCells[selectedCells.length - 1];
-    
-    const colSpan = bottomRightCell.cellIndex - topLeftCell.cellIndex + 1;
-    const rowSpan = bottomRightCell.parentNode.rowIndex - topLeftCell.parentNode.rowIndex + 1;
-
-    selectedCells.forEach((cell, i) => {
-      // 첫 번째 셀의 colspan, rowspan 을 늘리고 나머지 셀을 삭제한다.
-      if (i === 0) {
-        cell.colSpan = colSpan;
-        cell.rowSpan = rowSpan;
-      } else {
-        cell.remove();
-      }
-    });
-
-  }
   
   /**
    * get html element of table
@@ -318,7 +290,7 @@ export class Table {
       }
 
       if (event.shiftKey) {
-        this._shiftKeyPressed(event);
+        this._pressedShiftKey(event);
       }
     });
 
@@ -379,7 +351,7 @@ export class Table {
     }
   }
 
-  _shiftKeyPressed(event) {
+  _pressedShiftKey(event) {
     const table = this._table;
     const startCell = event.target.closest('td');
     const startRowIndex = startCell.parentNode.rowIndex;
@@ -400,6 +372,8 @@ export class Table {
           for (let i = startColIndex; i <= targetColIndex; i++) {
             table.rows[startRowIndex].cells[i].classList.add('selected');
           }
+
+          return;
         }
 
         if (startColIndex === targetColIndex) {
@@ -418,6 +392,70 @@ export class Table {
     }
 
     this._table.addEventListener('mousedown', handleMouseDownOnCell, { once: true });
+  }
+
+  _changeCellBackgroundColor(event) {
+    const table = this._table;
+    const selectedCells = table.querySelectorAll('td.selected');
+    const inputElement = document.createElement('input');
+    const pointerX = event.clientX;
+    const pointerY = event.clientY
+
+    const handleColorChange = (event) => {
+      const hex = event.target.value;
+
+      selectedCells.forEach((cell) => {
+        cell.style.backgroundColor = hex;
+      })
+    }
+
+    const registerHideFunction = (event) => {
+      document.addEventListener('click', hideColorPicker);
+    }
+
+    const hideColorPicker = (event) => {
+      if (event.target.tagName !== 'INPUT') {
+        inputElement.remove();
+        document.removeEventListener('click', hideColorPicker);
+      }
+    }
+    
+    inputElement.type = 'color';
+    inputElement.style.position = 'fixed';
+    inputElement.style.top = pointerY + 'px';
+    inputElement.style.left = pointerX + 'px';
+
+    inputElement.addEventListener('input', handleColorChange);
+    inputElement.addEventListener('click', registerHideFunction)
+
+    table.appendChild(inputElement);
+  }
+
+  _mergeCells() {
+    const table = this._table;
+    const everyCell = table.querySelectorAll('td')
+    const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
+
+    // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
+    if (selectedCells.some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
+      return;
+    }
+    
+    const topLeftCell = selectedCells[0];
+    const bottomRightCell = selectedCells[selectedCells.length - 1];
+    
+    const colSpan = bottomRightCell.cellIndex - topLeftCell.cellIndex + 1;
+    const rowSpan = bottomRightCell.parentNode.rowIndex - topLeftCell.parentNode.rowIndex + 1;
+
+    selectedCells.forEach((cell, i) => {
+      // 첫 번째 셀의 colspan, rowspan 을 늘리고 나머지 셀을 삭제한다.
+      if (i === 0) {
+        cell.colSpan = colSpan;
+        cell.rowSpan = rowSpan;
+      } else {
+        cell.remove();
+      }
+    });
   }
 
   /**
@@ -478,7 +516,8 @@ export class Table {
     contextMenu.appendChild(changeCellBackgroundColorButton);
 
     document.addEventListener('click', hideContextMenu);
-    mergeCellsButton.addEventListener('click', this.mergeCells.bind(this))
+    mergeCellsButton.addEventListener('click', this._mergeCells.bind(this));
+    changeCellBackgroundColorButton.addEventListener('click', this._changeCellBackgroundColor.bind(this));
   }
 
   /**
