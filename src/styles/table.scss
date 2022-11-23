@@ -248,10 +248,7 @@
     z-index: 99;
     background-color: #efefef;
 
-    &:hover {
-      background-color: #eae6e6;
-    }
-
+    
     &__button {
       width: calc(100% - 20px);
       height: 40px;
@@ -261,6 +258,9 @@
       padding-left: 20px;
       font-size: 13px;
       cursor: pointer;
+      &:hover {
+        background-color: #eae6e6;
+      }
     }
   }
 }

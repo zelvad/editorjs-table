@@ -312,7 +312,14 @@ export class Table {
     }, true);
 
     this._table.addEventListener('keydown', (event) => {
-      this._pressedEnterInEditField(event);
+      if (event.keyCode === 13) {
+        this._pressedEnterInEditField(event);
+        return;
+      }
+
+      if (event.shiftKey) {
+        this._shiftKeyPressed(event);
+      }
     });
 
     this._table.addEventListener('mousedown', (event) => {
@@ -372,91 +379,63 @@ export class Table {
     }
   }
 
+  _shiftKeyPressed(event) {
+    const table = this._table;
+    const startCell = event.target.closest('td');
+    const startRowIndex = startCell.parentNode.rowIndex;
+    const startColIndex = startCell.cellIndex;
+
+    const handleMouseDownOnCell = (event) => {
+      if (event.target.closest('td')) {
+        const targetCell = event.target.closest('td');
+        const targetRowIndex = targetCell.parentNode.rowIndex;
+        const targetColIndex = targetCell.cellIndex;
+
+        if (startRowIndex === targetRowIndex) {
+          // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
+          if (Array.from(table.rows[startRowIndex].cells).some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
+            return;
+          }
+          
+          for (let i = startColIndex; i <= targetColIndex; i++) {
+            table.rows[startRowIndex].cells[i].classList.add('selected');
+          }
+        }
+
+        if (startColIndex === targetColIndex) {
+          // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
+          for (let i = startRowIndex; i <= targetRowIndex; i++) {
+            const cell = table.rows[i].cells[startColIndex];
+
+            if (cell.colSpan > 1 || cell.rowSpan > 1) return;
+          }
+          
+          for (let i = startRowIndex; i <= targetRowIndex; i++) {
+            table.rows[i].cells[startColIndex].classList.add('selected');
+          }
+        }
+      }
+    }
+
+    this._table.addEventListener('mousedown', handleMouseDownOnCell, { once: true });
+  }
+
   /**
    * @private
    * @param {MouseEvent} event
    */
   _mouseDownOnCell(event) {
     if (event.target.closest('td')) {
-      const table = this._table
-      const cell = event.target.closest('td');
-      const startRowIndex = cell.parentNode.rowIndex;
-      const startColIndex = cell.cellIndex;
+      const table = this._table;
       const everyCell = table.querySelectorAll('td');
-      let currentCell = cell;
-      
-      // console.log(startRowIndex, startColIndex);
 
-      const handleMouseMove = (event) => {
-        const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY);
-        const cellBelowMousePointer = elementBelowMousePointer.closest('td');
-        const currentRowIndex = cellBelowMousePointer.parentNode.rowIndex;
-        const currentColIndex = cellBelowMousePointer.cellIndex;
-
-        if (currentCell !== cellBelowMousePointer) {
-          deselectEveryCell(everyCell);
-          selectCells(table, startRowIndex, startColIndex, currentRowIndex, currentColIndex);
-
-          currentCell = cellBelowMousePointer;
-        }
-      }
-
-      const handleMouseUp = (event) => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      }
-
-      const deselectEveryCell = (cells) => {
-        cells.forEach((cell) => {
+      const deselectEveryCell = () => {
+        everyCell.forEach((cell) => {
           cell.classList.remove('selected');
         });
       }
 
-      const selectCells = (table, startRowIndex, startColIndex, currentRowIndex, currentColIndex) => {
-        const lastCell = table.rows[currentRowIndex].cells[currentColIndex];
-        const isLastCellMerged = lastCell.colSpan > 1 || lastCell.rowSpan > 1;
-        let additionalRow = 0;
-        let additionalCol = 0;
-        let isAdditionalRow = false;
-
-        if (isLastCellMerged) {
-          additionalRow += (lastCell.rowSpan - 1);
-          additionalCol += (lastCell.colSpan - 1);
-        }
-      
-        for (let i = startRowIndex; i <= currentRowIndex + additionalRow; i++) {
-          const cellsInRow = table.rows[i].cells;
-          const maxRowSpanInRow = Math.max(...Array.from(cellsInRow).map((cell) => cell.rowSpan));
-          const maxColSpanInRow = Math.max(...Array.from(cellsInRow).map((cell) => cell.colSpan));
-
-          if (isAdditionalRow) {
-            for (let j = startColIndex; j < currentColIndex; j++) {
-              const cell = cellsInRow[j];
-              cell.classList.add('selected');
-            }
-            
-            continue;
-          }
-
-          for (let j = startColIndex; j <= currentColIndex + additionalCol; j++) {
-            const cell = cellsInRow[j];
-            const colspan = cell.colSpan;
-            const rowspan = cell.rowSpan;
-
-            cell.classList.add('selected');
-
-            if (maxColSpanInRow > 1 && colspan === maxColSpanInRow) {
-              isAdditionalRow = true;
-              break
-            }
-          }
-        }
-      }
-
       deselectEveryCell(everyCell);
-
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
     }
   }
 
@@ -492,9 +471,11 @@ export class Table {
     contextMenu.classList.add('context-menu');
 
     const mergeCellsButton = createMenuButton('셀 합치기');
+    const changeCellBackgroundColorButton = createMenuButton('셀 배경색 변경');
     
     this._table.appendChild(contextMenu);
     contextMenu.appendChild(mergeCellsButton);
+    contextMenu.appendChild(changeCellBackgroundColorButton);
 
     document.addEventListener('click', hideContextMenu);
     mergeCellsButton.addEventListener('click', this.mergeCells.bind(this))
