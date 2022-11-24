@@ -364,7 +364,7 @@ export class Table {
         const targetColIndex = targetCell.cellIndex;
 
         if (startRowIndex === targetRowIndex) {
-          // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
+          // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다. (로직 수정 필요)
           if (Array.from(table.rows[startRowIndex].cells).some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
             return;
           }
@@ -409,15 +409,13 @@ export class Table {
       })
     }
 
-    const registerHideFunction = (event) => {
-      document.addEventListener('click', hideColorPicker);
-    }
-
     const hideColorPicker = (event) => {
-      if (event.target.tagName !== 'INPUT') {
-        inputElement.remove();
-        document.removeEventListener('click', hideColorPicker);
+      if (event.target.tagName === 'INPUT') {
+        return;
       }
+
+      inputElement.remove();
+      document.removeEventListener('click', hideColorPicker);
     }
     
     inputElement.type = 'color';
@@ -426,7 +424,10 @@ export class Table {
     inputElement.style.left = pointerX + 'px';
 
     inputElement.addEventListener('input', handleColorChange);
-    inputElement.addEventListener('click', registerHideFunction)
+
+    setTimeout(() => {
+      document.addEventListener('click', hideColorPicker);
+    }, 0);
 
     table.appendChild(inputElement);
   }

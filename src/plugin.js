@@ -101,6 +101,7 @@ class Table {
     const width = table.offsetWidth;
     const colSpans = [];
     const rowSpans = [];
+    const backgroundColors = [];
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -113,6 +114,7 @@ class Table {
       })
       const colSpansInRow = [];
       const rowSpansInRow = [];
+      const backgroundColorsInRow = [];
       // const isWorthless = inputs.every(this._isEmpty);
       
       // if (isWorthless) {
@@ -128,10 +130,13 @@ class Table {
       cols.forEach((cell) => {
         colSpansInRow.push(cell.colSpan);
         rowSpansInRow.push(cell.rowSpan);
+        backgroundColorsInRow.push(cell.style.backgroundColor);
       })
 
       colSpans.push(colSpansInRow);
       rowSpans.push(rowSpansInRow);
+      backgroundColors.push(backgroundColorsInRow);
+
       
       data.push(result.map((res, i) => {
         if (res) {
@@ -152,8 +157,9 @@ class Table {
     return {
       columnWidths: sizes,
       content: data,
-      colSpans: colSpans,
-      rowSpans: rowSpans
+      colSpans,
+      rowSpans,
+      backgroundColors 
     };
   }
 

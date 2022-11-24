@@ -186,17 +186,18 @@ export class TableConstructor {
    * @param {KeyboardEvent} event
    */
   _containerEnterPressed(event) {
-    if (!(this._table.selectedCell !== null && !event.shiftKey)) {
-      return;
-    }
-    const indicativeRow = this._table.selectedCell.closest('TR');
-    let index = this._getHoveredSideOfContainer();
+    // 셀 내부에서 엔터 키를 누르면 테이블 밑에 row 가 생성되는 기능을 주석처리한다. 추후에 다음 셀로 포커스가 넘어가도록 수정 필요.
+    // if (!(this._table.selectedCell !== null && !event.shiftKey)) {
+    //   return;
+    // }
+    // const indicativeRow = this._table.selectedCell.closest('TR');
+    // let index = this._getHoveredSideOfContainer();
 
-    if (index === 1) {
-      index = indicativeRow.sectionRowIndex + 1;
-    }
-    const newstr = this._table.addRow(index);
+    // if (index === 1) {
+    //   index = indicativeRow.sectionRowIndex + 1;
+    // }
+    // const newstr = this._table.addRow(index);
 
-    newstr.cells[0].click();
+    // newstr.cells[0].click();
   }
 }
