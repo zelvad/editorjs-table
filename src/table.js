@@ -300,6 +300,12 @@ export class Table {
       }
     });
 
+    this._table.addEventListener('dblclick', (event) => {
+      if (event.button === 0) {
+        this._doubleClickCell(event);
+      }
+    });
+
     this._table.addEventListener('mouseover', (event) => {
       this._mouseEnterInDetectArea(event);
       event.stopPropagation();
@@ -349,6 +355,11 @@ export class Table {
     if (event.keyCode === 13 && !event.shiftKey) {
       event.preventDefault();
     }
+  }
+
+  _doubleClickCell(event) {
+    const cell = event.target.closest('td');
+    cell.classList.add('selected');
   }
 
   _pressedShiftKey(event) {
