@@ -262,5 +262,11 @@
         background-color: #eae6e6;
       }
     }
+
+    &__button.deactivated {
+      color: gray;
+      cursor: auto;
+      pointer-events: none;
+    }
   }
 }

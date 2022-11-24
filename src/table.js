@@ -445,13 +445,8 @@ export class Table {
 
   _mergeCells() {
     const table = this._table;
-    const everyCell = table.querySelectorAll('td')
+    const everyCell = table.querySelectorAll('td');
     const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
-
-    // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
-    if (selectedCells.some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
-      return;
-    }
     
     const topLeftCell = selectedCells[0];
     const bottomRightCell = selectedCells[selectedCells.length - 1];
@@ -506,13 +501,28 @@ export class Table {
       }
     }
 
-    const createMenuButton = (title) => {
+    const createMenuButton = (title, isActive = true) => {
       const menu = document.createElement('div');
     
       menu.textContent = title;
       menu.classList.add('context-menu__button');
 
+      !isActive && menu.classList.add('deactivated');
+
       return menu;
+    }
+
+    const checkIfMergePossible = () => {
+      const table = this._table;
+      const everyCell = table.querySelectorAll('td');
+      const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
+
+      // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
+      if (selectedCells.some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
+        return false;
+      }
+
+      return true;
     }
 
     contextMenu.style.position = 'fixed';
@@ -520,7 +530,7 @@ export class Table {
     contextMenu.style.left = pointerX + 'px';
     contextMenu.classList.add('context-menu');
 
-    const mergeCellsButton = createMenuButton('셀 합치기');
+    const mergeCellsButton = createMenuButton('셀 합치기', checkIfMergePossible());
     const changeCellBackgroundColorButton = createMenuButton('셀 배경색 변경');
     
     this._table.appendChild(contextMenu);
