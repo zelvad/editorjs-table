@@ -182,22 +182,36 @@ export class TableConstructor {
   /**
    * @private
    *
-   * if "cntrl + Eneter" is pressed then create new line under current and focus it
+   * 셀 내부에서 엔터키를 누르면 다음 줄로 포커스가 넘어간다
    * @param {KeyboardEvent} event
    */
   _containerEnterPressed(event) {
-    // 셀 내부에서 엔터 키를 누르면 테이블 밑에 row 가 생성되는 기능을 주석처리한다. 추후에 다음 셀로 포커스가 넘어가도록 수정 필요.
-    // if (!(this._table.selectedCell !== null && !event.shiftKey)) {
-    //   return;
-    // }
-    // const indicativeRow = this._table.selectedCell.closest('TR');
-    // let index = this._getHoveredSideOfContainer();
+    if (event.shiftKey) {
+      return;
+    }
 
-    // if (index === 1) {
-    //   index = indicativeRow.sectionRowIndex + 1;
-    // }
-    // const newstr = this._table.addRow(index);
+    const table = this._table._table;
+    const currentCell = this._table.selectedCell.closest('td');
+    const rowIndex = currentCell.parentNode.rowIndex;
+    const rowSpan = currentCell.rowSpan;
 
-    // newstr.cells[0].click();
+    // 셀이 세로로 합쳐졌을때, 셀의 가장 아래쪽에 위치한 Row 의 Index 값.
+    // 합쳐지지 않은 셀이라면, 셀이 위치한 Row 의 Index 값.
+    const cellBottomRowIndex = rowIndex + (rowSpan - 1);
+
+    // 더 이상 아래로 내려갈 수 없다면 취소한다
+    if (table.querySelectorAll('tr').length === (cellBottomRowIndex + 1)) {
+      return;
+    }
+
+    try {
+      const nextRowSameIndexCell = table.rows[cellBottomRowIndex + 1].cells[currentCell.cellIndex].querySelector('div.tc-table__inp');
+
+      nextRowSameIndexCell.focus();
+    } catch (error) {
+      const nextRowFirstIndexCell = table.rows[cellBottomRowIndex + 1].cells[0].querySelector('div.tc-table__inp');
+
+      nextRowFirstIndexCell.focus();
+    }
   }
 }
