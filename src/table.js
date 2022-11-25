@@ -125,7 +125,7 @@ export class Table {
 
     this.insertCol(index)
     for (let i = 0; i < rows.length; i++) {
-      const cell = rows[i].insertCell(index);
+      const cell = rows[i].insertCell(rows[i].length);
       cell.colSpan = 1;
       cell.rowSpan = 1;
       this._fillCell(cell);
@@ -433,6 +433,7 @@ export class Table {
     inputElement.style.position = 'fixed';
     inputElement.style.top = pointerY + 'px';
     inputElement.style.left = pointerX + 'px';
+    inputElement.style.zIndex = 99;
 
     inputElement.addEventListener('input', handleColorChange);
 
