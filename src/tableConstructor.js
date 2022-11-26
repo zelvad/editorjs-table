@@ -25,7 +25,7 @@ export class TableConstructor {
     /** creating table */
 
     try {
-      this._table = new Table(readOnly);
+      this._table = new Table(readOnly, api);
       const size = this._resizeTable(data, config);
       this._fillTable(data, size);
     } catch (e) {
@@ -45,6 +45,8 @@ export class TableConstructor {
     if (!this.readOnly) {
       this._hangEvents();
     }
+
+    this.api = api
   }
 
   /**

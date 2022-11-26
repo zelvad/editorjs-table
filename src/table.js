@@ -4,6 +4,7 @@ import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
 import { CreateLine } from "./createLine";
 import { ImageUpload, CSS as imageUploadCSS } from "./imageUpload";
 import './styles/table.scss';
+import { Toolbar } from './deleteBlock';
 
 export const CSS = {
   table: 'tc-table',
@@ -28,7 +29,7 @@ export class Table {
    *
    * @param {boolean} readOnly - read-only mode flag
    */
-  constructor(readOnly) {
+  constructor(readOnly, api) {
     this.readOnly = readOnly;
     this._numberOfColumns = 0;
     this._numberOfRows = 0;
@@ -37,6 +38,7 @@ export class Table {
     this.selectLine = new SelectLine(this);
     this.createLine = new CreateLine(this);
     this.imageUpload = new ImageUpload(this);
+    this.toolbar = new Toolbar(this, api);
     
     this._element = this._createTableWrapper();
     this._table = this._element.querySelector('table');
@@ -44,6 +46,7 @@ export class Table {
 
     if (!this.readOnly) {
       this._hangEvents();
+      this.toolbar.createToolbar();
     }
   }
   
