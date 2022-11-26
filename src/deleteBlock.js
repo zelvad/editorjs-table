@@ -4,13 +4,14 @@ export class Toolbar {
   constructor(table, api) {
     this.table = table;
     this.api = api;
+    this.toolbar = document.createElement('div');
+
+    this.toolbar.classList.add('table-toolbar');
   }
 
   createToolbar() {
     const table = this.table._table;
-    
-    const toolbar = document.createElement('div');
-    toolbar.classList.add('table-toolbar');
+    const toolbar = this.toolbar;
 
     const deleteButton = this._createFeatureButton('delete');
     deleteButton.innerHTML = trashIcon;
