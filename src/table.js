@@ -57,7 +57,7 @@ export class Table {
   fillButtons = (cell, x, y) => {
     // column
     if (y === 0) {
-      this.createLine.createElem(cell);
+      // this.createLine.createElem(cell);
       if (x !== 0) {
         this.resize.createElem(cell);
       }
@@ -73,7 +73,7 @@ export class Table {
   
     // row
     if (x === 0) {
-      this.createLine.createElem(cell, 1);
+      // this.createLine.createElem(cell, 1);
     }
   }
   
