@@ -1,4 +1,4 @@
-import { create, getCoords, getSideByCoords } from './documentUtils';
+import { create, getCoords, getSideByCoords, turnTdIntoTh } from './documentUtils';
 import { Resize } from "./resize";
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
 import { CreateLine } from "./createLine";
@@ -474,7 +474,6 @@ export class Table {
    * @param {MouseEvent} event
    */
   _mouseDownOnCell(event) {
-    console.log(this._numberOfColumns, this._numberOfRows)
     if (event.target.closest('td,th')) {
       const table = this._table;
       const everyCell = table.querySelectorAll('td,th');
@@ -495,10 +494,6 @@ export class Table {
    * @menu 셀 합치기, 셀 배경색 변경하기
    */
   _showCustomContextMenuOnSelectedCells(event) {
-    const contextMenu = document.createElement('div');
-    const pointerX = event.clientX;
-    const pointerY = event.clientY;
-
     const hideContextMenu = (event) => {
       if (event.target.className !== 'context-menu') {
         contextMenu.remove();
@@ -530,21 +525,40 @@ export class Table {
       return true;
     }
 
+    const turnCellIntoTableHeader = (event) => {
+      const table = this._table;
+      const everyCell = table.querySelectorAll('td');
+      const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
+
+      selectedCells.forEach((cell) => {
+        turnTdIntoTh(cell);
+      });
+    }
+
+    const pointerX = event.clientX;
+    const pointerY = event.clientY;
+
+    const contextMenu = document.createElement('div');
     contextMenu.style.position = 'fixed';
     contextMenu.style.top = pointerY + 'px';
     contextMenu.style.left = pointerX + 'px';
     contextMenu.classList.add('context-menu');
 
     const mergeCellsButton = createMenuButton('셀 합치기', checkIfMergePossible());
-    const changeCellBackgroundColorButton = createMenuButton('셀 배경색 변경');
+    mergeCellsButton.addEventListener('click', this._mergeCells.bind(this));
+    contextMenu.appendChild(mergeCellsButton);
+
+    const turnCellIntoTableHeaderButton = createMenuButton('셀 강조하기');
+    turnCellIntoTableHeaderButton.addEventListener('click', turnCellIntoTableHeader);
+    contextMenu.appendChild(turnCellIntoTableHeaderButton);
+
+    const changeCellBackgroundColorButton = createMenuButton('셀 배경색 커스텀하기');
+    changeCellBackgroundColorButton.addEventListener('click', this._changeCellBackgroundColor.bind(this));
+    contextMenu.appendChild(changeCellBackgroundColorButton);
     
     this._table.appendChild(contextMenu);
-    contextMenu.appendChild(mergeCellsButton);
-    contextMenu.appendChild(changeCellBackgroundColorButton);
 
     document.addEventListener('click', hideContextMenu);
-    mergeCellsButton.addEventListener('click', this._mergeCells.bind(this));
-    changeCellBackgroundColorButton.addEventListener('click', this._changeCellBackgroundColor.bind(this));
   }
 
   /**
