@@ -87,8 +87,8 @@ export function getSideByCoords(coords, x, y) {
 }
 
 /**
- * td 엘리먼트를 th 엘리먼트로 변경한다
  * @param cell - TD Element
+ * @description td 엘리먼트를 th 엘리먼트로 변경한다
  */
 export function turnTdIntoTh(cell) {
   const th = document.createElement('th');
@@ -105,8 +105,8 @@ export function turnTdIntoTh(cell) {
 }
 
 /**
- * th 엘리먼트를 td 엘리먼트로 변경한다
  * @param cell - TH Element
+ * @description th 엘리먼트를 td 엘리먼트로 변경한다
  */
 export function turnThIntoTd(cell) {
   const td = document.createElement('td');

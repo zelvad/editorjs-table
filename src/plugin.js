@@ -101,8 +101,8 @@ class Table {
     const width = table.offsetWidth;
     const colSpans = [];
     const rowSpans = [];
-    const headers = [];
     const backgroundColors = [];
+    const headers = [];
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];

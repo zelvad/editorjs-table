@@ -193,9 +193,8 @@ export class TableConstructor {
 
   /**
    * @private
-   *
-   * 셀 내부에서 엔터키를 누르면 다음 줄로 포커스가 넘어간다
    * @param {KeyboardEvent} event
+   * @description 셀 내부에서 엔터키를 누르면 다음 줄로 포커스가 넘어간다
    */
   _containerEnterPressed(event) {
     if (event.shiftKey) {

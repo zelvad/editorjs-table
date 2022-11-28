@@ -360,11 +360,21 @@ export class Table {
     }
   }
 
+  /**
+   * @private
+   * @param {MouseEvent} event 
+   * @description 셀을 더블클릭하면 해당 셀이 선택 상태로 변한다
+   */
   _doubleClickCell(event) {
     const cell = event.target.closest('td,th');
     cell.classList.add('selected');
   }
 
+  /**
+   * @private
+   * @param {KeyboardEvent} event 
+   * @description 쉬프트 키를 누르고 가로축/세로축 위의 다른 셀을 클릭하면 그 사이의 모든 셀이 선택된다
+   */
   _pressedShiftKey(event) {
     const table = this._table;
     const startCell = event.target.closest('td,th');
@@ -408,6 +418,11 @@ export class Table {
     this._table.addEventListener('mousedown', handleMouseDownOnCell, { once: true });
   }
 
+  /**
+   * @private
+   * @param {MouseEvent} event 
+   * @description 선택된 셀들의 배경색을 변경한다
+   */
   _changeCellBackgroundColor(event) {
     const table = this._table;
     const selectedCells = table.querySelectorAll('td.selected,th.selected');
@@ -447,6 +462,10 @@ export class Table {
     table.appendChild(inputElement);
   }
 
+  /**
+   * @private
+   * @description colspan, rowspan 을 이용해 선택된 셀들을 하나로 합친다
+   */
   _mergeCells() {
     const table = this._table;
     const everyCell = table.querySelectorAll('td,th');
@@ -472,6 +491,7 @@ export class Table {
   /**
    * @private
    * @param {MouseEvent} event
+   * @description 선택된 셀들을 모두 미선택 상태로 되돌린다
    */
   _mouseDownOnCell(event) {
     if (event.target.closest('td,th')) {
@@ -491,7 +511,7 @@ export class Table {
   /**
    * @private
    * @param {MouseEvent} event
-   * @menu 셀 합치기, 셀 배경색 변경하기
+   * @menu 선택된 셀 위에서 우클릭시 커스텀 메뉴가 나타난다
    */
   _showCustomContextMenuOnSelectedCells(event) {
     const hideContextMenu = (event) => {
