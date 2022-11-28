@@ -217,23 +217,26 @@
     height: 100%;
     overflow: hidden;
   }
+  tbody th {
+    background-color: #f9f9f9;
+  }
   tbody tr:first-child {
-    td {
+    td,th {
       border-top: none;
     }
   }
   tbody tr:last-child {
-    td {
+    td,th {
       border-bottom: none;
     }
   }
   tbody tr {
-    td:last-child {
+    td:last-child,th:last-child {
       border-right: none;
     }
   }
   tbody tr {
-    td:first-child {
+    td:first-child,th:first-child {
       border-left: none;
     }
   }

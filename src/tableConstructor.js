@@ -1,5 +1,5 @@
 import './styles/table-constructor.scss';
-import { create } from './documentUtils';
+import { create, turnTdIntoTh } from './documentUtils';
 import { Table } from './table';
 
 /**
@@ -65,17 +65,19 @@ export class TableConstructor {
    * @param {{rows: number, cols: number}} size - contains number of rows and cols
    */
   _fillTable(data, size) {
-    console.log('data', data, size)
     if (data.content !== undefined) {
       for (let i = 0; i < size.rows && i < data.content.length; i++) {
         for (let j = 0; j < size.cols && j < data.content[i].length; j++) {
           const content = data.content[i][j];
           const colSpan = data.colSpans[i][j];
           const rowSpan = data.rowSpans[i][j];
+          const bgColor = data.backgroundColors[i][j];
+          const isHeader = data.headers[i][j];
           const cell = this._table.body.rows[i].cells[j];
 
           cell.colSpan = colSpan;
           cell.rowSpan = rowSpan;
+          cell.style.backgroundColor = bgColor;
 
           // get current cell and her editable part
           if (typeof content === 'string') {
@@ -84,10 +86,13 @@ export class TableConstructor {
           } else if (content?.type === 'image') {
             this._table.imageUpload.createImage(cell, content.src);
           }
+
+          if (isHeader) {
+            turnTdIntoTh(cell);
+          }
         }
       }
     }
-
   }
 
   /**
@@ -198,7 +203,7 @@ export class TableConstructor {
     }
 
     const table = this._table._table;
-    const currentCell = this._table.selectedCell.closest('td');
+    const currentCell = this._table.selectedCell.closest('td,th');
     const rowIndex = currentCell.parentNode.rowIndex;
     const rowSpan = currentCell.rowSpan;
 

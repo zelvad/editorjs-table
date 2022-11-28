@@ -4,7 +4,7 @@ import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
 import { CreateLine } from "./createLine";
 import { ImageUpload, CSS as imageUploadCSS } from "./imageUpload";
 import './styles/table.scss';
-import { Toolbar } from './deleteBlock';
+import { Toolbar } from './customToolbar';
 
 export const CSS = {
   table: 'tc-table',
@@ -315,7 +315,7 @@ export class Table {
     }, true);
 
     this._table.addEventListener('contextmenu', (event) => {
-      if (event.target.closest('td') && event.target.closest('td').className.includes('selected')) {
+      if (event.target.closest('td,th') && event.target.closest('td,th').className.includes('selected')) {
         event.preventDefault();
         this._showCustomContextMenuOnSelectedCells(event);
         return false;
@@ -361,19 +361,19 @@ export class Table {
   }
 
   _doubleClickCell(event) {
-    const cell = event.target.closest('td');
+    const cell = event.target.closest('td,th');
     cell.classList.add('selected');
   }
 
   _pressedShiftKey(event) {
     const table = this._table;
-    const startCell = event.target.closest('td');
+    const startCell = event.target.closest('td,th');
     const startRowIndex = startCell.parentNode.rowIndex;
     const startColIndex = startCell.cellIndex;
 
     const handleMouseDownOnCell = (event) => {
-      if (event.target.closest('td')) {
-        const targetCell = event.target.closest('td');
+      if (event.target.closest('td,th')) {
+        const targetCell = event.target.closest('td,th');
         const targetRowIndex = targetCell.parentNode.rowIndex;
         const targetColIndex = targetCell.cellIndex;
 
@@ -410,7 +410,7 @@ export class Table {
 
   _changeCellBackgroundColor(event) {
     const table = this._table;
-    const selectedCells = table.querySelectorAll('td.selected');
+    const selectedCells = table.querySelectorAll('td.selected,th.selected');
     const inputElement = document.createElement('input');
     const pointerX = event.clientX;
     const pointerY = event.clientY
@@ -449,7 +449,7 @@ export class Table {
 
   _mergeCells() {
     const table = this._table;
-    const everyCell = table.querySelectorAll('td');
+    const everyCell = table.querySelectorAll('td,th');
     const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
     
     const topLeftCell = selectedCells[0];
@@ -474,9 +474,10 @@ export class Table {
    * @param {MouseEvent} event
    */
   _mouseDownOnCell(event) {
-    if (event.target.closest('td')) {
+    console.log(this._numberOfColumns, this._numberOfRows)
+    if (event.target.closest('td,th')) {
       const table = this._table;
-      const everyCell = table.querySelectorAll('td');
+      const everyCell = table.querySelectorAll('td,th');
 
       const deselectEveryCell = () => {
         everyCell.forEach((cell) => {
@@ -555,7 +556,7 @@ export class Table {
       return;
     }
 
-    const coordsCell = getCoords(event.target.closest('TD'));
+    const coordsCell = getCoords(event.target.closest('TD,TH'));
     const side = getSideByCoords(coordsCell, event.pageX, event.pageY);
 
     event.target.dispatchEvent(new CustomEvent('mouseInActivatingArea', {
