@@ -6,6 +6,10 @@
   left: -10px;
   margin-bottom: 80px;
 
+  &__readonly {
+    margin-bottom: 0;
+  }
+
   .table-toolbar {
     position: absolute;
     bottom: -60px;

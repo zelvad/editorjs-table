@@ -17,7 +17,7 @@ export class TableConstructor {
     this.readOnly = readOnly;
   
     this._CSS = {
-      editor: 'tc-editor',
+      editor: readOnly ? 'tc-editor__readonly' : 'tc-editor',
       inputField: 'tc-table__inp',
       withBorder: 'tc-table__with_border'
     };
@@ -65,11 +65,18 @@ export class TableConstructor {
    * @param {{rows: number, cols: number}} size - contains number of rows and cols
    */
   _fillTable(data, size) {
+    console.log('data', data, size)
     if (data.content !== undefined) {
       for (let i = 0; i < size.rows && i < data.content.length; i++) {
         for (let j = 0; j < size.cols && j < data.content[i].length; j++) {
           const content = data.content[i][j];
+          const colSpan = data.colSpans[i][j];
+          const rowSpan = data.rowSpans[i][j];
           const cell = this._table.body.rows[i].cells[j];
+
+          cell.colSpan = colSpan;
+          cell.rowSpan = rowSpan;
+
           // get current cell and her editable part
           if (typeof content === 'string') {
             const input = cell.querySelector('.' + this._CSS.inputField);
@@ -80,6 +87,7 @@ export class TableConstructor {
         }
       }
     }
+
   }
 
   /**
@@ -102,7 +110,6 @@ export class TableConstructor {
     // value of config have to be positive number
     const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined;
     const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined;
-    const { settings } = data;
     const defaultRows = 3;
     const defaultCols = 2;
     const rows = contentRows || configRows || defaultRows;
@@ -114,19 +121,17 @@ export class TableConstructor {
     for (let i = 0; i < cols; i++) {
       this._table.addColumn(i);
     }
-  
-    if (settings) {
-      if (settings.sizes) {
-        settings.sizes.forEach((size, i) => {
-          if (this._table.colgroup.children[i]) {
-            this._table.colgroup.children[i].style.width = `${size * 100}%`;
-          }
-        })
+
+
+    data.columnWidths?.forEach((width, i) => {
+      if (this._table.colgroup.children[i]) {
+        this._table.colgroup.children[i].style.width = `${width * 100}%`;
       }
-    }
+    });
+
     this._table.htmlElement.classList.toggle(
       this._CSS.withBorder,
-      settings?.withBorder === undefined ? true : settings?.withBorder
+      true
     );
     
     return {
