@@ -1,9 +1,10 @@
-import { create, getCoords, getSideByCoords } from './documentUtils';
+import { create, getCoords, getSideByCoords, turnTdIntoTh } from './documentUtils';
 import { Resize } from "./resize";
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
 import { CreateLine } from "./createLine";
 import { ImageUpload, CSS as imageUploadCSS } from "./imageUpload";
 import './styles/table.scss';
+import { Toolbar } from './customToolbar';
 
 export const CSS = {
   table: 'tc-table',
@@ -28,7 +29,7 @@ export class Table {
    *
    * @param {boolean} readOnly - read-only mode flag
    */
-  constructor(readOnly) {
+  constructor(readOnly, api) {
     this.readOnly = readOnly;
     this._numberOfColumns = 0;
     this._numberOfRows = 0;
@@ -37,6 +38,7 @@ export class Table {
     this.selectLine = new SelectLine(this);
     this.createLine = new CreateLine(this);
     this.imageUpload = new ImageUpload(this);
+    this.toolbar = new Toolbar(this, api);
     
     this._element = this._createTableWrapper();
     this._table = this._element.querySelector('table');
@@ -44,6 +46,7 @@ export class Table {
 
     if (!this.readOnly) {
       this._hangEvents();
+      this.toolbar.createToolbar();
     }
   }
   
@@ -57,7 +60,7 @@ export class Table {
   fillButtons = (cell, x, y) => {
     // column
     if (y === 0) {
-      this.createLine.createElem(cell);
+      // this.createLine.createElem(cell);
       if (x !== 0) {
         this.resize.createElem(cell);
       }
@@ -73,7 +76,7 @@ export class Table {
   
     // row
     if (x === 0) {
-      this.createLine.createElem(cell, 1);
+      // this.createLine.createElem(cell, 1);
     }
   }
   
@@ -125,7 +128,9 @@ export class Table {
 
     this.insertCol(index)
     for (let i = 0; i < rows.length; i++) {
-      const cell = rows[i].insertCell(index);
+      const cell = rows[i].insertCell(rows[i].length);
+      cell.colSpan = 1;
+      cell.rowSpan = 1;
       this._fillCell(cell);
     }
     if (!this.readOnly) {
@@ -171,7 +176,7 @@ export class Table {
     this._table.rows[index].remove();
     this.updateButtons();
   }
-
+  
   /**
    * get html element of table
    *
@@ -282,17 +287,40 @@ export class Table {
     }, true);
 
     this._table.addEventListener('keydown', (event) => {
-      this._pressedEnterInEditField(event);
+      if (event.keyCode === 13) {
+        this._pressedEnterInEditField(event);
+        return;
+      }
+
+      if (event.shiftKey) {
+        this._pressedShiftKey(event);
+      }
     });
 
-    this._table.addEventListener('click', (event) => {
-      this._clickedOnCell(event);
+    this._table.addEventListener('mousedown', (event) => {
+      if (event.button === 0) {
+        this._mouseDownOnCell(event);
+      }
+    });
+
+    this._table.addEventListener('dblclick', (event) => {
+      if (event.button === 0) {
+        this._doubleClickCell(event);
+      }
     });
 
     this._table.addEventListener('mouseover', (event) => {
       this._mouseEnterInDetectArea(event);
       event.stopPropagation();
     }, true);
+
+    this._table.addEventListener('contextmenu', (event) => {
+      if (event.target.closest('td,th') && event.target.closest('td,th').className.includes('selected')) {
+        event.preventDefault();
+        this._showCustomContextMenuOnSelectedCells(event);
+        return false;
+      }
+    });
   }
 
   /**
@@ -334,18 +362,223 @@ export class Table {
 
   /**
    * @private
-   * @param {MouseEvent} event
+   * @param {MouseEvent} event 
+   * @description 셀을 더블클릭하면 해당 셀이 선택 상태로 변한다
    */
-  _clickedOnCell(event) {
-    // const isImageDeleteButton = event.target.classList.contains(imageUploadCSS.buttonDelete);
+  _doubleClickCell(event) {
+    const cell = event.target.closest('td,th');
+    cell.classList.add('selected');
+  }
 
-    // if (isImageDeleteButton === false) {
-    //   if (!event.target.classList.contains(CSS.cell)) {
-    //     return;
-    //   }
-    //   const content = event.target.querySelector('.' + CSS.inputField);
-    //   content.focus();
-    // }
+  /**
+   * @private
+   * @param {KeyboardEvent} event 
+   * @description 쉬프트 키를 누르고 가로축/세로축 위의 다른 셀을 클릭하면 그 사이의 모든 셀이 선택된다
+   */
+  _pressedShiftKey(event) {
+    const table = this._table;
+    const startCell = event.target.closest('td,th');
+    const startRowIndex = startCell.parentNode.rowIndex;
+    const startColIndex = startCell.cellIndex;
+
+    const handleMouseDownOnCell = (event) => {
+      if (event.target.closest('td,th')) {
+        const targetCell = event.target.closest('td,th');
+        const targetRowIndex = targetCell.parentNode.rowIndex;
+        const targetColIndex = targetCell.cellIndex;
+
+        if (startRowIndex === targetRowIndex) {
+          // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다. (로직 수정 필요)
+          if (Array.from(table.rows[startRowIndex].cells).some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
+            return;
+          }
+          
+          for (let i = startColIndex; i <= targetColIndex; i++) {
+            table.rows[startRowIndex].cells[i].classList.add('selected');
+          }
+
+          return;
+        }
+
+        if (startColIndex === targetColIndex) {
+          // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
+          for (let i = startRowIndex; i <= targetRowIndex; i++) {
+            const cell = table.rows[i].cells[startColIndex];
+
+            if (cell.colSpan > 1 || cell.rowSpan > 1) return;
+          }
+          
+          for (let i = startRowIndex; i <= targetRowIndex; i++) {
+            table.rows[i].cells[startColIndex].classList.add('selected');
+          }
+        }
+      }
+    }
+
+    this._table.addEventListener('mousedown', handleMouseDownOnCell, { once: true });
+  }
+
+  /**
+   * @private
+   * @param {MouseEvent} event 
+   * @description 선택된 셀들의 배경색을 변경한다
+   */
+  _changeCellBackgroundColor(event) {
+    const table = this._table;
+    const selectedCells = table.querySelectorAll('td.selected,th.selected');
+    const inputElement = document.createElement('input');
+    const pointerX = event.clientX;
+    const pointerY = event.clientY
+
+    const handleColorChange = (event) => {
+      const hex = event.target.value;
+
+      selectedCells.forEach((cell) => {
+        cell.style.backgroundColor = hex;
+      })
+    }
+
+    const hideColorPicker = (event) => {
+      if (event.target.tagName === 'INPUT') {
+        return;
+      }
+
+      inputElement.remove();
+      document.removeEventListener('click', hideColorPicker);
+    }
+    
+    inputElement.type = 'color';
+    inputElement.style.position = 'fixed';
+    inputElement.style.top = pointerY + 'px';
+    inputElement.style.left = pointerX + 'px';
+    inputElement.style.zIndex = 99;
+
+    inputElement.addEventListener('input', handleColorChange);
+
+    setTimeout(() => {
+      document.addEventListener('click', hideColorPicker);
+    }, 0);
+
+    table.appendChild(inputElement);
+  }
+
+  /**
+   * @private
+   * @description colspan, rowspan 을 이용해 선택된 셀들을 하나로 합친다
+   */
+  _mergeCells() {
+    const table = this._table;
+    const everyCell = table.querySelectorAll('td,th');
+    const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
+    
+    const topLeftCell = selectedCells[0];
+    const bottomRightCell = selectedCells[selectedCells.length - 1];
+    
+    const colSpan = bottomRightCell.cellIndex - topLeftCell.cellIndex + 1;
+    const rowSpan = bottomRightCell.parentNode.rowIndex - topLeftCell.parentNode.rowIndex + 1;
+
+    selectedCells.forEach((cell, i) => {
+      // 첫 번째 셀의 colspan, rowspan 을 늘리고 나머지 셀을 삭제한다.
+      if (i === 0) {
+        cell.colSpan = colSpan;
+        cell.rowSpan = rowSpan;
+      } else {
+        cell.remove();
+      }
+    });
+  }
+
+  /**
+   * @private
+   * @param {MouseEvent} event
+   * @description 선택된 셀들을 모두 미선택 상태로 되돌린다
+   */
+  _mouseDownOnCell(event) {
+    if (event.target.closest('td,th')) {
+      const table = this._table;
+      const everyCell = table.querySelectorAll('td,th');
+
+      const deselectEveryCell = () => {
+        everyCell.forEach((cell) => {
+          cell.classList.remove('selected');
+        });
+      }
+
+      deselectEveryCell(everyCell);
+    }
+  }
+
+  /**
+   * @private
+   * @param {MouseEvent} event
+   * @menu 선택된 셀 위에서 우클릭시 커스텀 메뉴가 나타난다
+   */
+  _showCustomContextMenuOnSelectedCells(event) {
+    const hideContextMenu = (event) => {
+      if (event.target.className !== 'context-menu') {
+        contextMenu.remove();
+        document.removeEventListener('click', hideContextMenu);
+      }
+    }
+
+    const createMenuButton = (title, isActive = true) => {
+      const menu = document.createElement('div');
+    
+      menu.textContent = title;
+      menu.classList.add('context-menu__button');
+
+      !isActive && menu.classList.add('deactivated');
+
+      return menu;
+    }
+
+    const checkIfMergePossible = () => {
+      const table = this._table;
+      const everyCell = table.querySelectorAll('td');
+      const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
+
+      // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
+      if (selectedCells.some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    const turnCellIntoTableHeader = (event) => {
+      const table = this._table;
+      const everyCell = table.querySelectorAll('td');
+      const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
+
+      selectedCells.forEach((cell) => {
+        turnTdIntoTh(cell);
+      });
+    }
+
+    const pointerX = event.clientX;
+    const pointerY = event.clientY;
+
+    const contextMenu = document.createElement('div');
+    contextMenu.style.position = 'fixed';
+    contextMenu.style.top = pointerY + 'px';
+    contextMenu.style.left = pointerX + 'px';
+    contextMenu.classList.add('context-menu');
+
+    const mergeCellsButton = createMenuButton('셀 합치기', checkIfMergePossible());
+    mergeCellsButton.addEventListener('click', this._mergeCells.bind(this));
+    contextMenu.appendChild(mergeCellsButton);
+
+    const turnCellIntoTableHeaderButton = createMenuButton('셀 강조하기');
+    turnCellIntoTableHeaderButton.addEventListener('click', turnCellIntoTableHeader);
+    contextMenu.appendChild(turnCellIntoTableHeaderButton);
+
+    const changeCellBackgroundColorButton = createMenuButton('셀 배경색 커스텀하기');
+    changeCellBackgroundColorButton.addEventListener('click', this._changeCellBackgroundColor.bind(this));
+    contextMenu.appendChild(changeCellBackgroundColorButton);
+    
+    this._table.appendChild(contextMenu);
+
+    document.addEventListener('click', hideContextMenu);
   }
 
   /**
@@ -357,7 +590,7 @@ export class Table {
       return;
     }
 
-    const coordsCell = getCoords(event.target.closest('TD'));
+    const coordsCell = getCoords(event.target.closest('TD,TH'));
     const side = getSideByCoords(coordsCell, event.pageX, event.pageY);
 
     event.target.dispatchEvent(new CustomEvent('mouseInActivatingArea', {

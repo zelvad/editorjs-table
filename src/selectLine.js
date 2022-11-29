@@ -14,7 +14,7 @@ export class SelectLine {
   
   createElem(cell, direction = 0) {
     const className = direction === 0 ? CSS.selectLineCol : CSS.selectLineRow;
-  
+
     if (!cell.querySelector(`.${className}`)) {
       const elem = create('div', [className]);
       elem.addEventListener('click', this.onClick, false);
@@ -30,6 +30,7 @@ export class SelectLine {
   }
   
   onMouseEnter = (e) => {
+    // 가로 줄
     if (this.getDirection(e) === 0) {
       const index = this.getIndex(e)
       for (let i = 0; i < this.table.body.rows.length; i += 1) {
@@ -37,6 +38,7 @@ export class SelectLine {
           this.table.body.rows[i].children[index].classList.add(CSS.tdRemove);
         }
       }
+    // 세로 줄
     } else {
       const tr = e.target.closest('tr');
       tr.classList.add(CSS.trRemove);

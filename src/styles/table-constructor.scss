@@ -4,4 +4,46 @@
   box-sizing: content-box;
   width: 100%;
   left: -10px;
+
+  &__readonly {
+    margin-bottom: 0;
+  }
+
+  .table-toolbar {
+    position: absolute;
+    bottom: -60px;
+    left: 30px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0px 0px 10px #e6e6e6;
+    border-radius: 4px;
+    width: 87%;
+    height: 40px;
+    padding: 8px 16px;
+    color: black;
+
+    &__button {
+      border: none;
+      background: none;
+      border-radius: 4px;
+      font-size: 12px;
+      color: rgb(121, 121, 121);
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      transition: 80ms cubic-bezier(0.33, 1, 0.68, 1);
+      transition-property: color, background-color, box-shadow, border-color;
+      cursor: pointer;
+      &:hover {
+        background-color: rgb(243, 243, 243);
+        transition-duration: 0.1s;
+      }
+    }
+    
+    &__button:not(:last-child) {
+      margin-right: 10px;
+    }
+  }
 }

@@ -85,3 +85,39 @@ export function getSideByCoords(coords, x, y) {
 
   return side;
 }
+
+/**
+ * @param cell - TD Element
+ * @description td 엘리먼트를 th 엘리먼트로 변경한다
+ */
+export function turnTdIntoTh(cell) {
+  const th = document.createElement('th');
+
+  th.setAttribute('rowspan', cell.rowSpan);
+  th.setAttribute('colspan', cell.colSpan);
+  th.setAttribute('class', cell.className);
+  
+  while(cell.firstChild) {
+    th.appendChild(cell.firstChild);
+  }
+
+  cell.parentNode.replaceChild(th, cell);
+}
+
+/**
+ * @param cell - TH Element
+ * @description th 엘리먼트를 td 엘리먼트로 변경한다
+ */
+export function turnThIntoTd(cell) {
+  const td = document.createElement('td');
+
+  td.setAttribute('rowspan', cell.rowSpan);
+  td.setAttribute('colspan', cell.colSpan);
+  td.setAttribute('class', cell.className);
+  
+  while(cell.firstChild) {
+    td.appendChild(cell.firstChild);
+  }
+
+  cell.parentNode.replaceChild(td, cell);
+}

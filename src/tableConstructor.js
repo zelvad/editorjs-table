@@ -1,5 +1,5 @@
 import './styles/table-constructor.scss';
-import { create } from './documentUtils';
+import { create, turnTdIntoTh } from './documentUtils';
 import { Table } from './table';
 
 /**
@@ -17,7 +17,7 @@ export class TableConstructor {
     this.readOnly = readOnly;
   
     this._CSS = {
-      editor: 'tc-editor',
+      editor: readOnly ? 'tc-editor__readonly' : 'tc-editor',
       inputField: 'tc-table__inp',
       withBorder: 'tc-table__with_border'
     };
@@ -25,7 +25,7 @@ export class TableConstructor {
     /** creating table */
 
     try {
-      this._table = new Table(readOnly);
+      this._table = new Table(readOnly, api);
       const size = this._resizeTable(data, config);
       this._fillTable(data, size);
     } catch (e) {
@@ -45,6 +45,8 @@ export class TableConstructor {
     if (!this.readOnly) {
       this._hangEvents();
     }
+
+    this.api = api
   }
 
   /**
@@ -67,13 +69,26 @@ export class TableConstructor {
       for (let i = 0; i < size.rows && i < data.content.length; i++) {
         for (let j = 0; j < size.cols && j < data.content[i].length; j++) {
           const content = data.content[i][j];
+          const colSpan = data.colSpans[i][j];
+          const rowSpan = data.rowSpans[i][j];
+          const bgColor = data.backgroundColors[i][j];
+          const isHeader = data.headers[i][j];
           const cell = this._table.body.rows[i].cells[j];
+
+          cell.colSpan = colSpan;
+          cell.rowSpan = rowSpan;
+          cell.style.backgroundColor = bgColor;
+
           // get current cell and her editable part
           if (typeof content === 'string') {
             const input = cell.querySelector('.' + this._CSS.inputField);
             input.innerHTML = content;
           } else if (content?.type === 'image') {
             this._table.imageUpload.createImage(cell, content.src);
+          }
+
+          if (isHeader) {
+            turnTdIntoTh(cell);
           }
         }
       }
@@ -100,7 +115,6 @@ export class TableConstructor {
     // value of config have to be positive number
     const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined;
     const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined;
-    const { settings } = data;
     const defaultRows = 3;
     const defaultCols = 2;
     const rows = contentRows || configRows || defaultRows;
@@ -112,19 +126,17 @@ export class TableConstructor {
     for (let i = 0; i < cols; i++) {
       this._table.addColumn(i);
     }
-  
-    if (settings) {
-      if (settings.sizes) {
-        settings.sizes.forEach((size, i) => {
-          if (this._table.colgroup.children[i]) {
-            this._table.colgroup.children[i].style.width = `${size * 100}%`;
-          }
-        })
+
+
+    data.columnWidths?.forEach((width, i) => {
+      if (this._table.colgroup.children[i]) {
+        this._table.colgroup.children[i].style.width = `${width * 100}%`;
       }
-    }
+    });
+
     this._table.htmlElement.classList.toggle(
       this._CSS.withBorder,
-      settings?.withBorder === undefined ? true : settings?.withBorder
+      true
     );
     
     return {
@@ -181,22 +193,36 @@ export class TableConstructor {
 
   /**
    * @private
-   *
-   * if "cntrl + Eneter" is pressed then create new line under current and focus it
    * @param {KeyboardEvent} event
+   * @description 셀 내부에서 엔터키를 누르면 다음 줄로 포커스가 넘어간다
    */
   _containerEnterPressed(event) {
-    if (!(this._table.selectedCell !== null && !event.shiftKey)) {
+    if (event.shiftKey) {
       return;
     }
-    const indicativeRow = this._table.selectedCell.closest('TR');
-    let index = this._getHoveredSideOfContainer();
 
-    if (index === 1) {
-      index = indicativeRow.sectionRowIndex + 1;
+    const table = this._table._table;
+    const currentCell = this._table.selectedCell.closest('td,th');
+    const rowIndex = currentCell.parentNode.rowIndex;
+    const rowSpan = currentCell.rowSpan;
+
+    // 셀이 세로로 합쳐졌을때, 셀의 가장 아래쪽에 위치한 Row 의 Index 값.
+    // 합쳐지지 않은 셀이라면, 셀이 위치한 Row 의 Index 값.
+    const cellBottomRowIndex = rowIndex + (rowSpan - 1);
+
+    // 더 이상 아래로 내려갈 수 없다면 취소한다
+    if (table.querySelectorAll('tr').length === (cellBottomRowIndex + 1)) {
+      return;
     }
-    const newstr = this._table.addRow(index);
 
-    newstr.cells[0].click();
+    try {
+      const nextRowSameIndexCell = table.rows[cellBottomRowIndex + 1].cells[currentCell.cellIndex].querySelector('div.tc-table__inp');
+
+      nextRowSameIndexCell.focus();
+    } catch (error) {
+      const nextRowFirstIndexCell = table.rows[cellBottomRowIndex + 1].cells[0].querySelector('div.tc-table__inp');
+
+      nextRowFirstIndexCell.focus();
+    }
   }
 }
