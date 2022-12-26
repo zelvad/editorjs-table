@@ -1,6 +1,6 @@
-import './styles/table-constructor.scss';
-import { create, turnTdIntoTh } from './documentUtils';
-import { Table } from './table';
+import "./styles/table-constructor.scss"
+import { create, turnTdIntoTh } from "./documentUtils"
+import { Table } from "./table"
 
 /**
  * Entry point. Controls table and give API to user
@@ -14,36 +14,38 @@ export class TableConstructor {
    * @param {boolean} readOnly - read-only mode flag
    */
   constructor(data, config, api, readOnly) {
-    this.readOnly = readOnly;
-  
+    this.readOnly = readOnly
+
     this._CSS = {
-      editor: readOnly ? 'tc-editor__readonly' : 'tc-editor',
-      inputField: 'tc-table__inp',
-      withBorder: 'tc-table__with_border'
-    };
-    
+      editor: readOnly ? "tc-editor__readonly" : "tc-editor",
+      inputField: "tc-table__inp",
+      withBorder: "tc-table__with_border",
+    }
+
     /** creating table */
 
     try {
-      this._table = new Table(readOnly, api);
-      const size = this._resizeTable(data, config);
-      this._fillTable(data, size);
+      this._table = new Table(readOnly, api)
+      const size = this._resizeTable(data, config)
+      this._fillTable(data, size)
     } catch (e) {
       console.log(e)
     }
 
     /** creating container around table */
-    this._container = create('div', [this._CSS.editor, api.styles.block], null, [ this._table.htmlElement ]);
-    
+    this._container = create("div", [this._CSS.editor, api.styles.block], null, [
+      this._table.htmlElement,
+    ])
+
     /** Создаем кнопку для загрузки изображения */
-    this._table.imageUpload.createElem(this._container);
+    this._table.imageUpload.createElem(this._container)
 
     /** Activated elements */
-    this._hoveredCell = null;
-    this._hoveredCellSide = null;
+    this._hoveredCell = null
+    this._hoveredCellSide = null
 
     if (!this.readOnly) {
-      this._hangEvents();
+      this._hangEvents()
     }
 
     this.api = api
@@ -54,7 +56,7 @@ export class TableConstructor {
    * @return {HTMLElement}
    */
   get htmlElement() {
-    return this._container;
+    return this._container
   }
 
   /**
@@ -68,27 +70,27 @@ export class TableConstructor {
     if (data.content !== undefined) {
       for (let i = 0; i < size.rows && i < data.content.length; i++) {
         for (let j = 0; j < size.cols && j < data.content[i].length; j++) {
-          const content = data.content[i][j];
-          const colSpan = data.colSpans[i][j];
-          const rowSpan = data.rowSpans[i][j];
-          const bgColor = data.backgroundColors[i][j];
-          const isHeader = data.headers[i][j];
-          const cell = this._table.body.rows[i].cells[j];
+          const content = data.content[i][j]
+          const colSpan = data.colSpans[i][j]
+          const rowSpan = data.rowSpans[i][j]
+          const bgColor = data.backgroundColors[i][j]
+          const isHeader = data.headers[i][j]
+          const cell = this._table.body.rows[i].cells[j]
 
-          cell.colSpan = colSpan;
-          cell.rowSpan = rowSpan;
-          cell.style.backgroundColor = bgColor;
+          cell.colSpan = colSpan
+          cell.rowSpan = rowSpan
+          cell.style.backgroundColor = bgColor
 
           // get current cell and her editable part
-          if (typeof content === 'string') {
-            const input = cell.querySelector('.' + this._CSS.inputField);
-            input.innerHTML = content;
-          } else if (content?.type === 'image') {
-            this._table.imageUpload.createImage(cell, content.src);
+          if (typeof content === "string") {
+            const input = cell.querySelector("." + this._CSS.inputField)
+            input.innerHTML = content
+          } else if (content?.type === "image") {
+            this._table.imageUpload.createImage(cell, content.src)
           }
 
           if (isHeader) {
-            turnTdIntoTh(cell);
+            turnTdIntoTh(cell)
           }
         }
       }
@@ -106,43 +108,39 @@ export class TableConstructor {
    * @return {{rows: number, cols: number}} - number of cols and rows
    */
   _resizeTable(data, config) {
-    const isValidArray = Array.isArray(data.content);
-    const isNotEmptyArray = isValidArray ? data.content.length : false;
-    const contentRows = isValidArray ? data.content.length : undefined;
-    const contentCols = isNotEmptyArray ? data.content[0].length : undefined;
-    const parsedRows = Number.parseInt(config.rows);
-    const parsedCols = Number.parseInt(config.cols);
+    const isValidArray = Array.isArray(data.content)
+    const isNotEmptyArray = isValidArray ? data.content.length : false
+    const contentRows = isValidArray ? data.content.length : undefined
+    const contentCols = isNotEmptyArray ? data.content[0].length : undefined
+    const parsedRows = Number.parseInt(config.rows)
+    const parsedCols = Number.parseInt(config.cols)
     // value of config have to be positive number
-    const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined;
-    const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined;
-    const defaultRows = 3;
-    const defaultCols = 2;
-    const rows = contentRows || configRows || defaultRows;
-    const cols = contentCols || configCols || defaultCols;
+    const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined
+    const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined
+    const defaultRows = 3
+    const defaultCols = 2
+    const rows = contentRows || configRows || defaultRows
+    const cols = contentCols || configCols || defaultCols
 
     for (let i = 0; i < rows; i++) {
-      this._table.addRow(i);
+      this._table.addRow(i)
     }
     for (let i = 0; i < cols; i++) {
-      this._table.addColumn(i);
+      this._table.addColumn(i)
     }
-
 
     data.columnWidths?.forEach((width, i) => {
       if (this._table.colgroup.children[i]) {
-        this._table.colgroup.children[i].style.width = `${width * 100}%`;
+        this._table.colgroup.children[i].style.width = `${width * 100}%`
       }
-    });
+    })
 
-    this._table.htmlElement.classList.toggle(
-      this._CSS.withBorder,
-      true
-    );
-    
+    this._table.htmlElement.classList.toggle(this._CSS.withBorder, true)
+
     return {
       rows: rows,
-      cols: cols
-    };
+      cols: cols,
+    }
   }
 
   /**
@@ -151,9 +149,9 @@ export class TableConstructor {
    * hang necessary events
    */
   _hangEvents() {
-    this._container.addEventListener('keydown', (event) => {
-      this._containerKeydown(event);
-    });
+    this._container.addEventListener("keydown", (event) => {
+      this._containerKeydown(event)
+    })
   }
 
   /**
@@ -164,7 +162,7 @@ export class TableConstructor {
    */
   _containerKeydown(event) {
     if (event.keyCode === 13) {
-      this._containerEnterPressed(event);
+      this._containerEnterPressed(event)
     }
   }
 
@@ -176,9 +174,9 @@ export class TableConstructor {
    */
   _getHoveredSideOfContainer() {
     if (this._hoveredCell === this._container) {
-      return this._isBottomOrRight() ? 0 : -1;
+      return this._isBottomOrRight() ? 0 : -1
     }
-    return 1;
+    return 1
   }
 
   /**
@@ -188,7 +186,7 @@ export class TableConstructor {
    * @returns {boolean}
    */
   _isBottomOrRight() {
-    return this._hoveredCellSide === 'bottom' || this._hoveredCellSide === 'right';
+    return this._hoveredCellSide === "bottom" || this._hoveredCellSide === "right"
   }
 
   /**
@@ -198,31 +196,35 @@ export class TableConstructor {
    */
   _containerEnterPressed(event) {
     if (event.shiftKey) {
-      return;
+      return
     }
 
-    const table = this._table._table;
-    const currentCell = this._table.selectedCell.closest('td,th');
-    const rowIndex = currentCell.parentNode.rowIndex;
-    const rowSpan = currentCell.rowSpan;
+    const table = this._table._table
+    const currentCell = this._table.selectedCell.closest("td,th")
+    const rowIndex = currentCell.parentNode.rowIndex
+    const rowSpan = currentCell.rowSpan
 
     // 셀이 세로로 합쳐졌을때, 셀의 가장 아래쪽에 위치한 Row 의 Index 값.
     // 합쳐지지 않은 셀이라면, 셀이 위치한 Row 의 Index 값.
-    const cellBottomRowIndex = rowIndex + (rowSpan - 1);
+    const cellBottomRowIndex = rowIndex + (rowSpan - 1)
 
     // 더 이상 아래로 내려갈 수 없다면 취소한다
-    if (table.querySelectorAll('tr').length === (cellBottomRowIndex + 1)) {
-      return;
+    if (table.querySelectorAll("tr").length === cellBottomRowIndex + 1) {
+      return
     }
 
     try {
-      const nextRowSameIndexCell = table.rows[cellBottomRowIndex + 1].cells[currentCell.cellIndex].querySelector('div.tc-table__inp');
+      const nextRowSameIndexCell =
+        table.rows[cellBottomRowIndex + 1].cells[currentCell.cellIndex].querySelector(
+          "div.tc-table__inp"
+        )
 
-      nextRowSameIndexCell.focus();
+      nextRowSameIndexCell.focus()
     } catch (error) {
-      const nextRowFirstIndexCell = table.rows[cellBottomRowIndex + 1].cells[0].querySelector('div.tc-table__inp');
+      const nextRowFirstIndexCell =
+        table.rows[cellBottomRowIndex + 1].cells[0].querySelector("div.tc-table__inp")
 
-      nextRowFirstIndexCell.focus();
+      nextRowFirstIndexCell.focus()
     }
   }
 }
