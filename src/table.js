@@ -58,11 +58,13 @@ export class Table {
     // column
     if (y === 0) {
       this.createLine.createElem(cell);
-      if (x !== 0) {
-        this.resize.createElem(cell);
-      }
     }
-  
+    
+    if (x !== 0) {
+      // 여기서 너비조절 막대기 생성하는 중.
+      this.resize.createElem(cell);
+    }
+
     // select line button
     if (x === 0 || y === 0) {
       this.selectLine.createElem(cell, Number(x === 0));
