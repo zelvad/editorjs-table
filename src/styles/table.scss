@@ -213,29 +213,24 @@
     height: 100%;
     overflow: hidden;
   }
-  tbody tr:first-child {
-    td {
-      border-top: none;
-    }
-  }
-  tbody tr:last-child {
-    td {
-      border-bottom: none;
-    }
-  }
-  tbody tr {
-    td:last-child {
-      border-right: none;
-    }
-  }
-  tbody tr {
-    td:first-child {
-      border-left: none;
-    }
-  }
 
   .tc-table__cell.selected {
     background-color: #eef7ff;
+    border-color: #0065FF;
+
+    &::after {
+      height: 100%;
+      width: 100%;
+      border: 1px solid #0065FF;
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      bottom: 0px;
+      z-index: 12;
+      display: inline-block;
+      pointer-events: none;
+    }
   }
   .context-menu {
     position: fixed;
