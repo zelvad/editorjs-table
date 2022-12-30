@@ -198,7 +198,8 @@ export class Table {
         cell.colSpan = colSpan;
         cell.rowSpan = rowSpan;
       } else {
-        cell.remove();
+        cell.style.display = 'none'
+        // cell.remove();
       }
     });
 
@@ -386,6 +387,7 @@ export class Table {
       const startColIndex = cell.cellIndex;
       const everyCell = table.querySelectorAll('td');
       let currentCell = cell;
+      let isMouseOverFirstCell = true
       
       // console.log(startRowIndex, startColIndex);
 
@@ -394,10 +396,15 @@ export class Table {
         const cellBelowMousePointer = elementBelowMousePointer.closest('td');
         const currentRowIndex = cellBelowMousePointer.parentNode.rowIndex;
         const currentColIndex = cellBelowMousePointer.cellIndex;
-
+        
+        if (isMouseOverFirstCell) {
+          selectCells(currentRowIndex, currentColIndex);
+          isMouseOverFirstCell = false
+        }
+        
         if (currentCell !== cellBelowMousePointer) {
           deselectEveryCell(everyCell);
-          selectCells(table, startRowIndex, startColIndex, currentRowIndex, currentColIndex);
+          selectCells(currentRowIndex, currentColIndex);
 
           currentCell = cellBelowMousePointer;
         }
@@ -414,31 +421,39 @@ export class Table {
         });
       }
 
-      const selectCells = (table, startRowIndex, startColIndex, currentRowIndex, currentColIndex) => {
-        const lastCell = table.rows[currentRowIndex].cells[currentColIndex];
-        const isLastCellMerged = lastCell.colSpan > 1 || lastCell.rowSpan > 1;
+      const selectCells = (currentRowIndex, currentColIndex) => {
+        const firstCell = cell
+        const currentCell = table.rows[currentRowIndex].cells[currentColIndex];
+
+        const isLastCellMerged = currentCell.colSpan > 1 || currentCell.rowSpan > 1;
         let additionalRow = 0;
         let additionalCol = 0;
         let isAdditionalRow = false;
 
         if (isLastCellMerged) {
-          additionalRow += (lastCell.rowSpan - 1);
-          additionalCol += (lastCell.colSpan - 1);
+          additionalRow += (currentCell.rowSpan - 1);
+          additionalCol += (currentCell.colSpan - 1);
         }
       
+        /**
+         * @중요 (2022/12/30 금)
+         * display = none 방식으로 바꾸고 복잡한 선택 로직 다 지우니까 잘 된다.
+         * 컨플루언스랑 비슷한 모양해서 선택됨.
+         * 컨플루언스는 네모가 아니면 병합을 막는 로직이 있다.
+         */
         for (let i = startRowIndex; i <= currentRowIndex + additionalRow; i++) {
           const cellsInRow = table.rows[i].cells;
-          const maxRowSpanInRow = Math.max(...Array.from(cellsInRow).map((cell) => cell.rowSpan));
-          const maxColSpanInRow = Math.max(...Array.from(cellsInRow).map((cell) => cell.colSpan));
+          // const maxRowSpanInRow = Math.max(...Array.from(cellsInRow).map((cell) => cell.rowSpan));
+          // const maxColSpanInRow = Math.max(...Array.from(cellsInRow).map((cell) => cell.colSpan));
 
-          if (isAdditionalRow) {
-            for (let j = startColIndex; j < currentColIndex; j++) {
-              const cell = cellsInRow[j];
-              cell.classList.add('selected');
-            }
+          // if (isAdditionalRow) {
+          //   for (let j = startColIndex; j < currentColIndex; j++) {
+          //     const cell = cellsInRow[j];
+          //     cell.classList.add('selected');
+          //   }
             
-            continue;
-          }
+          //   continue;
+          // }
 
           for (let j = startColIndex; j <= currentColIndex + additionalCol; j++) {
             const cell = cellsInRow[j];
@@ -447,10 +462,10 @@ export class Table {
 
             cell.classList.add('selected');
 
-            if (maxColSpanInRow > 1 && colspan === maxColSpanInRow) {
-              isAdditionalRow = true;
-              break
-            }
+            // if (maxColSpanInRow > 1 && colspan === maxColSpanInRow) {
+            //   isAdditionalRow = true;
+            //   break
+            // }
           }
         }
       }

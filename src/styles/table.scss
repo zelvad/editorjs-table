@@ -21,15 +21,11 @@
     max-width: 100%;
   }
   &__with_border {
-    .tc-table__wrap {
-      border-color: #DBDBE2;
-    }
     .tc-table__cell {
       border-color: #DBDBE2;
     }
   }
   &__wrap {
-    border: 1px solid transparent;
     position: relative;
     height: 100%;
     width: 100%;
