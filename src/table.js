@@ -197,6 +197,23 @@ export class Table {
       }
     });
 
+    // 가로줄에 있는 모든 셀이 display="none" 이 되는 경우에 해당 Row 를 삭제한다.
+    const invisibleRows = [];
+
+    for (let i = 0; i < table.rows.length; i++) {
+      const row = table.rows[i];
+      const isEveryCellInvisible = Array.from(row.cells).every((cell) => cell.style.display === 'none');
+
+      if (isEveryCellInvisible) {
+        invisibleRows.push(i);
+      }
+    }
+
+    invisibleRows.forEach((index, i) => {
+      this.removeRow(index - i)
+    });
+
+    selectedCells[0].rowSpan -= invisibleRows.length
   }
   
   /**
@@ -382,8 +399,6 @@ export class Table {
       const everyCell = table.querySelectorAll('td');
       let currentCell = cell;
       let isMouseOverFirstCell = true
-      
-      // console.log(startRowIndex, startColIndex);
 
       const handleMouseMove = (event) => {
         const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY);
@@ -417,7 +432,6 @@ export class Table {
 
       const selectCells = (currentRowIndex, currentColIndex) => {
         const currentCell = table.rows[currentRowIndex].cells[currentColIndex];
-
         const isLastCellMerged = currentCell.colSpan > 1 || currentCell.rowSpan > 1;
         let additionalRow = 0;
         let additionalCol = 0;
