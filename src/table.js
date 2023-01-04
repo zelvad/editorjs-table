@@ -180,26 +180,20 @@ export class Table {
     const table = this._table;
     const everyCell = table.querySelectorAll('td')
     const selectedCells = Array.from(everyCell).filter((cell) => cell.classList.contains('selected'));
-
-    // 이미 합쳐진 셀이 포함됐다면 실행을 멈춘다.
-    if (selectedCells.some((cell) => cell.colSpan > 1 || cell.rowSpan > 1)) {
-      return;
-    }
     
     const topLeftCell = selectedCells[0];
     const bottomRightCell = selectedCells[selectedCells.length - 1];
-    
+
     const colSpan = bottomRightCell.cellIndex - topLeftCell.cellIndex + 1;
     const rowSpan = bottomRightCell.parentNode.rowIndex - topLeftCell.parentNode.rowIndex + 1;
 
     selectedCells.forEach((cell, i) => {
-      // 첫 번째 셀의 colspan, rowspan 을 늘리고 나머지 셀을 삭제한다.
+      // 첫 번째 셀의 colspan, rowspan 을 늘리고 나머지 셀을 숨긴다.
       if (i === 0) {
         cell.colSpan = colSpan;
         cell.rowSpan = rowSpan;
       } else {
         cell.style.display = 'none'
-        // cell.remove();
       }
     });
 
@@ -422,50 +416,24 @@ export class Table {
       }
 
       const selectCells = (currentRowIndex, currentColIndex) => {
-        const firstCell = cell
         const currentCell = table.rows[currentRowIndex].cells[currentColIndex];
 
         const isLastCellMerged = currentCell.colSpan > 1 || currentCell.rowSpan > 1;
         let additionalRow = 0;
         let additionalCol = 0;
-        let isAdditionalRow = false;
 
         if (isLastCellMerged) {
           additionalRow += (currentCell.rowSpan - 1);
           additionalCol += (currentCell.colSpan - 1);
         }
-      
-        /**
-         * @중요 (2022/12/30 금)
-         * display = none 방식으로 바꾸고 복잡한 선택 로직 다 지우니까 잘 된다.
-         * 컨플루언스랑 비슷한 모양해서 선택됨.
-         * 컨플루언스는 네모가 아니면 병합을 막는 로직이 있다.
-         */
+
         for (let i = startRowIndex; i <= currentRowIndex + additionalRow; i++) {
           const cellsInRow = table.rows[i].cells;
-          // const maxRowSpanInRow = Math.max(...Array.from(cellsInRow).map((cell) => cell.rowSpan));
-          // const maxColSpanInRow = Math.max(...Array.from(cellsInRow).map((cell) => cell.colSpan));
-
-          // if (isAdditionalRow) {
-          //   for (let j = startColIndex; j < currentColIndex; j++) {
-          //     const cell = cellsInRow[j];
-          //     cell.classList.add('selected');
-          //   }
-            
-          //   continue;
-          // }
 
           for (let j = startColIndex; j <= currentColIndex + additionalCol; j++) {
             const cell = cellsInRow[j];
-            const colspan = cell.colSpan;
-            const rowspan = cell.rowSpan;
 
             cell.classList.add('selected');
-
-            // if (maxColSpanInRow > 1 && colspan === maxColSpanInRow) {
-            //   isAdditionalRow = true;
-            //   break
-            // }
           }
         }
       }
@@ -503,18 +471,46 @@ export class Table {
       return menu;
     }
 
+    const checkIfMergePossible = () => {
+      const table = this._table;
+
+      let everySelectedCells = 0;
+      let visibleSelectedCells = 0;
+
+      for (let i = 0; i < table.rows.length; i++) {
+        const row = table.rows[i];
+
+        for (let j = 0; j < row.cells.length; j++) {
+          const cell = row.cells[j];
+          
+          if (cell.classList.contains('selected')) {            
+            everySelectedCells += 1;
+
+            if (cell.style.display !== 'none') {
+              visibleSelectedCells += (cell.colSpan * cell.rowSpan)
+            }
+          }
+        }
+      }
+      
+      return everySelectedCells === visibleSelectedCells
+    }
+
     contextMenu.style.position = 'fixed';
     contextMenu.style.top = pointerY + 'px';
     contextMenu.style.left = pointerX + 'px';
     contextMenu.classList.add('context-menu');
 
-    const mergeCellsButton = createMenuButton('셀 합치기');
-    
     this._table.appendChild(contextMenu);
-    contextMenu.appendChild(mergeCellsButton);
+    
+    if (checkIfMergePossible()) {
+      const mergeCellsButton = createMenuButton('셀 합치기');
+      
+      contextMenu.appendChild(mergeCellsButton);
+      mergeCellsButton.addEventListener('click', this.mergeCells.bind(this))
+    }
 
     document.addEventListener('click', hideContextMenu);
-    mergeCellsButton.addEventListener('click', this.mergeCells.bind(this))
   }
 
   /**
