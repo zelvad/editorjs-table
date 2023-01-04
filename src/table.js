@@ -139,10 +139,47 @@ export class Table {
   };
   
   removeColumn(index) {
+    const table = this._table;
+
     this._numberOfColumns--;
-    for (let i = 0; i < this._table.rows.length; i += 1) {
+    
+    for (let i = 0; i < table.rows.length; i++) {
+      const row = table.rows[i];
+      const cellInColumn = row.cells[index];
+
+      // 현재 셀이 합쳐진 셀의 일부라면 왼쪽으로 탐색하며 합쳐진 셀의 본체를 찾습니다.
+      // 본체를 찾았다면 본체의 colSpan 을 1 깎고 반복문을 종료합니다.
+      if (cellInColumn.style.display === 'none') {
+        for (let j = index - 1; j >= 0; j--) {
+          const leftCell = row.cells[j];
+
+          if (leftCell.colSpan > 1) {
+            leftCell.colSpan -= 1;
+            break;
+          }
+        }
+      }
+
+      // 현재 셀이 합쳐진 셀의 본체 혹은 일부라면, 오른쪽으로 탐색하며 본체에 소속된 셀들을 해방합니다.
+      // 현재 셀이 합쳐진 셀의 본체 혹은 일부가 아니라면, 반복문을 종료합니다.
+      if (cellInColumn.style.display === 'none' || cellInColumn.colSpan > 1) {
+        for (let i = index + 1; i < row.cells.length; i++) {
+          const rightCell = row.cells[i];
+
+          if (rightCell.style.display !== 'none') {
+            break;
+          }
+
+          rightCell.style.removeProperty('display');
+          rightCell.colSpan = 1;
+          rightCell.rowSpan = 1;
+        }
+      }
+
       this._table.rows[i].deleteCell(index);
     }
+
+    this._removeInvisibleRows()
     
     if (!this.readOnly) {
       this.removeCol(index);
@@ -196,24 +233,10 @@ export class Table {
         cell.style.display = 'none'
       }
     });
+    
+    const invisibleRowsCount = this._removeInvisibleRows();
 
-    // 가로줄에 있는 모든 셀이 display="none" 이 되는 경우에 해당 Row 를 삭제한다.
-    const invisibleRows = [];
-
-    for (let i = 0; i < table.rows.length; i++) {
-      const row = table.rows[i];
-      const isEveryCellInvisible = Array.from(row.cells).every((cell) => cell.style.display === 'none');
-
-      if (isEveryCellInvisible) {
-        invisibleRows.push(i);
-      }
-    }
-
-    invisibleRows.forEach((index, i) => {
-      this.removeRow(index - i)
-    });
-
-    selectedCells[0].rowSpan -= invisibleRows.length
+    selectedCells[0].rowSpan -= invisibleRowsCount;
   }
   
   /**
@@ -245,6 +268,31 @@ export class Table {
   
   get withBorder() {
     return
+  }
+
+  /**
+   * 가로줄에 있는 모든 셀이 display="none" 이 되는 경우에 해당 Row 를 삭제한다.
+   * 
+   * @returns 위 조건에 해당하는 Row 의 갯수를 반환한다.
+   */
+  _removeInvisibleRows() {
+    const table = this._table;
+    const invisibleRows = [];
+
+    for (let i = 0; i < table.rows.length; i++) {
+      const row = table.rows[i];
+      const isEveryCellInvisible = Array.from(row.cells).every((cell) => cell.style.display === 'none');
+
+      if (isEveryCellInvisible) {
+        invisibleRows.push(i);
+      }
+    }
+
+    invisibleRows.forEach((index, i) => {
+      this.removeRow(index - i);
+    });
+
+    return invisibleRows.length;
   }
 
   /**
