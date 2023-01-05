@@ -141,8 +141,6 @@ export class Table {
   removeColumn(index) {
     const table = this._table;
 
-    this._numberOfColumns--;
-    
     for (let i = 0; i < table.rows.length; i++) {
       const row = table.rows[i];
       const cellInColumn = row.cells[index];
@@ -163,8 +161,8 @@ export class Table {
       // 현재 셀이 합쳐진 셀의 본체 혹은 일부라면, 오른쪽으로 탐색하며 본체에 소속된 셀들을 해방합니다.
       // 현재 셀이 합쳐진 셀의 본체 혹은 일부가 아니라면, 반복문을 종료합니다.
       if (cellInColumn.style.display === 'none' || cellInColumn.colSpan > 1) {
-        for (let i = index + 1; i < row.cells.length; i++) {
-          const rightCell = row.cells[i];
+        for (let j = index + 1; j < row.cells.length; j++) {
+          const rightCell = row.cells[j];
 
           if (rightCell.style.display !== 'none') {
             break;
@@ -179,6 +177,7 @@ export class Table {
       this._table.rows[i].deleteCell(index);
     }
 
+    this._numberOfColumns--;
     this._removeInvisibleRows()
     
     if (!this.readOnly) {
