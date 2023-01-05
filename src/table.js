@@ -274,9 +274,7 @@ export class Table {
       }
     });
     
-    const invisibleRowsCount = this._removeInvisibleRows();
-
-    selectedCells[0].rowSpan -= invisibleRowsCount;
+    this._removeInvisibleRows();
   }
   
   /**
@@ -331,6 +329,15 @@ export class Table {
     invisibleRows.forEach((index, i) => {
       this.removeRow(index - i);
     });
+
+    // 테이블의 row 가 하나로 줄어든다면 모든 셀의 rowSpan 을 1 로 보정합니다.
+    if (table.rows.length === 1) {
+      for (let i = 0; i < table.rows[0].cells.length; i++) {
+        const cell = table.rows[0].cells[i];
+
+        cell.rowSpan = 1;
+      }
+    }
 
     return invisibleRows.length;
   }
