@@ -209,9 +209,23 @@ export class Table {
   removeRow(index) {
     const table = this._table;
     const selectedRow = table.rows[index];
-
+    
     for (let i = 0; i < selectedRow.cells.length; i++) {
       const cell = selectedRow.cells[i];
+
+      // 현재 셀이 합쳐진 셀의 본체라면, 아래로 탐색하며 소속된 셀을 전부 해방합니다.
+      // 같은 줄에 소속된 셀이 있다면 삭제될 것이니 건너뜁니다.
+      if (cell.rowSpan > 1) {
+        for (let j = index + 1; j < table.rows.length; j++) {
+          for (let k = i; k < i + cell.colSpan; k++) {
+            const cellBelow = table.rows[j].cells[k];
+  
+            cellBelow.style.removeProperty('display');
+            cellBelow.colSpan = 1;
+            cellBelow.rowSpan = 1;
+          }
+        }
+      }
 
       // 현재 셀이 합쳐진 셀의 일부라면 위로 탐색하며 합쳐진 셀의 본체를 찾습니다.
       // 본체를 찾았다면 본체의 rowSpan 을 1 깎고 반복문을 종료합니다.
@@ -228,22 +242,6 @@ export class Table {
           if (cellInUpperRow.style.display !== 'none') {
             break;
           }
-        }
-      }
-      
-      // 현재 셀이 합쳐진 셀의 본체 혹은 일부라면 아래로 탐색하며 본체에 소속된 셀들을 해방합니다.
-      // 현재 셀이 합쳐진 셀의 본체 혹은 일부가 아니라면 반복문을 종료합니다.
-      if (cell.style.display === 'none' || cell.rowSpan > 1) {
-        for (let j = index + 1; j < table.rows.length; j++) {
-          const cellBelow = table.rows[j].cells[i];
-          
-          if (cellBelow.style.display !== 'none') {
-            break;
-          }
-
-          cellBelow.style.removeProperty('display');
-          cellBelow.colSpan = 1;
-          cellBelow.rowSpan = 1;
         }
       }
     }
