@@ -209,6 +209,112 @@
     height: 100%;
     overflow: hidden;
   }
+  &__option_button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    visibility: hidden;
+    width: 22px;
+    height: 20px;
+    border: none;
+    background: none;
+    background-color: white;
+    border-radius: 3px;
+    padding: 0;
+    padding: 2px;
+    cursor: pointer;
+
+    &__inner_box {
+      border-radius: 3px;
+      background-color: #F4F5F7;
+      width: 100%;
+      height: 100%;
+      position: relative;
+
+      &:hover {
+        background-color: #e2e4e9;
+      }
+      &:active {
+        background-color: #b3d4ff99;
+        svg {
+          color: #0052CC;
+          fill: #0052CC;
+        }
+      }
+      &.activated {
+        background-color: #45526c;
+        svg {
+          color: white;
+          fill: white;
+        }
+      }
+
+      svg {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #45526c;
+        fill: #45526c;
+      }
+    }
+  }
+  &__option_table {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    color: var(--ds-text, #091E42);
+    background-color: var(--ds-surface-overlay, #FFFFFF);
+    border-radius: 3px;
+    box-shadow: rgb(9 30 66 / 25%) 0px 4px 8px -2px, rgb(9 30 66 / 31%) 0px 0px 1px;
+    box-sizing: border-box;
+    overflow: auto;
+    padding: 4px 0px;
+    max-height: 90vh;
+    min-width: 180px;
+    visibility: hidden;
+    z-index: 99;
+    &__inner {
+      box-sizing: border-box;
+      appearance: none;
+      border: none;
+      display: flex;
+      position: static;
+      flex-direction: column;
+      overflow: auto;
+      &__option {
+        display: flex;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: var(--ds-scale-500, 40px);
+        margin: var(--ds-scale-0, 0px);
+        padding: var(--ds-scale-100, 8px) var(--ds-scale-250, 20px);
+        -webkit-box-align: center;
+        align-items: center;
+        border: 0px;
+        font-size: 14px;
+        outline: 0px;
+        text-decoration: none;
+        user-select: none;
+        background-color: transparent;
+        color: currentcolor;
+        cursor: pointer;
+        &:hover {
+          background-color: #e2e4e9;
+        }
+        &:active {
+          background-color: #b3d4ff99;
+        }
+        &:disabled {
+          color: #e2e4e9;
+          cursor: not-allowed;
+          &:hover {
+            background-color: white;
+          }
+        }
+      }
+    }
+  }
 
   .tc-table__cell.selected {
     background-color: #eef7ff;

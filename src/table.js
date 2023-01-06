@@ -4,6 +4,7 @@ import { SelectLine, CSS as CSSSelectLine } from "./selectLine";
 import { CreateLine } from "./createLine";
 import { ImageUpload, CSS as imageUploadCSS } from "./imageUpload";
 import './styles/table.scss';
+import { CellMenu, CSS as CellMenuCSS } from './cellMenu';
 
 export const CSS = {
   table: 'tc-table',
@@ -33,14 +34,17 @@ export class Table {
     this._numberOfColumns = 0;
     this._numberOfRows = 0;
     
+    this._element = this._createTableWrapper();
+    this._table = this._element.querySelector('table');
+    this.colgroup = this._table.querySelector('colgroup');
+    
     this.resize = new Resize(this);
     this.selectLine = new SelectLine(this);
     this.createLine = new CreateLine(this);
     this.imageUpload = new ImageUpload(this);
+    this.cellMenu = new CellMenu(this);
     
-    this._element = this._createTableWrapper();
-    this._table = this._element.querySelector('table');
-    this.colgroup = this._table.querySelector('colgroup');
+    this._table.appendChild(this.cellMenu.container)
 
     if (!this.readOnly) {
       this._hangEvents();
@@ -268,11 +272,39 @@ export class Table {
         cell.colSpan = colSpan;
         cell.rowSpan = rowSpan;
       } else {
-        cell.style.display = 'none'
+        cell.colSpan = 1;
+        cell.rowSpan = 1;
+        cell.style.display = 'none';
       }
     });
     
     this._removeInvisibleRows();
+    // remove invisible columns?
+  }
+
+  checkIfMergePossible() {
+    const table = this._table;
+
+    let everySelectedCells = 0;
+    let visibleSelectedCells = 0;
+
+    for (let i = 0; i < table.rows.length; i++) {
+      const row = table.rows[i];
+
+      for (let j = 0; j < row.cells.length; j++) {
+        const cell = row.cells[j];
+        
+        if (cell.classList.contains('selected')) {            
+          everySelectedCells += 1;
+
+          if (cell.style.display !== 'none') {
+            visibleSelectedCells += (cell.colSpan * cell.rowSpan)
+          }
+        }
+      }
+    }
+    
+    return everySelectedCells === visibleSelectedCells
   }
   
   /**
@@ -388,9 +420,10 @@ export class Table {
    * @param {HTMLElement} cell - empty cell
    */
   _fillCell(cell) {
-    cell.classList.add(CSS.cell);
     const content = this._createContentEditableArea();
-
+    
+    this.cellMenu.createElem(cell);
+    cell.classList.add(CSS.cell);
     cell.appendChild(create('div', [ CSS.area ], null, [ content ]));
   }
 
@@ -451,6 +484,9 @@ export class Table {
       return;
     }
     this._selectedCell = event.target.closest('.' + CSS.cell);
+    const optionButton = this.selectedCell.querySelector('.' + CellMenuCSS.openCellMenuButton)
+
+    optionButton.style.visibility = 'visible';
     // this.imageUpload.onToggle(true);
   }
 
@@ -462,6 +498,12 @@ export class Table {
     if (!event.target.classList.contains(CSS.inputField)) {
       return;
     }
+
+    const lastSelectedCell = event.target.closest('.' + CSS.cell);
+    const optionButton = lastSelectedCell.querySelector('.' + CellMenuCSS.openCellMenuButton)
+
+    optionButton.style.visibility = 'hidden';
+    
     this._selectedCell = null;
     // this.imageUpload.onToggle(false);
   }
@@ -484,6 +526,10 @@ export class Table {
    * @param {MouseEvent} event
    */
   _mouseDownOnCell(event) {
+    if (event.target.closest('.' + CellMenuCSS.openCellMenuButton)) {
+      return;
+    }
+
     if (event.target.closest('td')) {
       const table = this._table
       const cell = event.target.closest('td');
@@ -491,7 +537,6 @@ export class Table {
       const startColIndex = cell.cellIndex;
       const everyCell = table.querySelectorAll('td');
       let currentCell = cell;
-      let isMouseOverFirstCell = true
 
       const handleMouseMove = (event) => {
         const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY);
@@ -499,14 +544,10 @@ export class Table {
         const currentRowIndex = cellBelowMousePointer.parentNode.rowIndex;
         const currentColIndex = cellBelowMousePointer.cellIndex;
         
-        if (isMouseOverFirstCell) {
-          selectCells(currentRowIndex, currentColIndex);
-          isMouseOverFirstCell = false
-        }
-        
         if (currentCell !== cellBelowMousePointer) {
           deselectEveryCell(everyCell);
           selectCells(currentRowIndex, currentColIndex);
+          cellBelowMousePointer.querySelector('.' + CSS.inputField).focus();
 
           currentCell = cellBelowMousePointer;
         }
@@ -546,78 +587,11 @@ export class Table {
       }
 
       deselectEveryCell(everyCell);
+      this.cellMenu.hideOptionTable();
 
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
-  }
-
-  /**
-   * @private
-   * @param {MouseEvent} event
-   * @menu 셀 합치기, 셀 배경색 변경하기
-   */
-  _showCustomContextMenuOnSelectedCells(event) {
-    const contextMenu = document.createElement('div');
-    const pointerX = event.clientX;
-    const pointerY = event.clientY;
-
-    const hideContextMenu = (event) => {
-      if (event.target.className !== 'context-menu') {
-        contextMenu.remove();
-        document.removeEventListener('click', hideContextMenu);
-      }
-    }
-
-    const createMenuButton = (title) => {
-      const menu = document.createElement('div');
-    
-      menu.textContent = title;
-      menu.classList.add('context-menu__button');
-
-      return menu;
-    }
-
-    const checkIfMergePossible = () => {
-      const table = this._table;
-
-      let everySelectedCells = 0;
-      let visibleSelectedCells = 0;
-
-      for (let i = 0; i < table.rows.length; i++) {
-        const row = table.rows[i];
-
-        for (let j = 0; j < row.cells.length; j++) {
-          const cell = row.cells[j];
-          
-          if (cell.classList.contains('selected')) {            
-            everySelectedCells += 1;
-
-            if (cell.style.display !== 'none') {
-              visibleSelectedCells += (cell.colSpan * cell.rowSpan)
-            }
-          }
-        }
-      }
-      
-      return everySelectedCells === visibleSelectedCells
-    }
-
-    contextMenu.style.position = 'fixed';
-    contextMenu.style.top = pointerY + 'px';
-    contextMenu.style.left = pointerX + 'px';
-    contextMenu.classList.add('context-menu');
-
-    this._table.appendChild(contextMenu);
-    
-    if (checkIfMergePossible()) {
-      const mergeCellsButton = createMenuButton('셀 합치기');
-      
-      contextMenu.appendChild(mergeCellsButton);
-      mergeCellsButton.addEventListener('click', this.mergeCells.bind(this))
-    }
-
-    document.addEventListener('click', hideContextMenu);
   }
 
   /**
