@@ -1,5 +1,6 @@
 import { create } from "./documentUtils";
 import chevronDown from './img/chevron-down.svg';
+import { CSS as SelectLineCSS } from "./selectLine";
 
 export class CellMenu {
   constructor(table) {
@@ -27,7 +28,7 @@ export class CellMenu {
     
     openCellMenuButton.appendChild(iconContainer);
     openCellMenuButton.addEventListener('mousedown', this._handleMouseDown.bind(this));
-    openCellMenuButton.addEventListener('click', this._handleClick.bind(this));
+    openCellMenuButton.addEventListener('click', this._handleCellMenuButtonClick.bind(this));
     cell.appendChild(openCellMenuButton);
   }
   
@@ -51,17 +52,81 @@ export class CellMenu {
     return option;
   }
 
-  _fillCellMenu() {
-    const mergeButton = this._createMergeButton.call(this.table);
+  _createRowRemoveButton() {
+    const option = document.createElement('button');
+    
+    const removeSelectedRows = (event) => {
+      const focusedCell = this.selectedCell;
+      const selectedRows = [];
+  
+      for (let i = 0; i < this._table.rows.length; i++) {
+        const row = this._table.rows[i];
+  
+        for (let j = 0; j < row.cells.length; j++) {
+          const cell = row.cells[j];
+  
+          if (cell.classList.contains('selected')) {
+            selectedRows.push(i);
+            break;
+          }
+        }
+      }
+  
+      if (selectedRows.length === 0) {
+        this.removeRow(focusedCell.parentNode.rowIndex);
+        return;
+      }
+  
+      selectedRows.forEach((row, i) => {
+        this.removeRow(row - i);
+      });
+    }
 
-    this._cellMenuInner.appendChild(mergeButton);
+    // https://stackoverflow.com/questions/49106088/changing-pseudo-element-style-from-javascript
+    const highlightCells = (event) => {
+      // const focusedCell = this.selectedCell;
+      // const selectedCells = this._table.querySelectorAll('.selected');
+
+      // if (selectedCells.length === 0) {
+      //   focusedCell.parentNode.classList.add(SelectLineCSS.trRemove);
+      //   return;
+      // }
+
+      // const topLeftRow = selectedCells[0].parentNode.rowIndex;
+      // const bottomRightRow = selectedCells[selectedCells.length - 1].parentNode.rowIndex;
+
+      // for (let i = topLeftRow; i <= bottomRightRow; i++) {
+      //   this._table.rows[i].classList.add(SelectLineCSS.trRemove);
+      // }
+    }
+
+    option.textContent = '행 삭제하기'
+
+    option.classList.add(CSS.option);
+    option.addEventListener('click', removeSelectedRows.bind(this));
+    option.addEventListener('mouseenter', highlightCells.bind(this));
+
+    return option;
   }
 
+  _fillCellMenu() {
+    const mergeButton = this._createMergeButton.call(this.table);
+    const rowRemoveButton = this._createRowRemoveButton.call(this.table);
+
+    this._cellMenuInner.appendChild(mergeButton);
+    this._cellMenuInner.appendChild(rowRemoveButton);
+  }
+
+  /**
+   * 메뉴 창 닫기를 방지합니다.
+   * 
+   * @param {MouseEvent} event 
+   */
   _handleMouseDown(event) {
     event.preventDefault();
   }
 
-  _handleClick(event) {
+  _handleCellMenuButtonClick(event) {
     const openCellMenuButton = event.target.closest('.' + CSS.openCellMenuButton);
     const iconBox = openCellMenuButton.querySelector('.' + CSS.iconBox);
     const mergeOption = this.container.querySelector('.' + CSS.mergeOption);
@@ -95,6 +160,5 @@ export const CSS = {
   cellMenu: 'tc-table__option_table',
   cellMenuInner: 'tc-table__option_table__inner',
   option: 'tc-table__option_table__inner__option',
-  disabledOption: 'tc-table__option_table__inner__option_disabled',
   mergeOption: 'merge-option'
 }

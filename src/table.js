@@ -509,7 +509,6 @@ export class Table {
 
     optionButton.style.visibility = 'hidden';
     
-    this._selectedCell = null;
     // this.imageUpload.onToggle(false);
   }
 
