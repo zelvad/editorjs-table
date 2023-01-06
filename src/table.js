@@ -229,6 +229,11 @@ export class Table {
             cellBelow.rowSpan = 1;
           }
         }
+
+      }
+
+      if (cell.colSpan > 1) {
+        i += cell.colSpan;
       }
 
       // 현재 셀이 합쳐진 셀의 일부라면 위로 탐색하며 합쳐진 셀의 본체를 찾습니다.
