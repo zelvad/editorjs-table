@@ -2,18 +2,30 @@ import { create } from "./documentUtils";
 import chevronDown from './img/chevron-down.svg';
 import { CSS as SelectLineCSS } from "./selectLine";
 
+const COLORS = ['#ffffff', '#e0ebfd', '#eafbfe', '#e8fbf0', '#fefae8', '#fcece7', '#e9e6fd', '#f4f5f7', '#b9d4fb', '#c1f3fd', '#bbf3d3', '#fcf0ba', '#f5c0b0', '#beb7ee', '#b4bac4', '#5f9af8', '#93dfef', '#7cd5a7', '#f6c544', '#f0957a', '#978ed4'];
+
 export class CellMenu {
   constructor(table) {
-    const cellMenu = document.createElement('div'); 
     const cellMenuInner = document.createElement('div');
-
-    cellMenu.appendChild(cellMenuInner);
-    cellMenu.classList.add(CSS.cellMenu);
     cellMenuInner.classList.add(CSS.cellMenuInner);
 
+    const cellMenu = document.createElement('div'); 
+    cellMenu.appendChild(cellMenuInner);
+    cellMenu.classList.add(CSS.cellMenu);
+   
+    const colorPalette = document.createElement('div');
+    colorPalette.classList.add(CSS.colorPalette);
     
+    COLORS.forEach((color) => {
+      const colorBlock = document.createElement('figure');
+      colorBlock.style.backgroundColor = color;
+      colorBlock.classList.add(CSS.colorBlock);
+      colorPalette.appendChild(colorBlock);
+    });
+
     this.table = table;
     this.container = cellMenu;
+    this.colorPalette = colorPalette;
     this._cellMenuInner = cellMenuInner;
 
     this._fillCellMenu();
@@ -109,10 +121,31 @@ export class CellMenu {
     return option;
   }
 
+  _createColorPickerButton() {
+    const option = document.createElement('button');
+    option.textContent = '셀 배경'
+    option.classList.add(CSS.option);
+    option.classList.add(CSS.colorOption);
+
+    const hideColorPalette = () => {}
+
+    option.addEventListener('mouseenter', (event) => {
+      const { top, left } = option.getBoundingClientRect();
+      const { width } = this.colorPalette.getBoundingClientRect();
+
+      this.colorPalette.style.top = `${top}px`;
+      this.colorPalette.style.left = `${left - width}px`;
+    })
+
+    return option;
+  }
+  
   _fillCellMenu() {
+    const colorPickerButton = this._createColorPickerButton();
     const mergeButton = this._createMergeButton.call(this.table);
     const rowRemoveButton = this._createRowRemoveButton.call(this.table);
 
+    this._cellMenuInner.appendChild(colorPickerButton);
     this._cellMenuInner.appendChild(mergeButton);
     this._cellMenuInner.appendChild(rowRemoveButton);
   }
@@ -160,5 +193,8 @@ export const CSS = {
   cellMenu: 'tc-table__option_table',
   cellMenuInner: 'tc-table__option_table__inner',
   option: 'tc-table__option_table__inner__option',
-  mergeOption: 'merge-option'
+  mergeOption: 'merge-option',
+  colorOption: 'color-option',
+  colorPalette: 'color-palette',
+  colorBlock: 'color-block'
 }

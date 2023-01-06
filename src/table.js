@@ -44,7 +44,8 @@ export class Table {
     this.imageUpload = new ImageUpload(this);
     this.cellMenu = new CellMenu(this);
     
-    this._table.appendChild(this.cellMenu.container)
+    this._table.appendChild(this.cellMenu.container);
+    this._table.appendChild(this.cellMenu.colorPalette);
 
     if (!this.readOnly) {
       this._hangEvents();
