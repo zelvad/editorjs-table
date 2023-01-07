@@ -53,6 +53,13 @@ export class Table {
       this._hangEvents();
     }
   }
+
+  deselectCells() {
+    const everyCell = this._table.querySelectorAll('td');
+    everyCell.forEach((cell) => {
+      cell.classList.remove('selected');
+    });
+  }
   
   columnSizeReCalc() {
     const cols = this.colgroup.children;
@@ -546,6 +553,8 @@ export class Table {
       const startColIndex = cell.cellIndex;
       const everyCell = table.querySelectorAll('td');
       let currentCell = cell;
+      this.selectedRows = [];
+      this.selectedCols = [];
 
       const handleMouseMove = (event) => {
         const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY);
@@ -554,7 +563,7 @@ export class Table {
         const currentColIndex = cellBelowMousePointer.cellIndex;
         
         if (currentCell !== cellBelowMousePointer) {
-          deselectEveryCell(everyCell);
+          this.deselectCells();
           selectCells(currentRowIndex, currentColIndex);
           cellBelowMousePointer.querySelector('.' + CSS.inputField).focus();
 
@@ -565,12 +574,6 @@ export class Table {
       const handleMouseUp = (event) => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
-      }
-
-      const deselectEveryCell = (cells) => {
-        cells.forEach((cell) => {
-          cell.classList.remove('selected');
-        });
       }
 
       const selectCells = (currentRowIndex, currentColIndex) => {
@@ -603,8 +606,8 @@ export class Table {
         }
       }
 
-      deselectEveryCell(everyCell);
-      this.cellMenu.hideOptionTable();
+      this.deselectCells();
+      this.cellMenu.hideCellMenu();
 
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);

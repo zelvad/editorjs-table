@@ -20,6 +20,7 @@ export class CellMenu {
       const colorBlock = document.createElement('figure');
       colorBlock.style.backgroundColor = color;
       colorBlock.classList.add(CSS.colorBlock);
+      colorBlock.setAttribute('data-color', color);
       colorPalette.appendChild(colorBlock);
     });
 
@@ -29,7 +30,11 @@ export class CellMenu {
     this._cellMenuInner = cellMenuInner;
 
     this._fillCellMenu();
+    
     this._cellMenuInner.addEventListener('click', this._catchClickEventDelegation.bind(this));
+    this.colorPalette.addEventListener('click', this._changeCellColor.bind(this));
+    this.colorPalette.addEventListener('mouseenter', this._showColorPalette.bind(this));
+    this.colorPalette.addEventListener('mouseleave', this._hideColorPalette.bind(this))
   }
 
   createElem(cell) {
@@ -44,7 +49,7 @@ export class CellMenu {
     cell.appendChild(openCellMenuButton);
   }
   
-  hideOptionTable() {
+  hideCellMenu() {
     this.container.style.visibility = 'hidden';
 
     this.table.body.querySelectorAll('.' + CSS.iconBox).forEach((iconBox) => {
@@ -135,11 +140,11 @@ export class CellMenu {
 
   _createColorPickerButton() {
     const option = document.createElement('button');
+
     option.textContent = '셀 배경'
+    
     option.classList.add(CSS.option);
     option.classList.add(CSS.colorOption);
-
-    const hideColorPalette = () => {}
 
     option.addEventListener('mouseenter', (event) => {
       const { top, left } = option.getBoundingClientRect();
@@ -147,9 +152,49 @@ export class CellMenu {
 
       this.colorPalette.style.top = `${top}px`;
       this.colorPalette.style.left = `${left - width}px`;
+      this.colorPalette.style.visibility = 'visible';
+    });
+
+    option.addEventListener('mouseleave', (event) => {
+      this.colorPalette.style.visibility = 'hidden';
     })
 
     return option;
+  }
+
+  _changeCellColor(event) {
+    if (event.target.closest('.' + CSS.colorBlock)) {
+      const color = event.target.dataset.color === COLORS[0] ? null : event.target.dataset.color;
+      const selectedRows = this.table.selectedRows;
+      const selectedCols = this.table.selectedCols;
+      const selectedCell = this.table.selectedCell;
+
+      this.colorPalette.style.visibility = 'hidden';
+      this.hideCellMenu();
+
+      if (!selectedRows.length && !selectedCols.length) {
+        selectedCell.style.backgroundColor = color;
+        this.table.deselectCells();
+        return;
+      }
+      
+      for (let i = selectedRows[0]; i <= selectedRows[selectedRows.length - 1]; i++) {
+        for (let j = selectedCols[0]; j <= selectedCols[selectedCols.length - 1]; j++) {
+          const cell = this.table.body.rows[i].cells[j];
+          cell.style.backgroundColor = color;
+        }
+      }
+
+      this.table.deselectCells();
+    }
+  }
+
+  _hideColorPalette() {
+    this.colorPalette.style.visibility = 'hidden';
+  }
+
+  _showColorPalette() {
+    this.colorPalette.style.visibility = 'visible';
   }
   
   _fillCellMenu() {
@@ -195,10 +240,10 @@ export class CellMenu {
 
   _catchClickEventDelegation(event) {
     if (event.target.classList.contains(CSS.option)) {
-      this.hideOptionTable();
+      this.hideCellMenu();
     }
   }
-  
+
 }
 
 export const CSS = {
