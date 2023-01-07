@@ -44,20 +44,20 @@
   }
   &__add_row_button,
   &__add_column_button {
-    background-color: #dfe0e2;
-    height: 16px;
-    left: 25px;
-    right: 0;
+    background-color: #ececec;
+    height: 13px;
     bottom: 0;
+    width: calc(100% - 56px);
     position: absolute;
     z-index: 1;
-    border-radius: 0 0 6px 6px;
+    border: 1px solid black;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     transition: opacity 0.2s ease;
+    box-sizing: border-box;
     &:after {
       content: "+";
       color: #4a525f;
@@ -70,13 +70,10 @@
     }
   }
   &__add_row_button {
-    border-radius: 0 6px 8px 0;
-    height: auto;
-    width: 16px;
-    left: auto;
+    height: calc(100% - 56px);
+    width: 12px;
     right: 0;
-    top: 25px;
-    bottom: 0;
+    top: 40px;
   }
   &__add_row,
   &__add_column {
@@ -179,20 +176,21 @@
   &__select_line_col,
   &__select_line_row {
     position: absolute;
-    height: 16px;
+    height: 10px;
     top: -16px;
     left: -1px;
     right: -1px;
-    background-color: rgba(#4a525f, 0.2);
+    background-color: rgb(236 236 236);
+    border: 1px solid black;
     cursor: pointer;
     transition: background-color 0.2s ease;
     &:hover {
-      background-color: #d62c0b;
+      background-color: #0065FF;
     }
   }
   &__select_line_row {
     height: auto;
-    width: 16px;
+    width: 10px;
     left: -16px;
     top: -1px;
     bottom: -1px;

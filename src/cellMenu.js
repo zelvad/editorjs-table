@@ -30,7 +30,7 @@ export class CellMenu {
     this._cellMenuInner = cellMenuInner;
 
     this._fillCellMenu();
-    
+
     this._cellMenuInner.addEventListener('click', this._catchClickEventDelegation.bind(this));
     this.colorPalette.addEventListener('click', this._changeCellColor.bind(this));
     this.colorPalette.addEventListener('mouseenter', this._showColorPalette.bind(this));
@@ -86,7 +86,7 @@ export class CellMenu {
       });
     }
 
-    option.textContent = '열 삭제하기'
+    option.textContent = '열(↕) 삭제하기'
 
     option.classList.add(CSS.option);
     option.addEventListener('click', removeSelectedCols.bind(this));
@@ -129,7 +129,7 @@ export class CellMenu {
       // }
     }
 
-    option.textContent = '행 삭제하기'
+    option.textContent = '행(↔) 삭제하기'
 
     option.classList.add(CSS.option);
     option.addEventListener('click', removeSelectedRows.bind(this));
