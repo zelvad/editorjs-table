@@ -491,9 +491,11 @@ export class Table {
     if (!event.target.classList.contains(CSS.inputField)) {
       return;
     }
-    this._selectedCell = event.target.closest('.' + CSS.cell);
-    const optionButton = this.selectedCell.querySelector('.' + CellMenuCSS.openCellMenuButton)
 
+    this._selectedCell = event.target.closest('.' + CSS.cell);
+    
+    const optionButton = this.selectedCell.querySelector('.' + CellMenuCSS.openCellMenuButton)
+    
     optionButton.style.visibility = 'visible';
     // this.imageUpload.onToggle(true);
   }

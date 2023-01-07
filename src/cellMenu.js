@@ -64,6 +64,31 @@ export class CellMenu {
     return option;
   }
 
+  _createColRemoveButton() {
+    const option = document.createElement('button');
+
+    const removeSelectedCols = (event) => {
+      const focusedCell = this.selectedCell;
+      const selectedCols = this.selectedCols;
+  
+      if (selectedCols.length === 0) {
+        this.removeColumn(focusedCell.cellIndex);
+        return;
+      }
+  
+      selectedCols.forEach((row, i) => {
+        this.removeColumn(row - i);
+      });
+    }
+
+    option.textContent = '열 삭제하기'
+
+    option.classList.add(CSS.option);
+    option.addEventListener('click', removeSelectedCols.bind(this));
+
+    return option;
+  }
+
   _createRowRemoveButton() {
     const option = document.createElement('button');
     
@@ -131,10 +156,12 @@ export class CellMenu {
     const colorPickerButton = this._createColorPickerButton();
     const mergeButton = this._createMergeButton.call(this.table);
     const rowRemoveButton = this._createRowRemoveButton.call(this.table);
+    const colRemoveButton = this._createColRemoveButton.call(this.table);
 
     this._cellMenuInner.appendChild(colorPickerButton);
     this._cellMenuInner.appendChild(mergeButton);
     this._cellMenuInner.appendChild(rowRemoveButton);
+    this._cellMenuInner.appendChild(colRemoveButton);
   }
 
   /**
