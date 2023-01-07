@@ -546,8 +546,6 @@ export class Table {
       const startColIndex = cell.cellIndex;
       const everyCell = table.querySelectorAll('td');
       let currentCell = cell;
-      this.selectedRows = [];
-      this.selectedCols = [];
 
       const handleMouseMove = (event) => {
         const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY);
@@ -580,6 +578,7 @@ export class Table {
         const isLastCellMerged = currentCell.colSpan > 1 || currentCell.rowSpan > 1;
         let additionalRow = 0;
         let additionalCol = 0;
+        this.selectedRows = [];
         this.selectedCols = [];
 
         if (isLastCellMerged) {
