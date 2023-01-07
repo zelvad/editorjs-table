@@ -69,20 +69,7 @@ export class CellMenu {
     
     const removeSelectedRows = (event) => {
       const focusedCell = this.selectedCell;
-      const selectedRows = [];
-  
-      for (let i = 0; i < this._table.rows.length; i++) {
-        const row = this._table.rows[i];
-  
-        for (let j = 0; j < row.cells.length; j++) {
-          const cell = row.cells[j];
-  
-          if (cell.classList.contains('selected')) {
-            selectedRows.push(i);
-            break;
-          }
-        }
-      }
+      const selectedRows = this.selectedRows;
   
       if (selectedRows.length === 0) {
         this.removeRow(focusedCell.parentNode.rowIndex);

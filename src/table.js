@@ -37,6 +37,8 @@ export class Table {
     this._element = this._createTableWrapper();
     this._table = this._element.querySelector('table');
     this.colgroup = this._table.querySelector('colgroup');
+    this.selectedRows = [];
+    this.selectedCols = [];
     
     this.resize = new Resize(this);
     this.selectLine = new SelectLine(this);
@@ -542,6 +544,8 @@ export class Table {
       const startColIndex = cell.cellIndex;
       const everyCell = table.querySelectorAll('td');
       let currentCell = cell;
+      this.selectedRows = [];
+      this.selectedCols = [];
 
       const handleMouseMove = (event) => {
         const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY);
@@ -574,6 +578,7 @@ export class Table {
         const isLastCellMerged = currentCell.colSpan > 1 || currentCell.rowSpan > 1;
         let additionalRow = 0;
         let additionalCol = 0;
+        this.selectedCols = [];
 
         if (isLastCellMerged) {
           additionalRow += (currentCell.rowSpan - 1);
@@ -582,12 +587,18 @@ export class Table {
 
         for (let i = startRowIndex; i <= currentRowIndex + additionalRow; i++) {
           const cellsInRow = table.rows[i].cells;
-
+          
           for (let j = startColIndex; j <= currentColIndex + additionalCol; j++) {
             const cell = cellsInRow[j];
-
+            
             cell.classList.add('selected');
           }
+  
+          this.selectedRows.push(i);
+        }
+
+        for (let i = startColIndex; i <= currentColIndex + additionalCol; i++) {
+          this.selectedCols.push(i);
         }
       }
 
