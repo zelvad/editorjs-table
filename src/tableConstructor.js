@@ -26,8 +26,7 @@ export class TableConstructor {
 
     try {
       this._table = new Table(readOnly)
-      const size = this._resizeTable(data, config)
-      this._fillTable(data, size)
+      this._resizeTable(data, config)
     } catch (e) {
       console.log(e)
     }
@@ -60,31 +59,6 @@ export class TableConstructor {
   /**
    * @private
    *
-   *  Fill table data passed to the constructor
-   * @param {TableData} data - data for insert in table
-   * @param {{rows: number, cols: number}} size - contains number of rows and cols
-   */
-  _fillTable(data, size) {
-    if (data.content !== undefined) {
-      for (let i = 0; i < size.rows && i < data.content.length; i++) {
-        for (let j = 0; j < size.cols && j < data.content[i].length; j++) {
-          const content = data.content[i][j]
-          const cell = this._table.body.rows[i].cells[j]
-          // get current cell and her editable part
-          if (typeof content === "string") {
-            const input = cell.querySelector("." + this._CSS.inputField)
-            input.innerHTML = content
-          } else if (content?.type === "image") {
-            this._table.imageUpload.createImage(cell, content.src)
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * @private
-   *
    * resize to match config or transmitted data
    * @param {TableData} data - data for inserting to the table
    * @param {object} config - configuration of table
@@ -93,41 +67,30 @@ export class TableConstructor {
    * @return {{rows: number, cols: number}} - number of cols and rows
    */
   _resizeTable(data, config) {
-    const isValidArray = Array.isArray(data.content)
-    const isNotEmptyArray = isValidArray ? data.content.length : false
-    const contentRows = isValidArray ? data.content.length : undefined
-    const contentCols = isNotEmptyArray ? data.content[0].length : undefined
-    const parsedRows = Number.parseInt(config.rows)
-    const parsedCols = Number.parseInt(config.cols)
-    // value of config have to be positive number
-    const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined
-    const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined
-    const { settings } = data
+    const isDataValid = !!data && Array.isArray(data.rows) && Array.isArray(data.colgroup)
+    const contentRows = isDataValid ? data.rows.length : undefined
+    const contentCols = isDataValid ? data.colgroup.length : undefined
+    const configRows = Number.parseInt(config.rows)
+    const configCols = Number.parseInt(config.cols)
     const defaultRows = 3
     const defaultCols = 2
     const rows = contentRows || configRows || defaultRows
     const cols = contentCols || configCols || defaultCols
+    const table = this._table
 
-    for (let i = 0; i < rows; i++) {
-      this._table.addRow(i)
-    }
-    for (let i = 0; i < cols; i++) {
-      this._table.addColumn(i)
-    }
-
-    if (settings) {
-      if (settings.sizes) {
-        settings.sizes.forEach((size, i) => {
-          if (this._table.colgroup.children[i]) {
-            this._table.colgroup.children[i].style.width = `${size * 100}%`
-          }
-        })
+    if (!isDataValid) {
+      for (let i = 0; i < rows; i++) {
+        table.addRow(i)
       }
+      for (let i = 0; i < cols; i++) {
+        table.addColumn(i)
+      }
+
+      table.htmlElement.classList.toggle(this._CSS.withBorder, true)
+    } else {
+      table.htmlElement.classList.toggle(this._CSS.withBorder, true)
+      this._table.drawTableFromData(data)
     }
-    this._table.htmlElement.classList.toggle(
-      this._CSS.withBorder,
-      settings?.withBorder === undefined ? true : settings?.withBorder
-    )
 
     return {
       rows: rows,

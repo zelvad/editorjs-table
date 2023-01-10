@@ -125,6 +125,50 @@ export class Table {
     this.body.querySelector("colgroup").children[index].remove()
   }
 
+  drawTableFromData(data) {
+    const table = this._table
+    const { rows, colgroup } = data
+
+    rows.forEach((row, i) => {
+      const newRow = table.insertRow(i)
+
+      if (i === 0) {
+        this.removeButtons(0)
+      }
+
+      row.forEach(({ text, bgColor, colspan, rowspan, display }, i) => {
+        const newCell = newRow.insertCell(i)
+
+        this._fillCell(newCell)
+
+        if (display === false) {
+          newCell.style.display = "none"
+        }
+
+        newCell.colSpan = colspan
+        newCell.rowSpan = rowspan
+        newCell.style.backgroundColor = bgColor
+        newCell.querySelector("." + CSS.inputField).innerHTML = text
+      })
+
+      this._numberOfRows++
+      this.updateButtons()
+    })
+
+    colgroup.forEach(({ span, width }, i) => {
+      if (i === 0) {
+        this.removeButtons(1)
+      }
+
+      this._numberOfColumns++
+      this.insertCol(i)
+      this.updateButtons()
+
+      this.colgroup.children[i].style.width = width
+      this.colgroup.children[i].span = span
+    })
+  }
+
   /**
    * Add column in table on index place
    *
@@ -146,6 +190,7 @@ export class Table {
       cell.rowSpan = 1
       this._fillCell(cell)
     }
+
     if (!this.readOnly) {
       this.columnSizeReCalc()
       this.updateButtons()
