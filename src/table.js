@@ -497,6 +497,10 @@ export class Table {
   }
 
   checkIfMergePossible() {
+    if (!this.selectedCols.length && !this.selectedRows.length) {
+      return false
+    }
+
     const table = this._table
 
     let everySelectedCells = 0
