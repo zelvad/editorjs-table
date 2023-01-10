@@ -340,6 +340,84 @@ export class Table {
     return row
   }
 
+  addRowBelow() {
+    const table = this._table
+    const isSelectedCellMerged = this.selectedCell.colSpan > 1 || this.selectedCell.rowSpan > 1
+    const edgeIndex = this.selectedCell.rowSpan + this.selectedCell.parentNode.rowIndex - 1
+    const index = isSelectedCellMerged ? edgeIndex : this.selectedCell.parentNode.rowIndex
+    const newRow = table.insertRow(index + 1)
+
+    for (let i = 0; i < table.rows[index].cells.length; i++) {
+      const cell = table.rows[index].cells[i]
+      const isInvisibleCell = cell.style.display === "none"
+      const isMainMergedCell = cell.colSpan > 1 || cell.rowSpan > 1
+      const isNormalCell = cell.colSpan === 1 && cell.rowSpan === 1 && cell.style.display !== "none"
+
+      if (isNormalCell) {
+        const newCell = newRow.insertCell(i)
+
+        newCell.colSpan = 1
+        newCell.rowSpan = 1
+
+        this._fillCell(newCell)
+        continue
+      }
+
+      if (isMainMergedCell) {
+        const newCell = newRow.insertCell(i)
+
+        cell.rowSpan += 1
+        newCell.colSpan = 1
+        newCell.rowSpan = 1
+        newCell.style.display = "none"
+
+        this._fillCell(newCell)
+        continue
+      }
+
+      if (isInvisibleCell) {
+        const mainMergedCell = this._searchMainMergedCell(cell)
+        const isOnSameColumnWithMainCell = i === mainMergedCell.cellIndex
+        const isAtBottomOfMaincell =
+          index === mainMergedCell.parentNode.rowIndex + mainMergedCell.rowSpan - 1
+
+        if (isAtBottomOfMaincell) {
+          const newCell = newRow.insertCell(i)
+
+          newCell.colSpan = 1
+          newCell.rowSpan = 1
+
+          this._fillCell(newCell)
+          continue
+        }
+
+        if (isOnSameColumnWithMainCell) {
+          const newCell = newRow.insertCell(i)
+
+          mainMergedCell.rowSpan += 1
+          newCell.colSpan = 1
+          newCell.rowSpan = 1
+          newCell.style.display = "none"
+
+          this._fillCell(newCell)
+          continue
+        }
+
+        const newCell = newRow.insertCell(i)
+
+        newCell.colSpan = 1
+        newCell.rowSpan = 1
+        newCell.style.display = "none"
+
+        this._fillCell(newCell)
+        continue
+      }
+    }
+
+    this._numberOfRows++
+    this.updateButtons()
+  }
+
   removeRow(index) {
     const table = this._table
     const selectedRow = table.rows[index]

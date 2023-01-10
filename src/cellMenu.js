@@ -102,6 +102,17 @@ export class CellMenu {
     return option
   }
 
+  _createAddRowBelow() {
+    const option = document.createElement("button")
+
+    option.textContent = "아래에 행 삽입"
+
+    option.classList.add(CSS.option)
+    option.addEventListener("click", this.addRowBelow.bind(this))
+
+    return option
+  }
+
   _createColRemoveButton() {
     const option = document.createElement("button")
 
@@ -230,12 +241,14 @@ export class CellMenu {
   _fillCellMenu() {
     const colorPickerButton = this._createColorPickerButton()
     const addColumnOnRightButton = this._createAddColumnOnRightButton.call(this.table)
+    const addRowBelowButton = this._createAddRowBelow.call(this.table)
     const mergeButton = this._createMergeButton.call(this.table)
     const rowRemoveButton = this._createRowRemoveButton.call(this.table)
     const colRemoveButton = this._createColRemoveButton.call(this.table)
 
     this._cellMenuInner.appendChild(colorPickerButton)
     this._cellMenuInner.appendChild(addColumnOnRightButton)
+    this._cellMenuInner.appendChild(addRowBelowButton)
     this._cellMenuInner.appendChild(mergeButton)
     this._cellMenuInner.appendChild(rowRemoveButton)
     this._cellMenuInner.appendChild(colRemoveButton)
