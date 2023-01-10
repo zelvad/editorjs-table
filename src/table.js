@@ -650,14 +650,12 @@ export class Table {
     ])
 
     if (!this.readOnly) {
-      const addRowButton = create("div", [CSS.addRowButton])
-      const addColumnButton = create("div", [CSS.addColumnButton])
-
-      addRowButton.addEventListener("click", () => this.addColumn(this._numberOfColumns), true)
-      addColumnButton.addEventListener("click", () => this.addRow(this._numberOfRows), true)
-
-      wrapper.appendChild(addRowButton)
-      wrapper.appendChild(addColumnButton)
+      // const addRowButton = create("div", [CSS.addRowButton])
+      // const addColumnButton = create("div", [CSS.addColumnButton])
+      // addRowButton.addEventListener("click", () => this.addColumn(this._numberOfColumns), true)
+      // addColumnButton.addEventListener("click", () => this.addRow(this._numberOfRows), true)
+      // wrapper.appendChild(addRowButton)
+      // wrapper.appendChild(addColumnButton)
     }
 
     return wrapper

@@ -22,7 +22,7 @@
   }
   &__with_border {
     .tc-table__cell {
-      border-color: #DBDBE2;
+      border-color: #dbdbe2;
     }
   }
   &__wrap {
@@ -99,7 +99,7 @@
         width: 4px;
         height: 4px;
         border-radius: 50%;
-        background-color: #4a525f;
+        background-color: #c1c7d0;
       }
       &:after {
         content: "+";
@@ -180,12 +180,12 @@
     top: -16px;
     left: -1px;
     right: -1px;
-    background-color: rgb(236 236 236);
-    border: 1px solid black;
+    background-color: #f4f5f7;
+    border: 1px solid #c1c7d0;
     cursor: pointer;
     transition: background-color 0.2s ease;
     &:hover {
-      background-color: #0065FF;
+      background-color: #ff9090;
     }
   }
   &__select_line_row {
@@ -225,7 +225,7 @@
 
     &__inner_box {
       border-radius: 3px;
-      background-color: #F4F5F7;
+      background-color: #f4f5f7;
       width: 100%;
       height: 100%;
       position: relative;
@@ -236,8 +236,8 @@
       &:active {
         background-color: #b3d4ff99;
         svg {
-          color: #0052CC;
-          fill: #0052CC;
+          color: #0052cc;
+          fill: #0052cc;
         }
       }
       &.activated {
@@ -262,8 +262,8 @@
     position: fixed;
     top: 0px;
     left: 0px;
-    color: var(--ds-text, #091E42);
-    background-color: var(--ds-surface-overlay, #FFFFFF);
+    color: var(--ds-text, #091e42);
+    background-color: var(--ds-surface-overlay, #ffffff);
     border-radius: 3px;
     box-shadow: rgb(9 30 66 / 25%) 0px 4px 8px -2px, rgb(9 30 66 / 31%) 0px 0px 1px;
     box-sizing: border-box;
@@ -322,7 +322,7 @@
     position: fixed;
     top: 0px;
     left: 0px;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     border-radius: 3px;
     box-shadow: rgb(9 30 66 / 25%) 0px 4px 8px -2px, rgb(9 30 66 / 31%) 0px 0px 1px;
     box-sizing: border-box;
@@ -354,7 +354,7 @@
     &::after {
       height: 100%;
       width: 100%;
-      border: 1px solid #0065FF;
+      border: 1px solid #0065ff;
       background-color: #339fff3b;
       content: "";
       position: absolute;
