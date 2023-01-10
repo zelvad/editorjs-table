@@ -1,6 +1,6 @@
-import './styles/table-constructor.scss';
-import { create } from './documentUtils';
-import { Table } from './table';
+import "./styles/table-constructor.scss"
+import { create } from "./documentUtils"
+import { Table } from "./table"
 
 /**
  * Entry point. Controls table and give API to user
@@ -14,36 +14,38 @@ export class TableConstructor {
    * @param {boolean} readOnly - read-only mode flag
    */
   constructor(data, config, api, readOnly) {
-    this.readOnly = readOnly;
-  
+    this.readOnly = readOnly
+
     this._CSS = {
-      editor: 'tc-editor',
-      inputField: 'tc-table__inp',
-      withBorder: 'tc-table__with_border'
-    };
-    
+      editor: "tc-editor",
+      inputField: "tc-table__inp",
+      withBorder: "tc-table__with_border",
+    }
+
     /** creating table */
 
     try {
-      this._table = new Table(readOnly);
-      const size = this._resizeTable(data, config);
-      this._fillTable(data, size);
+      this._table = new Table(readOnly)
+      const size = this._resizeTable(data, config)
+      this._fillTable(data, size)
     } catch (e) {
       console.log(e)
     }
 
     /** creating container around table */
-    this._container = create('div', [this._CSS.editor, api.styles.block], null, [ this._table.htmlElement ]);
-    
+    this._container = create("div", [this._CSS.editor, api.styles.block], null, [
+      this._table.htmlElement,
+    ])
+
     /** Создаем кнопку для загрузки изображения */
-    this._table.imageUpload.createElem(this._container);
+    this._table.imageUpload.createElem(this._container)
 
     /** Activated elements */
-    this._hoveredCell = null;
-    this._hoveredCellSide = null;
+    this._hoveredCell = null
+    this._hoveredCellSide = null
 
     if (!this.readOnly) {
-      this._hangEvents();
+      this._hangEvents()
     }
   }
 
@@ -52,7 +54,7 @@ export class TableConstructor {
    * @return {HTMLElement}
    */
   get htmlElement() {
-    return this._container;
+    return this._container
   }
 
   /**
@@ -66,14 +68,14 @@ export class TableConstructor {
     if (data.content !== undefined) {
       for (let i = 0; i < size.rows && i < data.content.length; i++) {
         for (let j = 0; j < size.cols && j < data.content[i].length; j++) {
-          const content = data.content[i][j];
-          const cell = this._table.body.rows[i].cells[j];
+          const content = data.content[i][j]
+          const cell = this._table.body.rows[i].cells[j]
           // get current cell and her editable part
-          if (typeof content === 'string') {
-            const input = cell.querySelector('.' + this._CSS.inputField);
-            input.innerHTML = content;
-          } else if (content?.type === 'image') {
-            this._table.imageUpload.createImage(cell, content.src);
+          if (typeof content === "string") {
+            const input = cell.querySelector("." + this._CSS.inputField)
+            input.innerHTML = content
+          } else if (content?.type === "image") {
+            this._table.imageUpload.createImage(cell, content.src)
           }
         }
       }
@@ -91,33 +93,33 @@ export class TableConstructor {
    * @return {{rows: number, cols: number}} - number of cols and rows
    */
   _resizeTable(data, config) {
-    const isValidArray = Array.isArray(data.content);
-    const isNotEmptyArray = isValidArray ? data.content.length : false;
-    const contentRows = isValidArray ? data.content.length : undefined;
-    const contentCols = isNotEmptyArray ? data.content[0].length : undefined;
-    const parsedRows = Number.parseInt(config.rows);
-    const parsedCols = Number.parseInt(config.cols);
+    const isValidArray = Array.isArray(data.content)
+    const isNotEmptyArray = isValidArray ? data.content.length : false
+    const contentRows = isValidArray ? data.content.length : undefined
+    const contentCols = isNotEmptyArray ? data.content[0].length : undefined
+    const parsedRows = Number.parseInt(config.rows)
+    const parsedCols = Number.parseInt(config.cols)
     // value of config have to be positive number
-    const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined;
-    const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined;
-    const { settings } = data;
-    const defaultRows = 3;
-    const defaultCols = 2;
-    const rows = contentRows || configRows || defaultRows;
-    const cols = contentCols || configCols || defaultCols;
+    const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined
+    const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined
+    const { settings } = data
+    const defaultRows = 3
+    const defaultCols = 2
+    const rows = contentRows || configRows || defaultRows
+    const cols = contentCols || configCols || defaultCols
 
     for (let i = 0; i < rows; i++) {
-      this._table.addRow(i);
+      this._table.addRow(i)
     }
     for (let i = 0; i < cols; i++) {
-      this._table.addColumn(i);
+      this._table.addColumn(i)
     }
-  
+
     if (settings) {
       if (settings.sizes) {
         settings.sizes.forEach((size, i) => {
           if (this._table.colgroup.children[i]) {
-            this._table.colgroup.children[i].style.width = `${size * 100}%`;
+            this._table.colgroup.children[i].style.width = `${size * 100}%`
           }
         })
       }
@@ -125,12 +127,12 @@ export class TableConstructor {
     this._table.htmlElement.classList.toggle(
       this._CSS.withBorder,
       settings?.withBorder === undefined ? true : settings?.withBorder
-    );
-    
+    )
+
     return {
       rows: rows,
-      cols: cols
-    };
+      cols: cols,
+    }
   }
 
   /**
@@ -139,9 +141,9 @@ export class TableConstructor {
    * hang necessary events
    */
   _hangEvents() {
-    this._container.addEventListener('keydown', (event) => {
-      this._containerKeydown(event);
-    });
+    this._container.addEventListener("keydown", (event) => {
+      this._containerKeydown(event)
+    })
   }
 
   /**
@@ -152,7 +154,7 @@ export class TableConstructor {
    */
   _containerKeydown(event) {
     if (event.keyCode === 13) {
-      this._containerEnterPressed(event);
+      this._containerEnterPressed(event)
     }
   }
 
@@ -164,9 +166,9 @@ export class TableConstructor {
    */
   _getHoveredSideOfContainer() {
     if (this._hoveredCell === this._container) {
-      return this._isBottomOrRight() ? 0 : -1;
+      return this._isBottomOrRight() ? 0 : -1
     }
-    return 1;
+    return 1
   }
 
   /**
@@ -176,7 +178,7 @@ export class TableConstructor {
    * @returns {boolean}
    */
   _isBottomOrRight() {
-    return this._hoveredCellSide === 'bottom' || this._hoveredCellSide === 'right';
+    return this._hoveredCellSide === "bottom" || this._hoveredCellSide === "right"
   }
 
   /**
@@ -187,16 +189,16 @@ export class TableConstructor {
    */
   _containerEnterPressed(event) {
     if (!(this._table.selectedCell !== null && !event.shiftKey)) {
-      return;
+      return
     }
-    const indicativeRow = this._table.selectedCell.closest('TR');
-    let index = this._getHoveredSideOfContainer();
+    const indicativeRow = this._table.selectedCell.closest("TR")
+    let index = this._getHoveredSideOfContainer()
 
     if (index === 1) {
-      index = indicativeRow.sectionRowIndex + 1;
+      index = indicativeRow.sectionRowIndex + 1
     }
-    const newstr = this._table.addRow(index);
+    const newstr = this._table.addRow(index)
 
-    newstr.cells[0].click();
+    newstr.cells[0].click()
   }
 }
