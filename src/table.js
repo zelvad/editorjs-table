@@ -141,63 +141,183 @@ export class Table {
 
     this.insertCol(index)
     for (let i = 0; i < rows.length; i++) {
-      const cell = rows[i].insertCell(index);
-      cell.colSpan = 1;
-      cell.rowSpan = 1;
-      this._fillCell(cell);
+      const cell = rows[i].insertCell(index)
+      cell.colSpan = 1
+      cell.rowSpan = 1
+      this._fillCell(cell)
     }
     if (!this.readOnly) {
-      this.columnSizeReCalc();
-      this.updateButtons();
+      this.columnSizeReCalc()
+      this.updateButtons()
     }
-  };
-  
-  removeColumn(index) {
-    const table = this._table;
+  }
+
+  addColumnOnRight() {
+    const table = this._table
+    const isSelectedCellMerged = this.selectedCell.colSpan > 1 || this.selectedCell.rowSpan > 1
+    const edgeIndex = this.selectedCell.colSpan + this.selectedCell.cellIndex - 1
+    const index = isSelectedCellMerged ? edgeIndex : this.selectedCell.cellIndex
 
     for (let i = 0; i < table.rows.length; i++) {
-      const row = table.rows[i];
-      const cellInColumn = row.cells[index];
+      const row = table.rows[i]
+      const cellInColumn = row.cells[index]
+      const isInvisibleCell = cellInColumn.style.display === "none"
+      const isMainMergedCell = cellInColumn.colSpan > 1 || cellInColumn.rowSpan > 1
+      const isNormalCell =
+        cellInColumn.colSpan === 1 &&
+        cellInColumn.rowSpan === 1 &&
+        cellInColumn.style.display !== "none"
+
+      if (isNormalCell) {
+        const newCell = row.insertCell(index + 1)
+
+        newCell.colSpan = 1
+        newCell.rowSpan = 1
+
+        this._fillCell(newCell)
+        continue
+      }
+
+      if (isMainMergedCell) {
+        const newCell = row.insertCell(index + 1)
+
+        cellInColumn.colSpan += 1
+        newCell.colSpan = 1
+        newCell.rowSpan = 1
+        newCell.style.display = "none"
+
+        this._fillCell(newCell)
+        continue
+      }
+
+      if (isInvisibleCell) {
+        const mainMergedCell = this._searchMainMergedCell(cellInColumn)
+        const isOnSameRowWithMainCell = i === mainMergedCell.parentNode.rowIndex
+        const isOnRightEdgeOfMainCell =
+          index === mainMergedCell.cellIndex + mainMergedCell.colSpan - 1
+
+        if (isOnRightEdgeOfMainCell) {
+          const newCell = row.insertCell(index + 1)
+
+          newCell.colSpan = 1
+          newCell.rowSpan = 1
+
+          this._fillCell(newCell)
+          continue
+        }
+
+        if (isOnSameRowWithMainCell) {
+          const newCell = row.insertCell(index + 1)
+
+          mainMergedCell.colSpan += 1
+          newCell.colSpan = 1
+          newCell.rowSpan = 1
+          newCell.style.display = "none"
+
+          this._fillCell(newCell)
+          continue
+        }
+
+        const newCell = row.insertCell(index + 1)
+
+        newCell.colSpan = 1
+        newCell.rowSpan = 1
+        newCell.style.display = "none"
+
+        this._fillCell(newCell)
+        continue
+      }
+    }
+
+    this._numberOfColumns++
+    this.insertCol(index)
+    this.columnSizeReCalc()
+    this.updateButtons()
+  }
+
+  /**
+   *
+   * @param {HTMLTableCellElement} cell
+   */
+  _searchMainMergedCell(cell) {
+    const table = this._table
+    const rowIndex = cell.parentNode.rowIndex
+    const colIndex = cell.cellIndex
+    const cells = table.querySelectorAll("td,th")
+    const mainMergedCells = Array.from(cells).filter((cell) => cell.colSpan > 1 || cell.rowSpan > 1)
+
+    return mainMergedCells.find((mainCell) => {
+      const mainCellRowIndex = mainCell.parentNode.rowIndex
+      const mainCellColindex = mainCell.cellIndex
+      const mainCellMaxRowIndex = mainCellRowIndex + (mainCell.rowSpan - 1)
+      const mainCellMaxColIndex = mainCellColindex + (mainCell.colSpan - 1)
+
+      return (
+        mainCellRowIndex <= rowIndex &&
+        rowIndex <= mainCellMaxRowIndex &&
+        mainCellColindex <= colIndex &&
+        colIndex <= mainCellMaxColIndex
+      )
+    })
+  }
+
+  removeColumn(index) {
+    const table = this._table
+
+    for (let i = 0; i < table.rows.length; i++) {
+      const row = table.rows[i]
+      const cellInColumn = row.cells[index]
+
+      // 현재 셀이 합쳐진 셀의 본체라면, 셀의 colspan, rowspan 만큼의 범위를 순회하며 거치는 모든 셀을 해방합니다.
+      // 그리고 인덱스에 해당하는 셀을 삭제합니다.
+      if (cellInColumn.colSpan > 1) {
+        const colspan = cellInColumn.colSpan
+        const rowspan = cellInColumn.rowSpan
+
+        for (let j = i; j < i + rowspan; j++) {
+          for (let k = index; k < index + colspan; k++) {
+            const cell = table.rows[j].cells[k]
+
+            cell.colSpan = 1
+            cell.rowSpan = 1
+
+            cell.style.removeProperty("display")
+          }
+
+          table.rows[j].deleteCell(index)
+        }
+
+        i += rowspan - 1
+        continue
+      }
 
       // 현재 셀이 합쳐진 셀의 일부라면 왼쪽으로 탐색하며 합쳐진 셀의 본체를 찾습니다.
       // 본체를 찾았다면 본체의 colSpan 을 1 깎고 반복문을 종료합니다.
-      if (cellInColumn.style.display === 'none') {
+      if (cellInColumn.style.display === "none") {
         for (let j = index - 1; j >= 0; j--) {
-          const leftCell = row.cells[j];
+          const leftCell = row.cells[j]
 
           if (leftCell.colSpan > 1) {
-            leftCell.colSpan -= 1;
-            break;
+            leftCell.colSpan -= 1
+            break
+          }
+
+          if (leftCell.style.display !== "none") {
+            break
           }
         }
       }
 
-      // 현재 셀이 합쳐진 셀의 본체 혹은 일부라면, 오른쪽으로 탐색하며 본체에 소속된 셀들을 해방합니다.
-      // 현재 셀이 합쳐진 셀의 본체 혹은 일부가 아니라면, 반복문을 종료합니다.
-      if (cellInColumn.style.display === 'none' || cellInColumn.colSpan > 1) {
-        for (let j = index + 1; j < row.cells.length; j++) {
-          const rightCell = row.cells[j];
-
-          if (rightCell.style.display !== 'none') {
-            break;
-          }
-
-          rightCell.style.removeProperty('display');
-          rightCell.colSpan = 1;
-          rightCell.rowSpan = 1;
-        }
-      }
-
-      this._table.rows[i].deleteCell(index);
+      this._table.rows[i].deleteCell(index)
     }
 
-    this._numberOfColumns--;
+    this._numberOfColumns--
     this._removeInvisibleRows()
-    
+
     if (!this.readOnly) {
-      this.removeCol(index);
-      this.columnSizeReCalc();
-      this.updateButtons();
+      this.removeCol(index)
+      this.columnSizeReCalc()
+      this.updateButtons()
     }
   }
 
