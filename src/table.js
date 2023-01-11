@@ -133,24 +133,35 @@ export class Table {
 
     rows.forEach((row, i) => {
       const newRow = table.insertRow(i)
+      const isFirstRow = i === 0
+      const isSecondRow = i === 1
 
-      if (i === 0) {
+      if (isFirstRow) {
         this.removeButtons(0)
       }
+      if (isFirstRow && row[1].isHeader) {
+        this.isRowHeaderOn = true
+      }
+      if (isSecondRow && row[0].isHeader) {
+        this.isColHeaderOn = true
+      }
 
-      row.forEach(({ text, bgColor, colspan, rowspan, display }, i) => {
+      row.forEach(({ text, bgColor, colspan, rowspan, display, isHeader }, i) => {
         const newCell = newRow.insertCell(i)
 
         this._fillCell(newCell)
-
-        if (display === false) {
-          newCell.style.display = "none"
-        }
 
         newCell.colSpan = colspan
         newCell.rowSpan = rowspan
         newCell.style.backgroundColor = bgColor
         newCell.querySelector("." + CSS.inputField).innerHTML = text
+
+        if (isHeader) {
+          turnTdIntoTh(newCell)
+        }
+        if (display === false) {
+          newCell.style.display = "none"
+        }
       })
 
       this._numberOfRows++
