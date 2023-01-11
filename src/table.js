@@ -858,76 +858,74 @@ export class Table {
    * @param {MouseEvent} event
    */
   _mouseDownOnCell(event) {
-    if (event.target.closest("." + CellMenuCSS.openCellMenuButton)) {
-      return
+    if (event.target.closest("." + CellMenuCSS.openCellMenuButton)) return
+    if (!event.target.closest("td,th")) return
+
+    const table = this._table
+    const cell = event.target.closest("td,th")
+    const startRowIndex = cell.parentNode.rowIndex
+    const startColIndex = cell.cellIndex
+    let currentCell = cell
+    this.selectedRows = []
+    this.selectedCols = []
+
+    const handleMouseMove = (event) => {
+      if (!event.target.closest("td,th")) return
+
+      const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY)
+      const cellBelowMousePointer = elementBelowMousePointer.closest("td,th")
+      const currentRowIndex = cellBelowMousePointer.parentNode.rowIndex
+      const currentColIndex = cellBelowMousePointer.cellIndex
+
+      if (currentCell !== cellBelowMousePointer) {
+        this.deselectCells()
+        selectCells(currentRowIndex, currentColIndex)
+        cellBelowMousePointer.querySelector("." + CSS.inputField).focus()
+
+        currentCell = cellBelowMousePointer
+      }
     }
 
-    if (event.target.closest("td,th")) {
-      const table = this._table
-      const cell = event.target.closest("td,th")
-      const startRowIndex = cell.parentNode.rowIndex
-      const startColIndex = cell.cellIndex
-      const everyCell = table.querySelectorAll("td,th")
-      let currentCell = cell
+    const handleMouseUp = (event) => {
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
+
+    const selectCells = (currentRowIndex, currentColIndex) => {
+      const currentCell = table.rows[currentRowIndex].cells[currentColIndex]
+      const isLastCellMerged = currentCell.colSpan > 1 || currentCell.rowSpan > 1
+      let additionalRow = 0
+      let additionalCol = 0
       this.selectedRows = []
       this.selectedCols = []
 
-      const handleMouseMove = (event) => {
-        const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY)
-        const cellBelowMousePointer = elementBelowMousePointer.closest("td,th")
-        const currentRowIndex = cellBelowMousePointer.parentNode.rowIndex
-        const currentColIndex = cellBelowMousePointer.cellIndex
-
-        if (currentCell !== cellBelowMousePointer) {
-          this.deselectCells()
-          selectCells(currentRowIndex, currentColIndex)
-          cellBelowMousePointer.querySelector("." + CSS.inputField).focus()
-
-          currentCell = cellBelowMousePointer
-        }
+      if (isLastCellMerged) {
+        additionalRow += currentCell.rowSpan - 1
+        additionalCol += currentCell.colSpan - 1
       }
 
-      const handleMouseUp = (event) => {
-        document.removeEventListener("mousemove", handleMouseMove)
-        document.removeEventListener("mouseup", handleMouseUp)
+      for (let i = startRowIndex; i <= currentRowIndex + additionalRow; i++) {
+        const cellsInRow = table.rows[i].cells
+
+        for (let j = startColIndex; j <= currentColIndex + additionalCol; j++) {
+          const cell = cellsInRow[j]
+
+          cell.classList.add("selected")
+        }
+
+        this.selectedRows.push(i)
       }
 
-      const selectCells = (currentRowIndex, currentColIndex) => {
-        const currentCell = table.rows[currentRowIndex].cells[currentColIndex]
-        const isLastCellMerged = currentCell.colSpan > 1 || currentCell.rowSpan > 1
-        let additionalRow = 0
-        let additionalCol = 0
-        this.selectedRows = []
-        this.selectedCols = []
-
-        if (isLastCellMerged) {
-          additionalRow += currentCell.rowSpan - 1
-          additionalCol += currentCell.colSpan - 1
-        }
-
-        for (let i = startRowIndex; i <= currentRowIndex + additionalRow; i++) {
-          const cellsInRow = table.rows[i].cells
-
-          for (let j = startColIndex; j <= currentColIndex + additionalCol; j++) {
-            const cell = cellsInRow[j]
-
-            cell.classList.add("selected")
-          }
-
-          this.selectedRows.push(i)
-        }
-
-        for (let i = startColIndex; i <= currentColIndex + additionalCol; i++) {
-          this.selectedCols.push(i)
-        }
+      for (let i = startColIndex; i <= currentColIndex + additionalCol; i++) {
+        this.selectedCols.push(i)
       }
-
-      this.deselectCells()
-      this.cellMenu.hideCellMenu()
-
-      document.addEventListener("mousemove", handleMouseMove)
-      document.addEventListener("mouseup", handleMouseUp)
     }
+
+    this.deselectCells()
+    this.cellMenu.hideCellMenu()
+
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
   }
 
   /**
