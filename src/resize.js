@@ -40,7 +40,7 @@ export class Resize {
   }
 
   onDragStart = (e) => {
-    const parentCellColIndex = e.target.closest("td").cellIndex
+    const parentCellColIndex = e.target.closest("td,th").cellIndex
     const resizeStickIndex = parentCellColIndex - 1
     this.startX = e.pageX
     this.active = e.target

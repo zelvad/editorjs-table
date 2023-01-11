@@ -7,6 +7,11 @@
   height: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  tbody th {
+    background-color: #f9f9f9;
+    text-align: initial;
+    font-weight: bold;
+  }
   &__container {
     padding: 40px 16px 16px 40px;
     margin: -24px 0 0 -24px;
@@ -283,6 +288,7 @@
       overflow: auto;
       &__option {
         display: flex;
+        justify-content: space-between;
         box-sizing: border-box;
         width: 100%;
         min-height: var(--ds-scale-500, 40px);
@@ -314,6 +320,13 @@
 
         &.color-option {
           position: relative;
+        }
+        &.toggle-row-header-option.row-header-on,
+        &.toggle-col-header-option.col-header-on {
+          font-weight: bold;
+          &::after {
+            content: "✔️";
+          }
         }
       }
     }

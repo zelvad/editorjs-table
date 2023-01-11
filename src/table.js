@@ -1,4 +1,4 @@
-import { create, getCoords, getSideByCoords } from "./documentUtils"
+import { create, getCoords, getSideByCoords, turnTdIntoTh, turnThIntoTd } from "./documentUtils"
 import { Resize } from "./resize"
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine"
 import { CreateLine } from "./createLine"
@@ -39,6 +39,8 @@ export class Table {
     this.colgroup = this._table.querySelector("colgroup")
     this.selectedRows = []
     this.selectedCols = []
+    this.isRowHeaderOn = false
+    this.isColHeaderOn = false
 
     this.resize = new Resize(this)
     this.selectLine = new SelectLine(this)
@@ -55,7 +57,7 @@ export class Table {
   }
 
   deselectCells() {
-    const everyCell = this._table.querySelectorAll("td")
+    const everyCell = this._table.querySelectorAll("td,th")
     everyCell.forEach((cell) => {
       cell.classList.remove("selected")
     })
@@ -203,9 +205,20 @@ export class Table {
     const edgeIndex = this.selectedCell.colSpan + this.selectedCell.cellIndex - 1
     const index = isSelectedCellMerged ? edgeIndex : this.selectedCell.cellIndex
 
+    const fillCell = (cell, isFirstRow) => {
+      if (isFirstRow && this.isRowHeaderOn) {
+        this._fillCell(cell)
+        turnTdIntoTh(cell)
+        return
+      }
+
+      this._fillCell(cell)
+    }
+
     for (let i = 0; i < table.rows.length; i++) {
       const row = table.rows[i]
       const cellInColumn = row.cells[index]
+      const isFirstRow = i === 0
       const isInvisibleCell = cellInColumn.style.display === "none"
       const isMainMergedCell = cellInColumn.colSpan > 1 || cellInColumn.rowSpan > 1
       const isNormalCell =
@@ -219,7 +232,7 @@ export class Table {
         newCell.colSpan = 1
         newCell.rowSpan = 1
 
-        this._fillCell(newCell)
+        fillCell(newCell, isFirstRow)
         continue
       }
 
@@ -231,7 +244,7 @@ export class Table {
         newCell.rowSpan = 1
         newCell.style.display = "none"
 
-        this._fillCell(newCell)
+        fillCell(newCell, isFirstRow)
         continue
       }
 
@@ -247,7 +260,7 @@ export class Table {
           newCell.colSpan = 1
           newCell.rowSpan = 1
 
-          this._fillCell(newCell)
+          fillCell(newCell, isFirstRow)
           continue
         }
 
@@ -259,7 +272,7 @@ export class Table {
           newCell.rowSpan = 1
           newCell.style.display = "none"
 
-          this._fillCell(newCell)
+          fillCell(newCell, isFirstRow)
           continue
         }
 
@@ -269,7 +282,7 @@ export class Table {
         newCell.rowSpan = 1
         newCell.style.display = "none"
 
-        this._fillCell(newCell)
+        fillCell(newCell, isFirstRow)
         continue
       }
     }
@@ -308,6 +321,11 @@ export class Table {
 
   removeColumn(index) {
     const table = this._table
+    const isFirstColumn = index === 0
+
+    if (isFirstColumn) {
+      this.isColHeaderOn = false
+    }
 
     for (let i = 0; i < table.rows.length; i++) {
       const row = table.rows[i]
@@ -392,11 +410,22 @@ export class Table {
     const index = isSelectedCellMerged ? edgeIndex : this.selectedCell.parentNode.rowIndex
     const newRow = table.insertRow(index + 1)
 
+    const fillCell = (cell, isFirstColumn) => {
+      if (isFirstColumn && this.isColHeaderOn) {
+        this._fillCell(cell)
+        turnTdIntoTh(cell)
+        return
+      }
+
+      this._fillCell(cell)
+    }
+
     for (let i = 0; i < table.rows[index].cells.length; i++) {
       const cell = table.rows[index].cells[i]
       const isInvisibleCell = cell.style.display === "none"
       const isMainMergedCell = cell.colSpan > 1 || cell.rowSpan > 1
       const isNormalCell = cell.colSpan === 1 && cell.rowSpan === 1 && cell.style.display !== "none"
+      const isFirstColumn = i === 0
 
       if (isNormalCell) {
         const newCell = newRow.insertCell(i)
@@ -404,7 +433,7 @@ export class Table {
         newCell.colSpan = 1
         newCell.rowSpan = 1
 
-        this._fillCell(newCell)
+        fillCell(newCell, isFirstColumn)
         continue
       }
 
@@ -416,7 +445,7 @@ export class Table {
         newCell.rowSpan = 1
         newCell.style.display = "none"
 
-        this._fillCell(newCell)
+        fillCell(newCell, isFirstColumn)
         continue
       }
 
@@ -432,7 +461,7 @@ export class Table {
           newCell.colSpan = 1
           newCell.rowSpan = 1
 
-          this._fillCell(newCell)
+          fillCell(newCell, isFirstColumn)
           continue
         }
 
@@ -444,7 +473,7 @@ export class Table {
           newCell.rowSpan = 1
           newCell.style.display = "none"
 
-          this._fillCell(newCell)
+          fillCell(newCell, isFirstColumn)
           continue
         }
 
@@ -454,7 +483,7 @@ export class Table {
         newCell.rowSpan = 1
         newCell.style.display = "none"
 
-        this._fillCell(newCell)
+        fillCell(newCell, isFirstColumn)
         continue
       }
     }
@@ -466,6 +495,11 @@ export class Table {
   removeRow(index) {
     const table = this._table
     const selectedRow = table.rows[index]
+    const isFirstRow = index === 0
+
+    if (isFirstRow) {
+      this.isRowHeaderOn = false
+    }
 
     for (let i = 0; i < selectedRow.cells.length; i++) {
       const cell = selectedRow.cells[i]
@@ -514,7 +548,7 @@ export class Table {
 
   mergeCells() {
     const table = this._table
-    const everyCell = table.querySelectorAll("td")
+    const everyCell = table.querySelectorAll("td,th")
     const selectedCells = Array.from(everyCell).filter((cell) =>
       cell.classList.contains("selected")
     )
@@ -568,6 +602,45 @@ export class Table {
     }
 
     return everySelectedCells === visibleSelectedCells
+  }
+
+  toggleFirstRowHeader() {
+    const table = this._table
+    const firstRow = table.rows[0]
+
+    for (let i = 0; i < firstRow.cells.length; i++) {
+      if (this.isRowHeaderOn) {
+        turnThIntoTd(firstRow.cells[i])
+      } else {
+        turnTdIntoTh(firstRow.cells[i])
+      }
+    }
+
+    if (this.isRowHeaderOn) {
+      this.isRowHeaderOn = false
+    } else {
+      this.isRowHeaderOn = true
+    }
+  }
+
+  toggleFirstColHeader() {
+    const table = this._table
+
+    for (let i = 0; i < table.rows.length; i++) {
+      const cell = table.rows[i].cells[0]
+
+      if (this.isColHeaderOn) {
+        turnThIntoTd(cell)
+      } else {
+        turnTdIntoTh(cell)
+      }
+    }
+
+    if (this.isColHeaderOn) {
+      this.isColHeaderOn = false
+    } else {
+      this.isColHeaderOn = true
+    }
   }
 
   /**
@@ -731,14 +804,6 @@ export class Table {
       },
       true
     )
-
-    this._table.addEventListener("contextmenu", (event) => {
-      if (event.target.closest("td") && event.target.closest("td").className.includes("selected")) {
-        event.preventDefault()
-        this._showCustomContextMenuOnSelectedCells(event)
-        return false
-      }
-    })
   }
 
   /**
@@ -797,19 +862,19 @@ export class Table {
       return
     }
 
-    if (event.target.closest("td")) {
+    if (event.target.closest("td,th")) {
       const table = this._table
-      const cell = event.target.closest("td")
+      const cell = event.target.closest("td,th")
       const startRowIndex = cell.parentNode.rowIndex
       const startColIndex = cell.cellIndex
-      const everyCell = table.querySelectorAll("td")
+      const everyCell = table.querySelectorAll("td,th")
       let currentCell = cell
       this.selectedRows = []
       this.selectedCols = []
 
       const handleMouseMove = (event) => {
         const elementBelowMousePointer = document.elementFromPoint(event.clientX, event.clientY)
-        const cellBelowMousePointer = elementBelowMousePointer.closest("td")
+        const cellBelowMousePointer = elementBelowMousePointer.closest("td,th")
         const currentRowIndex = cellBelowMousePointer.parentNode.rowIndex
         const currentColIndex = cellBelowMousePointer.cellIndex
 
@@ -874,7 +939,7 @@ export class Table {
       return
     }
 
-    const coordsCell = getCoords(event.target.closest("TD"))
+    const coordsCell = getCoords(event.target.closest("TD,TH"))
     const side = getSideByCoords(coordsCell, event.pageX, event.pageY)
 
     event.target.dispatchEvent(

@@ -238,8 +238,36 @@ export class CellMenu {
     this.colorPalette.style.visibility = "visible"
   }
 
+  _createToggleFirstRowHeaderButton() {
+    const option = document.createElement("button")
+
+    option.textContent = "헤더 행"
+
+    option.classList.add(CSS.option)
+    option.classList.add(CSS.toggleRowHeaderOption)
+
+    option.addEventListener("click", this.toggleFirstRowHeader.bind(this))
+
+    return option
+  }
+
+  _createToggleFirstColHeaderButton() {
+    const option = document.createElement("button")
+
+    option.textContent = "헤더 열"
+
+    option.classList.add(CSS.option)
+    option.classList.add(CSS.toggleColHeaderOption)
+
+    option.addEventListener("click", this.toggleFirstColHeader.bind(this))
+
+    return option
+  }
+
   _fillCellMenu() {
     const colorPickerButton = this._createColorPickerButton()
+    const toggleFirstRowHeaderButton = this._createToggleFirstRowHeaderButton.call(this.table)
+    const toggleFirstColHeaderButton = this._createToggleFirstColHeaderButton.call(this.table)
     const addColumnOnRightButton = this._createAddColumnOnRightButton.call(this.table)
     const addRowBelowButton = this._createAddRowBelow.call(this.table)
     const mergeButton = this._createMergeButton.call(this.table)
@@ -247,6 +275,8 @@ export class CellMenu {
     const colRemoveButton = this._createColRemoveButton.call(this.table)
 
     this._cellMenuInner.appendChild(colorPickerButton)
+    this._cellMenuInner.appendChild(toggleFirstRowHeaderButton)
+    this._cellMenuInner.appendChild(toggleFirstColHeaderButton)
     this._cellMenuInner.appendChild(addColumnOnRightButton)
     this._cellMenuInner.appendChild(addRowBelowButton)
     this._cellMenuInner.appendChild(mergeButton)
@@ -267,7 +297,12 @@ export class CellMenu {
     const openCellMenuButton = event.target.closest("." + CSS.openCellMenuButton)
     const iconBox = openCellMenuButton.querySelector("." + CSS.iconBox)
     const mergeOption = this.container.querySelector("." + CSS.mergeOption)
+    const toggleRowHeaderOption = this.container.querySelector("." + CSS.toggleRowHeaderOption)
+    const toggleColHeaderOption = this.container.querySelector("." + CSS.toggleColHeaderOption)
     const { top, right } = iconBox.getBoundingClientRect()
+    const isMergePossible = this.table.checkIfMergePossible.call(this.table)
+    const isToggleRowHeaderPossible = this.table.selectedCell.parentNode.rowIndex === 0
+    const isToggleColHeaderPossible = this.table.selectedCell.cellIndex === 0
 
     iconBox.classList.add("activated")
 
@@ -275,12 +310,31 @@ export class CellMenu {
     this.container.style.left = `${right + 4}px`
     this.container.style.visibility = "visible"
 
-    if (this.table.checkIfMergePossible.call(this.table)) {
-      mergeOption.disabled = false
-      return
+    if (isToggleRowHeaderPossible) {
+      toggleRowHeaderOption.style.display = "flex"
+
+      this.table.isRowHeaderOn
+        ? toggleRowHeaderOption.classList.add(CSS.rowHeaderOn)
+        : toggleRowHeaderOption.classList.remove(CSS.rowHeaderOn)
+    } else {
+      toggleRowHeaderOption.style.display = "none"
     }
 
-    mergeOption.disabled = true
+    if (isToggleColHeaderPossible) {
+      toggleColHeaderOption.style.display = "flex"
+
+      this.table.isColHeaderOn
+        ? toggleColHeaderOption.classList.add(CSS.colHeaderOn)
+        : toggleColHeaderOption.classList.remove(CSS.colHeaderOn)
+    } else {
+      toggleColHeaderOption.style.display = "none"
+    }
+
+    if (isMergePossible) {
+      mergeOption.disabled = false
+    } else {
+      mergeOption.disabled = true
+    }
   }
 
   _catchClickEventDelegation(event) {
@@ -300,4 +354,8 @@ export const CSS = {
   colorOption: "color-option",
   colorPalette: "color-palette",
   colorBlock: "color-block",
+  toggleRowHeaderOption: "toggle-row-header-option",
+  toggleColHeaderOption: "toggle-col-header-option",
+  rowHeaderOn: "row-header-on",
+  colHeaderOn: "col-header-on",
 }
