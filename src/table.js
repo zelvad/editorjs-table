@@ -1,10 +1,19 @@
-import { create, getCoords, getSideByCoords, turnTdIntoTh, turnThIntoTd } from "./documentUtils"
+import {
+  create,
+  getCoords,
+  getSideByCoords,
+  turnTdIntoTh,
+  turnThIntoTd,
+  hideCell,
+  showHiddenCell,
+} from "./documentUtils"
 import { Resize } from "./resize"
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine"
 import { CreateLine } from "./createLine"
 import { ImageUpload, CSS as imageUploadCSS } from "./imageUpload"
 import "./styles/table.scss"
 import { CellMenu, CSS as CellMenuCSS } from "./cellMenu"
+import { Shortcuts } from "./shortcuts"
 
 export const CSS = {
   table: "tc-table",
@@ -29,7 +38,7 @@ export class Table {
    *
    * @param {boolean} readOnly - read-only mode flag
    */
-  constructor(readOnly) {
+  constructor(api, readOnly) {
     this.readOnly = readOnly
     this._numberOfColumns = 0
     this._numberOfRows = 0
@@ -47,6 +56,7 @@ export class Table {
     this.createLine = new CreateLine(this)
     this.imageUpload = new ImageUpload(this)
     this.cellMenu = new CellMenu(this)
+    this.shortcuts = new Shortcuts(this, api)
 
     this._table.appendChild(this.cellMenu.container)
     this._table.appendChild(this.cellMenu.colorPalette)
@@ -161,6 +171,7 @@ export class Table {
         }
         if (display === false) {
           newCell.style.display = "none"
+          newCell.querySelector("." + CSS.inputField).contentEditable = false
         }
       })
 
@@ -251,16 +262,14 @@ export class Table {
         const newCell = row.insertCell(index + 1)
 
         cellInColumn.colSpan += 1
-        newCell.colSpan = 1
-        newCell.rowSpan = 1
-        newCell.style.display = "none"
 
         fillCell(newCell, isFirstRow)
+        hideCell(newCell)
         continue
       }
 
       if (isInvisibleCell) {
-        const mainMergedCell = this._searchMainMergedCell(cellInColumn)
+        const mainMergedCell = this.searchMainMergedCell(cellInColumn)
         const isOnSameRowWithMainCell = i === mainMergedCell.parentNode.rowIndex
         const isOnRightEdgeOfMainCell =
           index === mainMergedCell.cellIndex + mainMergedCell.colSpan - 1
@@ -279,21 +288,16 @@ export class Table {
           const newCell = row.insertCell(index + 1)
 
           mainMergedCell.colSpan += 1
-          newCell.colSpan = 1
-          newCell.rowSpan = 1
-          newCell.style.display = "none"
 
           fillCell(newCell, isFirstRow)
+          hideCell(newCell)
           continue
         }
 
         const newCell = row.insertCell(index + 1)
 
-        newCell.colSpan = 1
-        newCell.rowSpan = 1
-        newCell.style.display = "none"
-
         fillCell(newCell, isFirstRow)
+        hideCell(newCell)
         continue
       }
     }
@@ -308,7 +312,7 @@ export class Table {
    *
    * @param {HTMLTableCellElement} cell
    */
-  _searchMainMergedCell(cell) {
+  searchMainMergedCell(cell) {
     const table = this._table
     const rowIndex = cell.parentNode.rowIndex
     const colIndex = cell.cellIndex
@@ -352,10 +356,7 @@ export class Table {
           for (let k = index; k < index + colspan; k++) {
             const cell = table.rows[j].cells[k]
 
-            cell.colSpan = 1
-            cell.rowSpan = 1
-
-            cell.style.removeProperty("display")
+            showHiddenCell(cell)
           }
 
           table.rows[j].deleteCell(index)
@@ -452,16 +453,14 @@ export class Table {
         const newCell = newRow.insertCell(i)
 
         cell.rowSpan += 1
-        newCell.colSpan = 1
-        newCell.rowSpan = 1
-        newCell.style.display = "none"
 
         fillCell(newCell, isFirstColumn)
+        hideCell(newCell)
         continue
       }
 
       if (isInvisibleCell) {
-        const mainMergedCell = this._searchMainMergedCell(cell)
+        const mainMergedCell = this.searchMainMergedCell(cell)
         const isOnSameColumnWithMainCell = i === mainMergedCell.cellIndex
         const isAtBottomOfMaincell =
           index === mainMergedCell.parentNode.rowIndex + mainMergedCell.rowSpan - 1
@@ -480,21 +479,16 @@ export class Table {
           const newCell = newRow.insertCell(i)
 
           mainMergedCell.rowSpan += 1
-          newCell.colSpan = 1
-          newCell.rowSpan = 1
-          newCell.style.display = "none"
 
           fillCell(newCell, isFirstColumn)
+          hideCell(newCell)
           continue
         }
 
         const newCell = newRow.insertCell(i)
 
-        newCell.colSpan = 1
-        newCell.rowSpan = 1
-        newCell.style.display = "none"
-
         fillCell(newCell, isFirstColumn)
+        hideCell(newCell)
         continue
       }
     }
@@ -522,9 +516,7 @@ export class Table {
           for (let k = i; k < i + cell.colSpan; k++) {
             const cellBelow = table.rows[j].cells[k]
 
-            cellBelow.style.removeProperty("display")
-            cellBelow.colSpan = 1
-            cellBelow.rowSpan = 1
+            showHiddenCell(cellBelow)
           }
         }
       }
@@ -576,9 +568,7 @@ export class Table {
         cell.colSpan = colSpan
         cell.rowSpan = rowSpan
       } else {
-        cell.colSpan = 1
-        cell.rowSpan = 1
-        cell.style.display = "none"
+        hideCell(cell)
       }
     })
 
@@ -750,7 +740,7 @@ export class Table {
    * @returns {HTMLElement} - the area
    */
   _createContentEditableArea() {
-    return create("div", [CSS.inputField], { contenteditable: !this.readOnly })
+    return create("div", [CSS.inputField], { contentEditable: !this.readOnly })
   }
 
   /**
@@ -781,40 +771,15 @@ export class Table {
    * @private
    */
   _hangEvents() {
-    this._table.addEventListener(
-      "focus",
-      (event) => {
-        this._focusEditField(event)
-      },
-      true
-    )
+    this._table.addEventListener("focus", this._focusEditField.bind(this), true)
 
-    this._table.addEventListener(
-      "blur",
-      (event) => {
-        this._blurEditField(event)
-      },
-      true
-    )
+    this._table.addEventListener("blur", this._blurEditField.bind(this), true)
 
-    this._table.addEventListener("keydown", (event) => {
-      this._pressedEnterInEditField(event)
-    })
+    this._table.addEventListener("keydown", this._shortcutKeys.bind(this))
 
-    this._table.addEventListener("mousedown", (event) => {
-      if (event.button === 0) {
-        this._mouseDownOnCell(event)
-      }
-    })
+    this._table.addEventListener("mousedown", this._mouseDownOnCell.bind(this))
 
-    this._table.addEventListener(
-      "mouseover",
-      (event) => {
-        this._mouseEnterInDetectArea(event)
-        event.stopPropagation()
-      },
-      true
-    )
+    this._table.addEventListener("mouseover", this._mouseEnterInDetectArea.bind(this), true)
   }
 
   /**
@@ -855,12 +820,25 @@ export class Table {
    * @private
    * @param {KeyboardEvent} event
    */
-  _pressedEnterInEditField(event) {
+  _shortcutKeys(event) {
     if (!event.target.classList.contains(CSS.inputField)) {
       return
     }
-    if (event.keyCode === 13 && !event.shiftKey) {
-      event.preventDefault()
+    if (event.key === "Enter") {
+      this.shortcuts.handleEnterKeyPress(event)
+      return
+    }
+    if (event.key === "Tab") {
+      this.shortcuts.handleTabKeyPress(event)
+      return
+    }
+    if (event.key === "ArrowUp") {
+      this.shortcuts.handleArrowUpKeyPress(event)
+      return
+    }
+    if (event.key === "ArrowDown") {
+      this.shortcuts.handleArrowDownKeyPress(event)
+      return
     }
   }
 
@@ -869,6 +847,7 @@ export class Table {
    * @param {MouseEvent} event
    */
   _mouseDownOnCell(event) {
+    if (event.button !== 0) return
     if (event.target.closest("." + CellMenuCSS.openCellMenuButton)) return
     if (!event.target.closest("td,th")) return
 
@@ -951,6 +930,7 @@ export class Table {
     const coordsCell = getCoords(event.target.closest("TD,TH"))
     const side = getSideByCoords(coordsCell, event.pageX, event.pageY)
 
+    event.stopPropagation()
     event.target.dispatchEvent(
       new CustomEvent("mouseInActivatingArea", {
         detail: {
