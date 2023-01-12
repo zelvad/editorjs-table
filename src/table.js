@@ -226,6 +226,7 @@ export class Table {
     const isSelectedCellMerged = this.selectedCell.colSpan > 1 || this.selectedCell.rowSpan > 1
     const edgeIndex = this.selectedCell.colSpan + this.selectedCell.cellIndex - 1
     const index = isSelectedCellMerged ? edgeIndex : this.selectedCell.cellIndex
+    const isLastColumn = index === table.rows[0].cells.length - 1
 
     const fillCell = (cell, isFirstRow) => {
       if (isFirstRow && this.isRowHeaderOn) {
@@ -235,6 +236,11 @@ export class Table {
       }
 
       this._fillCell(cell)
+    }
+
+    if (isLastColumn) {
+      this.addColumn()
+      return
     }
 
     for (let i = 0; i < table.rows.length; i++) {
@@ -420,6 +426,7 @@ export class Table {
     const isSelectedCellMerged = this.selectedCell.colSpan > 1 || this.selectedCell.rowSpan > 1
     const edgeIndex = this.selectedCell.rowSpan + this.selectedCell.parentNode.rowIndex - 1
     const index = isSelectedCellMerged ? edgeIndex : this.selectedCell.parentNode.rowIndex
+    const isLastRow = index === table.rows.length - 1
     const newRow = table.insertRow(index + 1)
 
     const fillCell = (cell, isFirstColumn) => {
@@ -430,6 +437,11 @@ export class Table {
       }
 
       this._fillCell(cell)
+    }
+
+    if (isLastRow) {
+      this.addRow()
+      return
     }
 
     for (let i = 0; i < table.rows[index].cells.length; i++) {
