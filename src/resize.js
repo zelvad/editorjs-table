@@ -50,8 +50,6 @@ export class Resize {
     this.widthFirst = w1
     this.widthSecond = w2
 
-    this._highlightResizeStick(parentCellColIndex)
-
     document.body.style.cursor = "col-resize"
 
     e.preventDefault && e.preventDefault()
@@ -67,7 +65,6 @@ export class Resize {
   onDragEnd = () => {
     this.active = null
     document.body.style.cursor = "auto"
-    this._dehighlightResizeStick(this.activeIndex + 1)
   }
 
   move = (delta) => {
@@ -95,21 +92,5 @@ export class Resize {
   getWidthCols = () => {
     const [first, second] = this.getCols()
     return [this.parseWidth(first), this.parseWidth(second)]
-  }
-
-  _highlightResizeStick = (index) => {
-    const resizeSticksInColumn = this.table.body.querySelectorAll(`[data-index='${index}']`)
-
-    resizeSticksInColumn.forEach((stick) => {
-      stick.style.opacity = 1
-    })
-  }
-
-  _dehighlightResizeStick = (index) => {
-    const resizeSticksInColumn = this.table.body.querySelectorAll(`[data-index='${index}']`)
-
-    resizeSticksInColumn.forEach((stick) => {
-      stick.style.removeProperty("opacity")
-    })
   }
 }
