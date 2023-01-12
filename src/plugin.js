@@ -95,72 +95,40 @@ class Table {
    */
   save(toolsContent) {
     const table = toolsContent.querySelector("table")
-    const data = []
-    const rows = table.rows
-    const sizes = []
-    const width = table.offsetWidth
-    const colSpans = []
-    const rowSpans = []
-    const backgroundColors = []
-    const headers = []
+    const colgroup = []
+    const rows = []
 
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i]
-      const cols = Array.from(row.cells)
-      const inputs = cols.map((cell) => cell.querySelector("." + this._CSS.input))
-      const images = cols.map((cell) => cell.querySelector("." + imageCSS.image))
-      const result = cols.map((item, i) => {
-        if (inputs[i]) return { type: "input", text: inputs[i].innerHTML }
-        if (images[i]) return { type: "image", src: images[i].getAttribute("src") }
-      })
-      const colSpansInRow = []
-      const rowSpansInRow = []
-      const backgroundColorsInRow = []
-      const headersInRow = []
+    for (let i = 0; i < table.rows.length; i++) {
+      const row = table.rows[i]
+      const rowData = []
 
-      if (i === 0) {
-        cols.forEach((c) => {
-          sizes.push(c.offsetWidth / width)
-        })
+      for (let j = 0; j < row.cells.length; j++) {
+        const cell = row.cells[j]
+        const data = {
+          text: cell.querySelector("." + this._CSS.input).innerHTML,
+          colspan: cell.colSpan,
+          rowspan: cell.rowSpan,
+          display: cell.style.display === "none" ? false : true,
+          bgColor: cell.style.backgroundColor,
+          isHeader: cell.tagName === "TH",
+        }
+
+        rowData.push(data)
       }
 
-      cols.forEach((cell) => {
-        colSpansInRow.push(cell.colSpan)
-        rowSpansInRow.push(cell.rowSpan)
-        backgroundColorsInRow.push(cell.style.backgroundColor)
-        headersInRow.push(cell.tagName === "TH" ? true : false)
-      })
-
-      colSpans.push(colSpansInRow)
-      rowSpans.push(rowSpansInRow)
-      backgroundColors.push(backgroundColorsInRow)
-      headers.push(headersInRow)
-
-      data.push(
-        result.map((res, i) => {
-          if (res) {
-            switch (res.type) {
-              case "input": {
-                return res.text
-              }
-              case "image": {
-                return res
-              }
-              default:
-            }
-          }
-          return ""
-        })
-      )
+      rows.push(rowData)
     }
 
+    table.querySelectorAll("col").forEach((col) => {
+      colgroup.push({
+        span: col.span,
+        width: col.style.width,
+      })
+    })
+
     return {
-      columnWidths: sizes,
-      content: data,
-      colSpans,
-      rowSpans,
-      backgroundColors,
-      headers,
+      rows,
+      colgroup,
     }
   }
 

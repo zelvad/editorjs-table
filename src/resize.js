@@ -23,6 +23,7 @@ export class Resize {
   createElem(cell) {
     if (!cell.querySelector(`.${CSS.resizedColumn}`)) {
       const elem = create("div", [CSS.resizedColumn])
+      elem.dataset.index = cell.cellIndex
       elem.addEventListener("mousedown", this.onDragStart, false)
       cell.appendChild(elem)
     }
@@ -39,14 +40,17 @@ export class Resize {
   }
 
   onDragStart = (e) => {
-    const index = this.getIndex(e)
+    const parentCellColIndex = e.target.closest("td,th").cellIndex
+    const resizeStickIndex = parentCellColIndex - 1
     this.startX = e.pageX
     this.active = e.target
-    this.activeIndex = index
+    this.activeIndex = resizeStickIndex
     this.width = this.table.body.offsetWidth
     const [w1, w2] = this.getWidthCols()
     this.widthFirst = w1
     this.widthSecond = w2
+
+    this._highlightResizeStick(parentCellColIndex)
 
     document.body.style.cursor = "col-resize"
 
@@ -63,6 +67,7 @@ export class Resize {
   onDragEnd = () => {
     this.active = null
     document.body.style.cursor = "auto"
+    this._dehighlightResizeStick(this.activeIndex + 1)
   }
 
   move = (delta) => {
@@ -90,5 +95,21 @@ export class Resize {
   getWidthCols = () => {
     const [first, second] = this.getCols()
     return [this.parseWidth(first), this.parseWidth(second)]
+  }
+
+  _highlightResizeStick = (index) => {
+    const resizeSticksInColumn = this.table.body.querySelectorAll(`[data-index='${index}']`)
+
+    resizeSticksInColumn.forEach((stick) => {
+      stick.style.opacity = 1
+    })
+  }
+
+  _dehighlightResizeStick = (index) => {
+    const resizeSticksInColumn = this.table.body.querySelectorAll(`[data-index='${index}']`)
+
+    resizeSticksInColumn.forEach((stick) => {
+      stick.style.removeProperty("opacity")
+    })
   }
 }

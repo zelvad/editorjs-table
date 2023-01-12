@@ -1,3 +1,5 @@
+import { CSS as TableCSS } from "./table"
+
 /**
  * Checks the item is not missed or messed
  * @param {object|string[]|Element[]|HTMLElement|string} elem - element
@@ -39,44 +41,6 @@ export function create(tagName, cssClasses = null, attrs = null, children = null
     }
   }
   return elem
-}
-
-/**
- *
- * @param {Object} data
- * @param {String} data.tag
- * @param {String | String[] | null} data.class
- * @param {Object | null} data.attribute
- * @param {HTMLElement[] | HTMLElement | null} data.children
- */
-export function createElement(data) {
-  const element = document.createElement(data.tag)
-
-  if (typeof data.class === "string") {
-    element.classList.add(data.class)
-  } else if (Array.isArray(data.class)) {
-    data.class.forEach((className) => {
-      element.classList.add(className)
-    })
-  }
-
-  if (typeof data.attribute === "object") {
-    for (let key in data.attribute) {
-      element.setAttribute(key, data.attribute[key])
-    }
-  }
-
-  if (data.children === undefined || data.children === null) {
-    return element
-  } else if (Array.isArray(data.children)) {
-    data.children.forEach((child) => {
-      element.appendChild(child)
-    })
-  } else if (data.children !== null) {
-    element.appendChild(data.children)
-  }
-
-  return element
 }
 
 /**
@@ -125,8 +89,8 @@ export function getSideByCoords(coords, x, y) {
 }
 
 /**
+ * td 엘리먼트를 th 엘리먼트로 변경한다
  * @param cell - TD Element
- * @description td 엘리먼트를 th 엘리먼트로 변경한다
  */
 export function turnTdIntoTh(cell) {
   const th = document.createElement("th")
@@ -134,6 +98,7 @@ export function turnTdIntoTh(cell) {
   th.setAttribute("rowspan", cell.rowSpan)
   th.setAttribute("colspan", cell.colSpan)
   th.setAttribute("class", cell.className)
+  th.style.setProperty("display", cell.style.display === "none" ? "none" : null)
 
   while (cell.firstChild) {
     th.appendChild(cell.firstChild)
@@ -143,8 +108,8 @@ export function turnTdIntoTh(cell) {
 }
 
 /**
+ * th 엘리먼트를 td 엘리먼트로 변경한다
  * @param cell - TH Element
- * @description th 엘리먼트를 td 엘리먼트로 변경한다
  */
 export function turnThIntoTd(cell) {
   const td = document.createElement("td")
@@ -152,10 +117,56 @@ export function turnThIntoTd(cell) {
   td.setAttribute("rowspan", cell.rowSpan)
   td.setAttribute("colspan", cell.colSpan)
   td.setAttribute("class", cell.className)
+  td.style.setProperty("display", cell.style.display === "none" ? "none" : null)
 
   while (cell.firstChild) {
     td.appendChild(cell.firstChild)
   }
 
   cell.parentNode.replaceChild(td, cell)
+}
+
+export function hideCell(cell) {
+  cell.colSpan = 1
+  cell.rowSpan = 1
+  cell.style.display = "none"
+  cell.querySelector("." + TableCSS.inputField).contentEditable = false
+}
+
+export function showHiddenCell(cell) {
+  cell.colSpan = 1
+  cell.rowSpan = 1
+  cell.style.removeProperty("display")
+  cell.querySelector("." + TableCSS.inputField).contentEditable = true
+}
+
+/**
+ * 커서의 인덱스를 반환합니다.
+ * https://stackoverflow.com/questions/4811822/get-a-ranges-start-and-end-offsets-relative-to-its-parent-container/4812022#4812022
+ *
+ * @param {HTMLElement} element
+ * @returns Number
+ */
+export function getCaretCharacterOffsetWithin(element) {
+  var caretOffset = 0
+  var doc = element.ownerDocument || element.document
+  var win = doc.defaultView || doc.parentWindow
+  var sel
+  if (typeof win.getSelection != "undefined") {
+    sel = win.getSelection()
+    if (sel.rangeCount > 0) {
+      var range = win.getSelection().getRangeAt(0)
+      var preCaretRange = range.cloneRange()
+      preCaretRange.selectNodeContents(element)
+      preCaretRange.setEnd(range.endContainer, range.endOffset)
+      caretOffset = preCaretRange.toString().length
+    }
+  } else if ((sel = doc.selection) && sel.type != "Control") {
+    var textRange = sel.createRange()
+    var preCaretTextRange = doc.body.createTextRange()
+    preCaretTextRange.moveToElementText(element)
+    preCaretTextRange.setEndPoint("EndToEnd", textRange)
+    caretOffset = preCaretTextRange.text.length
+  }
+  return caretOffset
 }
