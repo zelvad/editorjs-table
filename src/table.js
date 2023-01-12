@@ -427,7 +427,6 @@ export class Table {
     const edgeIndex = this.selectedCell.rowSpan + this.selectedCell.parentNode.rowIndex - 1
     const index = isSelectedCellMerged ? edgeIndex : this.selectedCell.parentNode.rowIndex
     const isLastRow = index === table.rows.length - 1
-    const newRow = table.insertRow(index + 1)
 
     const fillCell = (cell, isFirstColumn) => {
       if (isFirstColumn && this.isColHeaderOn) {
@@ -443,6 +442,8 @@ export class Table {
       this.addRow()
       return
     }
+
+    const newRow = table.insertRow(index + 1)
 
     for (let i = 0; i < table.rows[index].cells.length; i++) {
       const cell = table.rows[index].cells[i]

@@ -42,12 +42,7 @@ export class Shortcuts {
     const caretPosition = getCaretCharacterOffsetWithin(inputField)
 
     if (selectedCell.parentNode.rowIndex === 0) {
-      const currentBlockIndex = this.api.blocks.getCurrentBlockIndex()
-
-      if (currentBlockIndex > 0) {
-        this.api.caret.setToBlock("start", currentBlockIndex - 1)
-      }
-
+      this.api.caret.setToPreviousBlock("end", 0)
       return
     }
 
@@ -81,21 +76,19 @@ export class Shortcuts {
     const selectedCell = this.table.selectedCell
     const inputField = selectedCell.querySelector("." + CSS.inputField)
     const caretPosition = getCaretCharacterOffsetWithin(inputField)
+    const isCurrentCellAtBottom =
+      selectedCell.parentNode.rowIndex + selectedCell.rowSpan - 1 === table.rows.length - 1
 
-    if (selectedCell.parentNode.rowIndex === table.rows.length - 1) {
-      const currentBlockIndex = this.api.blocks.getCurrentBlockIndex()
-      const lastBlockIndex = this.api.blocks.getBlocksCount() - 1
-
-      if (currentBlockIndex === lastBlockIndex) {
-        this.api.caret.setToBlock("start", currentBlockIndex + 1)
-      }
-
+    if (isCurrentCellAtBottom) {
+      this.api.caret.setToNextBlock("start", 0)
       return
     }
 
     if (caretPosition === inputField.textContent.length) {
       const belowCell =
-        table.rows[selectedCell.parentNode.rowIndex + 1].cells[selectedCell.cellIndex]
+        table.rows[selectedCell.parentNode.rowIndex + selectedCell.rowSpan].cells[
+          selectedCell.cellIndex
+        ]
       const belowCellInput = belowCell.querySelector("." + CSS.inputField)
 
       if (belowCell.style.display === "none") {
