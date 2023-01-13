@@ -65,6 +65,18 @@ export class CellMenu {
     return option
   }
 
+  _createUnmergeButton() {
+    const option = document.createElement("button")
+
+    option.textContent = "셀 나누기"
+
+    option.classList.add(CSS.option)
+    option.classList.add(CSS.unmergeOption)
+    option.addEventListener("click", this.unmerge.bind(this))
+
+    return option
+  }
+
   _createAddColumnOnRightButton() {
     const option = document.createElement("button")
 
@@ -246,6 +258,7 @@ export class CellMenu {
     const addColumnOnRightButton = this._createAddColumnOnRightButton.call(this.table)
     const addRowBelowButton = this._createAddRowBelow.call(this.table)
     const mergeButton = this._createMergeButton.call(this.table)
+    const unmergeButton = this._createUnmergeButton.call(this.table)
     const rowRemoveButton = this._createRowRemoveButton.call(this.table)
     const colRemoveButton = this._createColRemoveButton.call(this.table)
 
@@ -255,6 +268,7 @@ export class CellMenu {
     this._cellMenuInner.appendChild(addColumnOnRightButton)
     this._cellMenuInner.appendChild(addRowBelowButton)
     this._cellMenuInner.appendChild(mergeButton)
+    this._cellMenuInner.appendChild(unmergeButton)
     this._cellMenuInner.appendChild(rowRemoveButton)
     this._cellMenuInner.appendChild(colRemoveButton)
   }
@@ -272,10 +286,13 @@ export class CellMenu {
     const openCellMenuButton = event.target.closest("." + CSS.openCellMenuButton)
     const iconBox = openCellMenuButton.querySelector("." + CSS.iconBox)
     const mergeOption = this.container.querySelector("." + CSS.mergeOption)
+    const unmergeOption = this.container.querySelector("." + CSS.unmergeOption)
     const toggleRowHeaderOption = this.container.querySelector("." + CSS.toggleRowHeaderOption)
     const toggleColHeaderOption = this.container.querySelector("." + CSS.toggleColHeaderOption)
     const { top, right } = iconBox.getBoundingClientRect()
     const isMergePossible = this.table.checkIfMergePossible.call(this.table)
+    const isCurrentCellMerged =
+      this.table.selectedCell.colSpan > 1 || this.table.selectedCell.rowSpan > 1
     const isToggleRowHeaderPossible = this.table.selectedCell.parentNode.rowIndex === 0
     const isToggleColHeaderPossible = this.table.selectedCell.cellIndex === 0
 
@@ -309,6 +326,12 @@ export class CellMenu {
       mergeOption.disabled = false
     } else {
       mergeOption.disabled = true
+    }
+
+    if (isCurrentCellMerged) {
+      unmergeOption.style.display = "flex"
+    } else {
+      unmergeOption.style.display = "none"
     }
   }
 
@@ -355,6 +378,7 @@ export const CSS = {
   cellMenuInner: "tc-table__option_table__inner",
   option: "tc-table__option_table__inner__option",
   mergeOption: "merge-option",
+  unmergeOption: "unmerge-option",
   colorOption: "color-option",
   colorPalette: "color-palette",
   colorBlock: "color-block",

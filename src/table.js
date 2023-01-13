@@ -613,6 +613,29 @@ export class Table {
     return everySelectedCells === visibleSelectedCells
   }
 
+  unmerge() {
+    const table = this._table
+    const selectedCell = this.selectedCell
+    const rowIndex = selectedCell.parentNode.rowIndex
+    const cellIndex = selectedCell.cellIndex
+    const rowSpan = selectedCell.rowSpan
+    const colSpan = selectedCell.colSpan
+
+    for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
+      for (let j = cellIndex; j < cellIndex + colSpan; j++) {
+        const cell = table.rows[i].cells[j]
+
+        if (i === rowIndex && j === cellIndex) {
+          cell.colSpan = 1
+          cell.rowSpan = 1
+          continue
+        }
+
+        showHiddenCell(cell)
+      }
+    }
+  }
+
   toggleFirstRowHeader() {
     const table = this._table
     const firstRow = table.rows[0]
