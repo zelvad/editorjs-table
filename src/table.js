@@ -75,6 +75,8 @@ export class Table {
   }
 
   fillButtons = (cell, x, y) => {
+    if (this.readOnly) return
+
     // column
     if (y === 0) {
       // this.createLine.createElem(cell)
