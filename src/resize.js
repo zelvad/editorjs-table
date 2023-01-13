@@ -4,15 +4,18 @@ const CSS = {
   resizedColumn: "tc-table__resize_column",
 }
 
+const MIN_COL_WIDTH = 50
+
 export class Resize {
   constructor(table) {
     this.table = table
-    this.init()
-
-    this.active = null
-    this.activeIndex = 0
+    this.resizeStick = null
+    this.resizeStickIndex = 0
+    this.isLastResizeStick = false
     this.startX = 0
     this.x = 0
+
+    this.init()
   }
 
   init() {
@@ -23,7 +26,6 @@ export class Resize {
   createElem(cell) {
     if (!cell.querySelector(`.${CSS.resizedColumn}`)) {
       const elem = create("div", [CSS.resizedColumn])
-      elem.dataset.index = cell.cellIndex
       elem.addEventListener("mousedown", this.onDragStart, false)
       cell.appendChild(elem)
     }
@@ -40,14 +42,24 @@ export class Resize {
   }
 
   onDragStart = (e) => {
+    const columnCount = this.table.body.rows[0].cells.length
     const parentCellColIndex = e.target.closest("td,th").cellIndex
     const resizeStickIndex = parentCellColIndex - 1
-    this.startX = e.pageX
-    this.active = e.target
-    this.activeIndex = resizeStickIndex
+
+    this.startX = e.clientX
+    this.resizeStick = e.target
+    this.resizeStickIndex = resizeStickIndex
     this.width = this.table.body.offsetWidth
+
+    if (columnCount === parentCellColIndex + 1) {
+      this.isLastResizeStick = true
+    }
+
     const [w1, w2] = this.getWidthCols()
+
+    // 왼쪽 셀 너비
     this.widthFirst = w1
+    // 오른쪽 셀 너비
     this.widthSecond = w2
 
     document.body.style.cursor = "col-resize"
@@ -57,36 +69,41 @@ export class Resize {
   }
 
   onDrag = (e) => {
-    if (this.active) {
-      this.move(e.pageX - this.startX)
+    if (this.resizeStick) {
+      this.move(e.clientX - this.startX)
     }
   }
 
   onDragEnd = () => {
-    this.active = null
+    this.resizeStick = null
+    this.isLastResizeStick = false
     document.body.style.cursor = "auto"
   }
 
   move = (delta) => {
     const [first, second] = this.getCols()
-    let w1 = (this.widthFirst / this.width + delta / this.width) * 100
-    let w2 = (this.widthSecond / this.width - delta / this.width) * 100
+    const w1 = this.widthFirst + delta
+    const w2 = this.widthSecond - delta
 
-    if (w1 >= 5 && w2 >= 5) {
-      first.style.width = `${w1}%`
-      second.style.width = `${w2}%`
+    if (w1 >= MIN_COL_WIDTH) {
+      first.style.width = `${w1}px`
+
+      if (w1 >= MIN_COL_WIDTH && w2 >= MIN_COL_WIDTH) {
+        second.style.width = `${w2}px`
+      }
     }
   }
 
   getCols = () => {
     const cols = this.table.colgroup.children
-    const first = cols[this.activeIndex]
-    const second = cols[this.activeIndex + 1]
+    const first = cols[this.resizeStickIndex]
+    const second = cols[this.resizeStickIndex + 1]
     return [first, second]
   }
 
-  parseWidth = (e) => {
-    return (Number.parseFloat(e.style.width) / 100) * this.width
+  parseWidth = (col) => {
+    const width = col.style.width || col.getBoundingClientRect().width
+    return Number.parseFloat(width)
   }
 
   getWidthCols = () => {

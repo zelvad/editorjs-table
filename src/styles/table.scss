@@ -7,6 +7,9 @@
   height: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  col {
+    min-width: 50px;
+  }
   tbody th {
     background-color: #f9f9f9;
     text-align: initial;
@@ -16,7 +19,7 @@
     padding: 40px 16px 16px 40px;
     margin: -24px 0 0 -24px;
     position: relative;
-    overflow: hidden;
+    overflow: auto;
     &_readonly {
       padding: 16px 0;
       margin: 0;

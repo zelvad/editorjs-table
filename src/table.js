@@ -39,6 +39,7 @@ export class Table {
    * @param {boolean} readOnly - read-only mode flag
    */
   constructor(api, readOnly) {
+    this.api = api
     this.readOnly = readOnly
     this._numberOfColumns = 0
     this._numberOfRows = 0
@@ -73,17 +74,10 @@ export class Table {
     })
   }
 
-  columnSizeReCalc() {
-    const cols = this.colgroup.children
-    for (let i = 0; i < cols.length; i += 1) {
-      cols[i].style.width = `${100 / cols.length}%`
-    }
-  }
-
   fillButtons = (cell, x, y) => {
     // column
     if (y === 0) {
-      this.createLine.createElem(cell)
+      // this.createLine.createElem(cell)
     }
 
     if (x !== 0) {
@@ -101,7 +95,7 @@ export class Table {
 
     // row
     if (x === 0) {
-      this.createLine.createElem(cell, 1)
+      // this.createLine.createElem(cell, 1)
     }
   }
 
@@ -130,7 +124,9 @@ export class Table {
   }
 
   insertCol(index) {
-    this.colgroup.insertBefore(create("col", [], { span: 1 }), this.colgroup.children[index])
+    const col = create("col", [], { span: 1 })
+
+    this.colgroup.insertBefore(col, this.colgroup.children[index])
   }
 
   removeCol(index) {
@@ -216,7 +212,6 @@ export class Table {
     }
 
     if (!this.readOnly) {
-      this.columnSizeReCalc()
       this.updateButtons()
     }
   }
@@ -309,8 +304,7 @@ export class Table {
     }
 
     this._numberOfColumns++
-    this.insertCol(index)
-    this.columnSizeReCalc()
+    this.insertCol(index + 1)
     this.updateButtons()
   }
 
@@ -397,7 +391,6 @@ export class Table {
 
     if (!this.readOnly) {
       this.removeCol(index)
-      this.columnSizeReCalc()
       this.updateButtons()
     }
   }
