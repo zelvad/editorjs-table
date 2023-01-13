@@ -1,6 +1,5 @@
 import { create } from "./documentUtils"
 import chevronDown from "./img/chevron-down.svg"
-import { CSS as SelectLineCSS } from "./selectLine"
 
 const COLORS = [
   "#ffffff",
@@ -28,35 +27,10 @@ const COLORS = [
 
 export class CellMenu {
   constructor(table) {
-    const cellMenuInner = document.createElement("div")
-    cellMenuInner.classList.add(CSS.cellMenuInner)
-
-    const cellMenu = document.createElement("div")
-    cellMenu.appendChild(cellMenuInner)
-    cellMenu.classList.add(CSS.cellMenu)
-
-    const colorPalette = document.createElement("div")
-    colorPalette.classList.add(CSS.colorPalette)
-
-    COLORS.forEach((color) => {
-      const colorBlock = document.createElement("figure")
-      colorBlock.style.backgroundColor = color
-      colorBlock.classList.add(CSS.colorBlock)
-      colorBlock.setAttribute("data-color", color)
-      colorPalette.appendChild(colorBlock)
-    })
-
     this.table = table
-    this.container = cellMenu
-    this.colorPalette = colorPalette
-    this._cellMenuInner = cellMenuInner
 
+    this._init()
     this._fillCellMenu()
-
-    this._cellMenuInner.addEventListener("click", this._catchClickEventDelegation.bind(this))
-    this.colorPalette.addEventListener("click", this._changeCellColor.bind(this))
-    this.colorPalette.addEventListener("mouseenter", this._showColorPalette.bind(this))
-    this.colorPalette.addEventListener("mouseleave", this._hideColorPalette.bind(this))
   }
 
   createElem(cell) {
@@ -155,6 +129,7 @@ export class CellMenu {
       })
     }
 
+    // 삭제할 행을 표시해주는 기능을 추가한다
     // https://stackoverflow.com/questions/49106088/changing-pseudo-element-style-from-javascript
     const highlightCells = (event) => {
       // const focusedCell = this.selectedCell;
@@ -174,7 +149,7 @@ export class CellMenu {
 
     option.classList.add(CSS.option)
     option.addEventListener("click", removeSelectedRows.bind(this))
-    option.addEventListener("mouseenter", highlightCells.bind(this))
+    // option.addEventListener("mouseenter", highlightCells.bind(this))
 
     return option
   }
@@ -335,6 +310,35 @@ export class CellMenu {
     } else {
       mergeOption.disabled = true
     }
+  }
+
+  _init() {
+    const cellMenuInner = document.createElement("div")
+    cellMenuInner.classList.add(CSS.cellMenuInner)
+
+    const cellMenu = document.createElement("div")
+    cellMenu.appendChild(cellMenuInner)
+    cellMenu.classList.add(CSS.cellMenu)
+
+    const colorPalette = document.createElement("div")
+    colorPalette.classList.add(CSS.colorPalette)
+
+    COLORS.forEach((color) => {
+      const colorBlock = document.createElement("figure")
+      colorBlock.style.backgroundColor = color
+      colorBlock.classList.add(CSS.colorBlock)
+      colorBlock.setAttribute("data-color", color)
+      colorPalette.appendChild(colorBlock)
+    })
+
+    this.container = cellMenu
+    this.colorPalette = colorPalette
+    this._cellMenuInner = cellMenuInner
+
+    this._cellMenuInner.addEventListener("click", this._catchClickEventDelegation.bind(this))
+    this.colorPalette.addEventListener("click", this._changeCellColor.bind(this))
+    this.colorPalette.addEventListener("mouseenter", this._showColorPalette.bind(this))
+    this.colorPalette.addEventListener("mouseleave", this._hideColorPalette.bind(this))
   }
 
   _catchClickEventDelegation(event) {
