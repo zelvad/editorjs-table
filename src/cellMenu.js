@@ -26,8 +26,10 @@ const COLORS = [
 ]
 
 export class CellMenu {
-  constructor(table) {
+  constructor(table, config, api) {
     this.table = table
+    this._colors = config.colors || COLORS
+    this.api = api
 
     this._init()
     this._fillCellMenu()
@@ -56,7 +58,7 @@ export class CellMenu {
   _createMergeButton() {
     const option = document.createElement("button")
 
-    option.textContent = "셀 합치기"
+    option.textContent = this.api.i18n.t("Merge Cells")
 
     option.classList.add(CSS.option)
     option.classList.add(CSS.mergeOption)
@@ -68,7 +70,7 @@ export class CellMenu {
   _createUnmergeButton() {
     const option = document.createElement("button")
 
-    option.textContent = "셀 나누기"
+    option.textContent = this.api.i18n.t("Divide Cell")
 
     option.classList.add(CSS.option)
     option.classList.add(CSS.unmergeOption)
@@ -80,7 +82,7 @@ export class CellMenu {
   _createAddColumnOnRightButton() {
     const option = document.createElement("button")
 
-    option.textContent = "오른쪽에 열 삽입"
+    option.textContent = this.api.i18n.t("Insert Column On Right")
 
     option.classList.add(CSS.option)
     option.addEventListener("click", this.addColumnOnRight.bind(this))
@@ -91,7 +93,7 @@ export class CellMenu {
   _createAddRowBelow() {
     const option = document.createElement("button")
 
-    option.textContent = "아래에 행 삽입"
+    option.textContent = this.api.i18n.t("Insert Row Below")
 
     option.classList.add(CSS.option)
     option.addEventListener("click", this.addRowBelow.bind(this))
@@ -116,7 +118,7 @@ export class CellMenu {
       })
     }
 
-    option.textContent = "열(↕) 삭제"
+    option.textContent = this.api.i18n.t("Remove Column")
 
     option.classList.add(CSS.option)
     option.addEventListener("click", removeSelectedCols.bind(this))
@@ -157,7 +159,7 @@ export class CellMenu {
       // }
     }
 
-    option.textContent = "행(↔) 삭제"
+    option.textContent = this.api.i18n.t("Remove Row")
 
     option.classList.add(CSS.option)
     option.addEventListener("click", removeSelectedRows.bind(this))
@@ -169,7 +171,7 @@ export class CellMenu {
   _createColorPickerButton() {
     const option = document.createElement("button")
 
-    option.textContent = "셀 배경"
+    option.textContent = this.api.i18n.t("Cell Color")
 
     option.classList.add(CSS.option)
     option.classList.add(CSS.colorOption)
@@ -192,7 +194,8 @@ export class CellMenu {
 
   _changeCellColor(event) {
     if (event.target.closest("." + CSS.colorBlock)) {
-      const color = event.target.dataset.color === COLORS[0] ? null : event.target.dataset.color
+      const color =
+        event.target.dataset.color === this._colors[0] ? null : event.target.dataset.color
       const selectedRows = this.table.selectedRows
       const selectedCols = this.table.selectedCols
       const selectedCell = this.table.selectedCell
@@ -228,7 +231,7 @@ export class CellMenu {
   _createToggleFirstRowHeaderButton() {
     const option = document.createElement("button")
 
-    option.textContent = "헤더 행"
+    option.textContent = this.api.i18n.t("Header Row")
 
     option.classList.add(CSS.option)
     option.classList.add(CSS.toggleRowHeaderOption)
@@ -241,7 +244,7 @@ export class CellMenu {
   _createToggleFirstColHeaderButton() {
     const option = document.createElement("button")
 
-    option.textContent = "헤더 열"
+    option.textContent = this.api.i18n.t("Header Column")
 
     option.classList.add(CSS.option)
     option.classList.add(CSS.toggleColHeaderOption)
@@ -346,7 +349,7 @@ export class CellMenu {
     const colorPalette = document.createElement("div")
     colorPalette.classList.add(CSS.colorPalette)
 
-    COLORS.forEach((color) => {
+    this._colors.forEach((color) => {
       const colorBlock = document.createElement("figure")
       colorBlock.style.backgroundColor = color
       colorBlock.classList.add(CSS.colorBlock)

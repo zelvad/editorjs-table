@@ -38,7 +38,7 @@ export class Table {
    *
    * @param {boolean} readOnly - read-only mode flag
    */
-  constructor(api, readOnly) {
+  constructor(config, api, readOnly) {
     this.api = api
     this.readOnly = readOnly
     this._numberOfColumns = 0
@@ -56,7 +56,7 @@ export class Table {
     this.selectLine = new SelectLine(this)
     this.createLine = new CreateLine(this)
     this.imageUpload = new ImageUpload(this)
-    this.cellMenu = new CellMenu(this)
+    this.cellMenu = new CellMenu(this, config, api)
     this.shortcuts = new Shortcuts(this, api)
 
     this._table.appendChild(this.cellMenu.container)

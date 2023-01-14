@@ -25,7 +25,7 @@ export class TableConstructor {
     /** creating table */
 
     try {
-      this._table = new Table(api, readOnly)
+      this._table = new Table(config, api, readOnly)
       this._drawTable(data, config)
     } catch (e) {
       console.log(e)
