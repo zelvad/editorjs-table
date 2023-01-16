@@ -1,7 +1,7 @@
-const TableConstructor = require('./tableConstructor').TableConstructor;
-const svgIcon = require('./img/toolboxIcon.svg');
-const borderIcon = require('./img/border.svg');
-const { CSS: imageCSS } = require('./imageUpload');
+const TableConstructor = require("./tableConstructor").TableConstructor
+const svgIcon = require("./img/toolboxIcon.svg")
+const borderIcon = require("./img/border.svg")
+const { CSS: imageCSS } = require("./imageUpload")
 
 /**
  *  Tool for table's creating
@@ -16,7 +16,7 @@ class Table {
    * @returns {boolean}
    */
   static get isReadOnlySupported() {
-    return true;
+    return true
   }
 
   /**
@@ -26,7 +26,7 @@ class Table {
    * @public
    */
   static get enableLineBreaks() {
-    return true;
+    return true
   }
 
   /**
@@ -36,7 +36,7 @@ class Table {
     return {
       br: true,
       mark: true,
-    };
+    }
   }
 
   /**
@@ -49,8 +49,8 @@ class Table {
   static get toolbox() {
     return {
       icon: svgIcon,
-      title: 'Table',
-    };
+      title: "Table",
+    }
   }
 
   /**
@@ -62,18 +62,18 @@ class Table {
    * @param {boolean} readOnly - read-only mode flag
    */
   constructor({ data, config, api, readOnly }) {
-    this.api = api;
-    this.readOnly = readOnly;
+    this.api = api
+    this.readOnly = readOnly
 
-    this._tableConstructor = new TableConstructor(data, config, api, readOnly);
-  
+    this._tableConstructor = new TableConstructor(data, config, api, readOnly)
+
     this._CSS = {
-      input: 'tc-table__inp',
+      input: "tc-table__inp",
       settingsButton: this.api.styles.settingsButton,
       settingsButtonActive: this.api.styles.settingsButtonActive,
-    };
+    }
 
-    this.borderActive = data.settings?.withBorder;
+    this.borderActive = data.settings?.withBorder
   }
 
   /**
@@ -83,7 +83,7 @@ class Table {
    * @public
    */
   render() {
-    return this._tableConstructor.htmlElement;
+    return this._tableConstructor.htmlElement
   }
 
   /**
@@ -94,54 +94,42 @@ class Table {
    * @returns {TableData} - saved data
    */
   save(toolsContent) {
-    const table = toolsContent.querySelector('table');
-    const data = [];
-    const rows = table.rows;
-    const sizes = [];
-    const width = table.offsetWidth;
+    const table = toolsContent.querySelector("table")
+    const colgroup = []
+    const rows = []
 
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const cols = Array.from(row.cells);
-      const inputs = cols.map(cell => cell.querySelector('.' + this._CSS.input));
-      const images = cols.map(cell => cell.querySelector('.' + imageCSS.image));
-      const result = cols.map((item, i) => {
-        if (inputs[i]) return { type: 'input', text: inputs[i].innerHTML }
-        else if (images[i]) return { type: 'image', src: images[i].getAttribute('src') }
-        return undefined;
-      })
-      // const isWorthless = inputs.every(this._isEmpty);
-      
-      // if (isWorthless) {
-      //   continue;
-      // }
-      
-      if (i === 0) {
-        cols.forEach(c => {
-          sizes.push(c.offsetWidth / width);
-        })
-      }
-      
-      data.push(result.map((res, i) => {
-        if (res) {
-          switch (res.type) {
-            case 'input': {
-              return res.text;
-            }
-            case 'image': {
-              return res;
-            }
-            default:
-          }
+    for (let i = 0; i < table.rows.length; i++) {
+      const row = table.rows[i]
+      const rowData = []
+
+      for (let j = 0; j < row.cells.length; j++) {
+        const cell = row.cells[j]
+        const data = {
+          text: cell.querySelector("." + this._CSS.input).innerHTML,
+          colspan: cell.colSpan,
+          rowspan: cell.rowSpan,
+          display: cell.style.display === "none" ? false : true,
+          bgColor: cell.style.backgroundColor,
+          isHeader: cell.tagName === "TH",
         }
-        return ""
-      }));
+
+        rowData.push(data)
+      }
+
+      rows.push(rowData)
     }
 
+    table.querySelectorAll("col").forEach((col) => {
+      colgroup.push({
+        span: col.span,
+        width: col.style.width,
+      })
+    })
+
     return {
-      columnWidths: sizes,
-      content: data,
-    };
+      rows,
+      colgroup,
+    }
   }
 
   /**
@@ -150,64 +138,67 @@ class Table {
    * @returns {boolean}
    */
   _isEmpty(input) {
-    return !input.textContent.trim();
+    return !input.textContent.trim()
   }
-  
+
   toggleBorder = () => {
-    this.borderActive = !this.borderActive;
-    this.toggleBorderButton.classList.toggle(this._CSS.settingsButtonActive, this.borderActive);
-    this._tableConstructor._table._element.classList.toggle(this._tableConstructor._CSS.withBorder, this.borderActive)
+    this.borderActive = !this.borderActive
+    this.toggleBorderButton.classList.toggle(this._CSS.settingsButtonActive, this.borderActive)
+    this._tableConstructor._table._element.classList.toggle(
+      this._tableConstructor._CSS.withBorder,
+      this.borderActive
+    )
   }
-  
+
   /**
    * Create Block's settings block
    *
    * @returns {HTMLElement}
    */
   renderSettings() {
-    const holder = document.createElement('DIV');
-    
+    const holder = document.createElement("DIV")
+
     /** Add border toggle */
-    const toggleBorderButton = document.createElement('SPAN');
-    
-    toggleBorderButton.classList.add(this._CSS.settingsButton);
-    
+    const toggleBorderButton = document.createElement("SPAN")
+
+    toggleBorderButton.classList.add(this._CSS.settingsButton)
+
     /**
      * Highlight current level button
      */
     if (this.borderActive) {
-      toggleBorderButton.classList.add(this._CSS.settingsButtonActive);
+      toggleBorderButton.classList.add(this._CSS.settingsButtonActive)
     }
-    
+
     /**
      * Add SVG icon
      */
-    toggleBorderButton.innerHTML = borderIcon;
-    
+    toggleBorderButton.innerHTML = borderIcon
+
     /**
      * Save level to its button
      */
-    toggleBorderButton.dataset.active = this.borderActive;
-    
+    toggleBorderButton.dataset.active = this.borderActive
+
     /**
      * Set up click handler
      */
-    toggleBorderButton.addEventListener('click', () => {
-      this.toggleBorder();
-    });
-    
+    toggleBorderButton.addEventListener("click", () => {
+      this.toggleBorder()
+    })
+
     /**
      * Append settings button to holder
      */
     // holder.appendChild(toggleBorderButton);
-    
+
     /**
      * Save settings buttons
      */
-    this.toggleBorderButton = toggleBorderButton;
-    
-    return holder;
+    this.toggleBorderButton = toggleBorderButton
+
+    return holder
   }
 }
 
-module.exports = Table;
+module.exports = Table

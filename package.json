@@ -1,5 +1,5 @@
 {
-  "name": "@medistream/editorjs-resizable-table",
+  "name": "@medistream/editorjs-table",
   "description": "Resizable table for Editor.js",
   "version": "0.1.22",
   "license": "MIT",
@@ -32,6 +32,7 @@
     "eslint-config-codex": "^1.6.1",
     "multer": "^1.4.2",
     "node-sass": "^5.0.0",
+    "prettier": "^2.8.2",
     "request": "^2.88.2",
     "sass": "^1.32.12",
     "sass-loader": "^10.1.1",
