@@ -59,9 +59,6 @@ export class Table {
     this.cellMenu = new CellMenu(this, config, api)
     this.shortcuts = new Shortcuts(this, api)
 
-    this._table.appendChild(this.cellMenu.container)
-    this._table.appendChild(this.cellMenu.colorPalette)
-
     if (!this.readOnly) {
       this._hangEvents()
     }

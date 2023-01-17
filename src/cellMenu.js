@@ -178,9 +178,10 @@ export class CellMenu {
 
     option.addEventListener("mouseenter", (event) => {
       const { top, left } = option.getBoundingClientRect()
+      const scrollY = Math.floor(window.scrollY)
       const { width } = this.colorPalette.getBoundingClientRect()
 
-      this.colorPalette.style.top = `${top}px`
+      this.colorPalette.style.top = `${Math.floor(top) + scrollY}px`
       this.colorPalette.style.left = `${left - width}px`
       this.colorPalette.style.visibility = "visible"
     })
@@ -293,6 +294,7 @@ export class CellMenu {
     const toggleRowHeaderOption = this.container.querySelector("." + CSS.toggleRowHeaderOption)
     const toggleColHeaderOption = this.container.querySelector("." + CSS.toggleColHeaderOption)
     const { top, right } = iconBox.getBoundingClientRect()
+    const scrollY = Math.floor(window.scrollY)
     const isMergePossible = this.table.checkIfMergePossible.call(this.table)
     const isCurrentCellMerged =
       this.table.selectedCell.colSpan > 1 || this.table.selectedCell.rowSpan > 1
@@ -301,7 +303,7 @@ export class CellMenu {
 
     iconBox.classList.add("activated")
 
-    this.container.style.top = `${top}px`
+    this.container.style.top = `${Math.floor(top) + scrollY}px`
     this.container.style.left = `${right + 4}px`
     this.container.style.visibility = "visible"
 
@@ -365,6 +367,9 @@ export class CellMenu {
     this.colorPalette.addEventListener("click", this._changeCellColor.bind(this))
     this.colorPalette.addEventListener("mouseenter", this._showColorPalette.bind(this))
     this.colorPalette.addEventListener("mouseleave", this._hideColorPalette.bind(this))
+
+    document.body.appendChild(cellMenu)
+    document.body.appendChild(colorPalette)
   }
 
   _catchClickEventDelegation(event) {
@@ -383,7 +388,7 @@ export const CSS = {
   mergeOption: "merge-option",
   unmergeOption: "unmerge-option",
   colorOption: "color-option",
-  colorPalette: "color-palette",
+  colorPalette: "tc-table__color-palette",
   colorBlock: "color-block",
   toggleRowHeaderOption: "toggle-row-header-option",
   toggleColHeaderOption: "toggle-col-header-option",

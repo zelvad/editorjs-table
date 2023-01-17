@@ -268,7 +268,7 @@
     }
   }
   &__option_table {
-    position: fixed;
+    position: absolute;
     top: 0px;
     left: 0px;
     color: var(--ds-text, #091e42);
@@ -335,8 +335,8 @@
       }
     }
   }
-  .color-palette {
-    position: fixed;
+  &__color-palette {
+    position: absolute;
     top: 0px;
     left: 0px;
     background-color: #ffffff;
