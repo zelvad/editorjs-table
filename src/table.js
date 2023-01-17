@@ -940,7 +940,6 @@ export class Table {
     }
 
     this.deselectCells()
-    this.cellMenu.hideCellMenu()
 
     document.addEventListener("mousemove", handleMouseMove)
     document.addEventListener("mouseup", handleMouseUp)

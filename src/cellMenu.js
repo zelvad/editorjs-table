@@ -47,7 +47,9 @@ export class CellMenu {
     cell.appendChild(openCellMenuButton)
   }
 
-  hideCellMenu() {
+  _hideCellMenu(event) {
+    if (event.target.closest("." + CSS.openCellMenuButton)) return
+
     this.container.style.visibility = "hidden"
 
     this.table.body.querySelectorAll("." + CSS.iconBox).forEach((iconBox) => {
@@ -202,7 +204,7 @@ export class CellMenu {
       const selectedCell = this.table.selectedCell
 
       this.colorPalette.style.visibility = "hidden"
-      this.hideCellMenu()
+      this._hideCellMenu()
 
       if (!selectedRows.length && !selectedCols.length) {
         selectedCell.style.backgroundColor = color
@@ -370,11 +372,12 @@ export class CellMenu {
 
     document.body.appendChild(cellMenu)
     document.body.appendChild(colorPalette)
+    document.addEventListener("click", this._hideCellMenu.bind(this))
   }
 
   _catchClickEventDelegation(event) {
     if (event.target.classList.contains(CSS.option)) {
-      this.hideCellMenu()
+      this._hideCellMenu()
     }
   }
 }
