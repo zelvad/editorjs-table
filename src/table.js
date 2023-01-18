@@ -584,7 +584,7 @@ export class Table {
     const table = this._table
     const everyCell = table.querySelectorAll("td,th")
     const selectedCells = Array.from(everyCell).filter((cell) =>
-      cell.classList.contains("selected")
+      cell.classList.contains(CSS.selected)
     )
 
     const topLeftCell = selectedCells[0]
@@ -623,7 +623,7 @@ export class Table {
       for (let j = 0; j < row.cells.length; j++) {
         const cell = row.cells[j]
 
-        if (cell.classList.contains("selected")) {
+        if (cell.classList.contains(CSS.selected)) {
           everySelectedCells += 1
 
           if (cell.style.display !== "none") {
@@ -954,7 +954,7 @@ export class Table {
         for (let j = startColIndex; j <= currentColIndex + additionalCol; j++) {
           const cell = cellsInRow[j]
 
-          cell.classList.add("selected")
+          cell.classList.add(CSS.selected)
         }
 
         this.selectedRows.push(i)

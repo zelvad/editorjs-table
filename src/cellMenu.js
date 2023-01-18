@@ -204,7 +204,7 @@ export class CellMenu {
       const selectedCell = this.table.selectedCell
 
       this.colorPalette.style.visibility = "hidden"
-      this._hideCellMenu()
+      this._hideCellMenu(event)
 
       if (!selectedRows.length && !selectedCols.length) {
         selectedCell.style.backgroundColor = color
@@ -377,7 +377,7 @@ export class CellMenu {
 
   _catchClickEventDelegation(event) {
     if (event.target.classList.contains(CSS.option)) {
-      this._hideCellMenu()
+      this._hideCellMenu(event)
     }
   }
 }

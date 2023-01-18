@@ -18,7 +18,7 @@ export class SelectLine {
      */
     this.table = table
 
-    this.removeButton = this._createRemoveButton()
+    this.removeButton = this._createLineRemoveButton()
   }
 
   /**
@@ -81,6 +81,10 @@ export class SelectLine {
     })
   }
 
+  hideLineRemoveButton() {
+    this.removeButton.style.visibility = "hidden"
+  }
+
   /**
    * 선택된 줄의 첫 번째 셀을 포커스 합니다.
    *
@@ -102,7 +106,7 @@ export class SelectLine {
    *
    * @private
    */
-  _createRemoveButton() {
+  _createLineRemoveButton() {
     const lineRemoveButton = create("button", [CSS.removeButton])
     const iconContainer = create("div")
 
@@ -155,7 +159,7 @@ export class SelectLine {
       this.table.selectedRows.length === this.table.body.rows.length
 
     if (isEveryCellSelected) {
-      this._hideLineRemoveButton()
+      this.hideLineRemoveButton()
       return
     }
 
@@ -199,13 +203,6 @@ export class SelectLine {
       this.removeButton.style.visibility = "visible"
       this.removeButton.setAttribute("data-direction", direction)
     }
-  }
-
-  /**
-   * @private
-   */
-  _hideLineRemoveButton() {
-    this.removeButton.style.visibility = "hidden"
   }
 
   /**
