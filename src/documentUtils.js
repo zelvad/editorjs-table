@@ -130,6 +130,7 @@ export function hideCell(cell) {
   cell.colSpan = 1
   cell.rowSpan = 1
   cell.style.display = "none"
+  cell.setAttribute("data-visibility", "hidden")
   cell.querySelector("." + TableCSS.inputField).contentEditable = false
 }
 
@@ -137,6 +138,7 @@ export function showHiddenCell(cell) {
   cell.colSpan = 1
   cell.rowSpan = 1
   cell.style.removeProperty("display")
+  cell.removeAttribute("data-visibility")
   cell.querySelector("." + TableCSS.inputField).contentEditable = true
 }
 

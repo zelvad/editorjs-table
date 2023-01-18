@@ -50,6 +50,7 @@ export class Table {
     this.colgroup = this._table.querySelector("colgroup")
     this.selectedRows = []
     this.selectedCols = []
+    this.visibleCells = []
     this.isRowHeaderOn = false
     this.isColHeaderOn = false
 
@@ -174,6 +175,7 @@ export class Table {
         }
         if (display === false) {
           newCell.style.display = "none"
+          newCell.setAttribute("data-visibility", "hidden")
           newCell.querySelector("." + CSS.inputField).contentEditable = false
         }
       })
