@@ -882,6 +882,10 @@ export class Table {
       this.shortcuts.handleEnterKeyPress(event)
       return
     }
+    if (event.key === "Tab" && event.shiftKey) {
+      this.shortcuts.handleShiftTabKeyPress(event)
+      return
+    }
     if (event.key === "Tab") {
       this.shortcuts.handleTabKeyPress(event)
       return
