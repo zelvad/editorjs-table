@@ -19,9 +19,11 @@
     padding: 40px 16px 16px 40px;
     margin: -24px 0 0 -24px;
     position: relative;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     &_readonly {
-      overflow: auto;
+      overflow-x: auto;
+      overflow-y: hidden;
       padding: 16px 0;
       margin: 0;
     }
@@ -65,34 +67,38 @@
   &__add_row_button,
   &__add_column_button {
     background-color: #ececec;
-    height: 13px;
-    bottom: 0;
-    width: calc(100% - 56px);
     position: absolute;
     z-index: 1;
-    border: 1px solid black;
     cursor: pointer;
+    border: 1px solid black;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     transition: opacity 0.2s ease;
     box-sizing: border-box;
+    opacity: 0;
     &:after {
       content: "+";
       color: #4a525f;
     }
     &:hover {
       background-color: #4a525f;
+      opacity: 1;
       &:after {
         color: #fff;
       }
     }
   }
+  &__add_column_button {
+    height: 13px;
+    bottom: -4px;
+    width: calc(100% - 36px);
+  }
   &__add_row_button {
-    height: calc(100% - 56px);
+    height: calc(100% - 66px);
     width: 12px;
-    right: 0;
+    right: -5px;
     top: 40px;
   }
   &__add_row,

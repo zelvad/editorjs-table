@@ -1,6 +1,6 @@
 import "./styles/table-constructor.scss"
 import { create } from "./documentUtils"
-import { Table } from "./table"
+import { Table, CSS as TableCSS } from "./table"
 
 /**
  * Entry point. Controls table and give API to user
@@ -42,6 +42,10 @@ export class TableConstructor {
     /** Activated elements */
     this._hoveredCell = null
     this._hoveredCellSide = null
+
+    if (!this.readOnly) {
+      this._attachAddRowColumnButton()
+    }
   }
 
   /**
@@ -92,5 +96,24 @@ export class TableConstructor {
       rows: rows,
       cols: cols,
     }
+  }
+
+  _attachAddRowColumnButton() {
+    const addRowButton = create("div", [TableCSS.addRowButton])
+    const addColumnButton = create("div", [TableCSS.addColumnButton])
+
+    addRowButton.addEventListener(
+      "click",
+      () => this._table.addColumn(this._table._numberOfColumns),
+      true
+    )
+    addColumnButton.addEventListener(
+      "click",
+      () => this._table.addRow(this._table._numberOfRows),
+      true
+    )
+
+    this._container.appendChild(addRowButton)
+    this._container.appendChild(addColumnButton)
   }
 }
