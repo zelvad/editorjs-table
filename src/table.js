@@ -27,6 +27,7 @@ export const CSS = {
   addRow: "tc-table__add_row",
   addColumnButton: "tc-table__add_column_button",
   addRowButton: "tc-table__add_row_button",
+  selected: "selected",
 }
 
 /**
@@ -65,10 +66,17 @@ export class Table {
   }
 
   deselectCells() {
-    const everyCell = this._table.querySelectorAll("td,th")
+    const everyCell = this._table.querySelectorAll("." + CSS.selected)
+
     everyCell.forEach((cell) => {
-      cell.classList.remove("selected")
+      cell.classList.remove(CSS.selected)
     })
+
+    this.selectLine.dehighlightSelectLines()
+    this.selectLine.hideLineRemoveButton()
+
+    this.selectedRows = []
+    this.selectedCols = []
   }
 
   fillButtons = (cell, x, y) => {
@@ -186,6 +194,24 @@ export class Table {
       this.colgroup.children[i].style.width = width
       this.colgroup.children[i].span = span
     })
+  }
+
+  selectColumn(index) {
+    const table = this._table
+
+    for (let i = 0; i < table.rows.length; i++) {
+      const cell = table.rows[i].cells[index]
+      cell.classList.add(CSS.selected)
+    }
+  }
+
+  selectRow(index) {
+    const table = this._table
+
+    for (let i = 0; i < table.rows[index].cells.length; i++) {
+      const cell = table.rows[index].cells[i]
+      cell.classList.add(CSS.selected)
+    }
   }
 
   /**
@@ -877,6 +903,8 @@ export class Table {
   _mouseDownOnCell(event) {
     if (event.button !== 0) return
     if (event.target.closest("." + CellMenuCSS.openCellMenuButton)) return
+    if (event.target.classList.contains(CSSSelectLine.selectLineCol)) return
+    if (event.target.classList.contains(CSSSelectLine.selectLineRow)) return
     if (!event.target.closest("td,th")) return
 
     const table = this._table
@@ -884,8 +912,6 @@ export class Table {
     const startRowIndex = cell.parentNode.rowIndex
     const startColIndex = cell.cellIndex
     let currentCell = cell
-    this.selectedRows = []
-    this.selectedCols = []
 
     const handleMouseMove = (event) => {
       if (!event.target.closest("td,th")) return
@@ -936,6 +962,21 @@ export class Table {
 
       for (let i = startColIndex; i <= currentColIndex + additionalCol; i++) {
         this.selectedCols.push(i)
+      }
+
+      const isEveryRowSelected = this.selectedRows.length === this._table.rows.length
+      const isEveryColSelected = this.selectedCols.length === this._table.rows[0].cells.length
+
+      if (isEveryRowSelected) {
+        this.selectLine.highlightColSelectLines(this.selectedCols)
+      }
+
+      if (isEveryColSelected) {
+        this.selectLine.highlightRowSelectLines(this.selectedRows)
+      }
+
+      if (!isEveryRowSelected && !isEveryColSelected) {
+        this.selectLine.hideLineRemoveButton()
       }
     }
 
