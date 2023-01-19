@@ -160,7 +160,7 @@ export class Table {
         this.isColHeaderOn = true
       }
 
-      row.forEach(({ text, bgColor, colspan, rowspan, display, isHeader }, i) => {
+      row.forEach(({ content, bgColor, colspan, rowspan, display, isHeader }, i) => {
         const newCell = newRow.insertCell(i)
 
         this._fillCell(newCell)
@@ -168,7 +168,7 @@ export class Table {
         newCell.colSpan = colspan
         newCell.rowSpan = rowspan
         newCell.style.backgroundColor = bgColor
-        newCell.querySelector("." + CSS.inputField).innerHTML = text
+        newCell.querySelector("." + CSS.inputField).innerHTML = content
 
         if (isHeader) {
           turnTdIntoTh(newCell)

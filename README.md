@@ -138,7 +138,7 @@ This Tool returns `data` with following format
     "rows": [
       [
         {
-          "text": "",
+          "content": "",
           "colspan": 1,
           "rowspan": 1,
           "display": true,
@@ -146,7 +146,7 @@ This Tool returns `data` with following format
           "isHeader": false
         },
         {
-          "text": "",
+          "content": "",
           "colspan": 1,
           "rowspan": 1,
           "display": true,
@@ -156,7 +156,7 @@ This Tool returns `data` with following format
       ],
       [
         {
-          "text": "",
+          "content": "",
           "colspan": 1,
           "rowspan": 1,
           "display": true,
@@ -164,7 +164,7 @@ This Tool returns `data` with following format
           "isHeader": false
         },
         {
-          "text": "",
+          "content": "",
           "colspan": 1,
           "rowspan": 1,
           "display": true,
@@ -174,7 +174,7 @@ This Tool returns `data` with following format
       ],
       [
         {
-          "text": "",
+          "content": "",
           "colspan": 1,
           "rowspan": 1,
           "display": true,
@@ -182,7 +182,7 @@ This Tool returns `data` with following format
           "isHeader": false
         },
         {
-          "text": "",
+          "content": "",
           "colspan": 1,
           "rowspan": 1,
           "display": true,
