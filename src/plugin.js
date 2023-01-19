@@ -105,7 +105,7 @@ class Table {
       for (let j = 0; j < row.cells.length; j++) {
         const cell = row.cells[j]
         const data = {
-          text: cell.querySelector("." + this._CSS.input).innerHTML,
+          content: cell.querySelector("." + this._CSS.input).innerHTML,
           colspan: cell.colSpan,
           rowspan: cell.rowSpan,
           display: cell.style.display === "none" ? false : true,

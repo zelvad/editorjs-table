@@ -4,7 +4,7 @@
 
 Resizable Table Block for the [Editor.js](https://editorjs.io).
 
-![](https://res.cloudinary.com/ddulqhyfu/image/upload/v1621586778/github/editorjs-resizable-table-1.png)
+![](https://user-images.githubusercontent.com/108341074/213103362-1f730708-94b8-4504-8c0f-84ce52c410af.png)
 
 ## Installation
 
@@ -116,31 +116,91 @@ var editor = EditorJS({
 
 ## Config Params
 
-| Field | Type     | Description                               |
-| ----- | -------- | ----------------------------------------- |
-| rows  | `number` | initial number of rows. by default `2`    |
-| cols  | `number` | initial number of columns. by default `2` |
+| Field  | Type       | Description                                          |
+| ------ | ---------- | ---------------------------------------------------- |
+| rows   | `number`   | initial number of rows. by default `2`               |
+| cols   | `number`   | initial number of columns. by default `2`            |
+| colors | `string[]` | cell background color options. default preset exists |
 
 ## Output data
 
 This Tool returns `data` with following format
 
-| Field   | Type         | Description                               |
-| ------- | ------------ | ----------------------------------------- |
-| content | `string[][]` | two-dimensional array with table contents |
+| Field    | Type       | Description                                    |
+| -------- | ---------- | ---------------------------------------------- |
+| rows     | `object[]` | array of objects containing data for each cell |
+| colgroup | `object[]` | array of objects containing data for each col  |
 
 ```json
 {
   "type": "table",
   "data": {
-    "content": [
-      ["Kine", "1 pcs", "100$"],
-      ["Pigs", "3 pcs", "200$"],
-      ["Chickens", "12 pcs", "150$"]
+    "rows": [
+      [
+        {
+          "content": "",
+          "colspan": 1,
+          "rowspan": 1,
+          "display": true,
+          "bgColor": "",
+          "isHeader": false
+        },
+        {
+          "content": "",
+          "colspan": 1,
+          "rowspan": 1,
+          "display": true,
+          "bgColor": "",
+          "isHeader": false
+        }
+      ],
+      [
+        {
+          "content": "",
+          "colspan": 1,
+          "rowspan": 1,
+          "display": true,
+          "bgColor": "",
+          "isHeader": false
+        },
+        {
+          "content": "",
+          "colspan": 1,
+          "rowspan": 1,
+          "display": true,
+          "bgColor": "",
+          "isHeader": false
+        }
+      ],
+      [
+        {
+          "content": "",
+          "colspan": 1,
+          "rowspan": 1,
+          "display": true,
+          "bgColor": "",
+          "isHeader": false
+        },
+        {
+          "content": "",
+          "colspan": 1,
+          "rowspan": 1,
+          "display": true,
+          "bgColor": "",
+          "isHeader": false
+        }
+      ]
     ],
-    "settings": {
-      "sizes": [0.5, 0.25, 0.25]
-    }
+    "colgroup": [
+      {
+        "span": 1,
+        "width": ""
+      },
+      {
+        "span": 1,
+        "width": ""
+      }
+    ]
   }
 }
 ```

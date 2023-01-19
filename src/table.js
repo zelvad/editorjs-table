@@ -27,6 +27,7 @@ export const CSS = {
   addRow: "tc-table__add_row",
   addColumnButton: "tc-table__add_column_button",
   addRowButton: "tc-table__add_row_button",
+  selected: "selected",
 }
 
 /**
@@ -49,6 +50,7 @@ export class Table {
     this.colgroup = this._table.querySelector("colgroup")
     this.selectedRows = []
     this.selectedCols = []
+    this.visibleCells = []
     this.isRowHeaderOn = false
     this.isColHeaderOn = false
 
@@ -59,19 +61,23 @@ export class Table {
     this.cellMenu = new CellMenu(this, config, api)
     this.shortcuts = new Shortcuts(this, api)
 
-    this._table.appendChild(this.cellMenu.container)
-    this._table.appendChild(this.cellMenu.colorPalette)
-
     if (!this.readOnly) {
       this._hangEvents()
     }
   }
 
   deselectCells() {
-    const everyCell = this._table.querySelectorAll("td,th")
+    const everyCell = this._table.querySelectorAll("." + CSS.selected)
+
     everyCell.forEach((cell) => {
-      cell.classList.remove("selected")
+      cell.classList.remove(CSS.selected)
     })
+
+    this.selectLine.dehighlightSelectLines()
+    this.selectLine.hideLineRemoveButton()
+
+    this.selectedRows = []
+    this.selectedCols = []
   }
 
   fillButtons = (cell, x, y) => {
@@ -154,7 +160,7 @@ export class Table {
         this.isColHeaderOn = true
       }
 
-      row.forEach(({ text, bgColor, colspan, rowspan, display, isHeader }, i) => {
+      row.forEach(({ content, bgColor, colspan, rowspan, display, isHeader }, i) => {
         const newCell = newRow.insertCell(i)
 
         this._fillCell(newCell)
@@ -162,13 +168,14 @@ export class Table {
         newCell.colSpan = colspan
         newCell.rowSpan = rowspan
         newCell.style.backgroundColor = bgColor
-        newCell.querySelector("." + CSS.inputField).innerHTML = text
+        newCell.querySelector("." + CSS.inputField).innerHTML = content
 
         if (isHeader) {
           turnTdIntoTh(newCell)
         }
         if (display === false) {
           newCell.style.display = "none"
+          newCell.setAttribute("data-visibility", "hidden")
           newCell.querySelector("." + CSS.inputField).contentEditable = false
         }
       })
@@ -189,6 +196,24 @@ export class Table {
       this.colgroup.children[i].style.width = width
       this.colgroup.children[i].span = span
     })
+  }
+
+  selectColumn(index) {
+    const table = this._table
+
+    for (let i = 0; i < table.rows.length; i++) {
+      const cell = table.rows[i].cells[index]
+      cell.classList.add(CSS.selected)
+    }
+  }
+
+  selectRow(index) {
+    const table = this._table
+
+    for (let i = 0; i < table.rows[index].cells.length; i++) {
+      const cell = table.rows[index].cells[i]
+      cell.classList.add(CSS.selected)
+    }
   }
 
   /**
@@ -561,7 +586,7 @@ export class Table {
     const table = this._table
     const everyCell = table.querySelectorAll("td,th")
     const selectedCells = Array.from(everyCell).filter((cell) =>
-      cell.classList.contains("selected")
+      cell.classList.contains(CSS.selected)
     )
 
     const topLeftCell = selectedCells[0]
@@ -600,7 +625,7 @@ export class Table {
       for (let j = 0; j < row.cells.length; j++) {
         const cell = row.cells[j]
 
-        if (cell.classList.contains("selected")) {
+        if (cell.classList.contains(CSS.selected)) {
           everySelectedCells += 1
 
           if (cell.style.display !== "none") {
@@ -754,15 +779,6 @@ export class Table {
       ]),
     ])
 
-    if (!this.readOnly) {
-      // const addRowButton = create("div", [CSS.addRowButton])
-      // const addColumnButton = create("div", [CSS.addColumnButton])
-      // addRowButton.addEventListener("click", () => this.addColumn(this._numberOfColumns), true)
-      // addColumnButton.addEventListener("click", () => this.addRow(this._numberOfRows), true)
-      // wrapper.appendChild(addRowButton)
-      // wrapper.appendChild(addColumnButton)
-    }
-
     return wrapper
   }
 
@@ -859,6 +875,10 @@ export class Table {
       this.shortcuts.handleEnterKeyPress(event)
       return
     }
+    if (event.key === "Tab" && event.shiftKey) {
+      this.shortcuts.handleShiftTabKeyPress(event)
+      return
+    }
     if (event.key === "Tab") {
       this.shortcuts.handleTabKeyPress(event)
       return
@@ -880,6 +900,8 @@ export class Table {
   _mouseDownOnCell(event) {
     if (event.button !== 0) return
     if (event.target.closest("." + CellMenuCSS.openCellMenuButton)) return
+    if (event.target.classList.contains(CSSSelectLine.selectLineCol)) return
+    if (event.target.classList.contains(CSSSelectLine.selectLineRow)) return
     if (!event.target.closest("td,th")) return
 
     const table = this._table
@@ -887,8 +909,6 @@ export class Table {
     const startRowIndex = cell.parentNode.rowIndex
     const startColIndex = cell.cellIndex
     let currentCell = cell
-    this.selectedRows = []
-    this.selectedCols = []
 
     const handleMouseMove = (event) => {
       if (!event.target.closest("td,th")) return
@@ -931,7 +951,7 @@ export class Table {
         for (let j = startColIndex; j <= currentColIndex + additionalCol; j++) {
           const cell = cellsInRow[j]
 
-          cell.classList.add("selected")
+          cell.classList.add(CSS.selected)
         }
 
         this.selectedRows.push(i)
@@ -940,10 +960,24 @@ export class Table {
       for (let i = startColIndex; i <= currentColIndex + additionalCol; i++) {
         this.selectedCols.push(i)
       }
+
+      const isEveryRowSelected = this.selectedRows.length === this._table.rows.length
+      const isEveryColSelected = this.selectedCols.length === this._table.rows[0].cells.length
+
+      if (isEveryRowSelected) {
+        this.selectLine.highlightColSelectLines(this.selectedCols)
+      }
+
+      if (isEveryColSelected) {
+        this.selectLine.highlightRowSelectLines(this.selectedRows)
+      }
+
+      if (!isEveryRowSelected && !isEveryColSelected) {
+        this.selectLine.hideLineRemoveButton()
+      }
     }
 
     this.deselectCells()
-    this.cellMenu.hideCellMenu()
 
     document.addEventListener("mousemove", handleMouseMove)
     document.addEventListener("mouseup", handleMouseUp)

@@ -47,7 +47,9 @@ export class CellMenu {
     cell.appendChild(openCellMenuButton)
   }
 
-  hideCellMenu() {
+  _hideCellMenu(event) {
+    if (event.target.closest("." + CSS.openCellMenuButton)) return
+
     this.container.style.visibility = "hidden"
 
     this.table.body.querySelectorAll("." + CSS.iconBox).forEach((iconBox) => {
@@ -178,9 +180,10 @@ export class CellMenu {
 
     option.addEventListener("mouseenter", (event) => {
       const { top, left } = option.getBoundingClientRect()
+      const scrollY = Math.floor(window.scrollY)
       const { width } = this.colorPalette.getBoundingClientRect()
 
-      this.colorPalette.style.top = `${top}px`
+      this.colorPalette.style.top = `${Math.floor(top) + scrollY}px`
       this.colorPalette.style.left = `${left - width}px`
       this.colorPalette.style.visibility = "visible"
     })
@@ -201,7 +204,7 @@ export class CellMenu {
       const selectedCell = this.table.selectedCell
 
       this.colorPalette.style.visibility = "hidden"
-      this.hideCellMenu()
+      this._hideCellMenu(event)
 
       if (!selectedRows.length && !selectedCols.length) {
         selectedCell.style.backgroundColor = color
@@ -293,6 +296,7 @@ export class CellMenu {
     const toggleRowHeaderOption = this.container.querySelector("." + CSS.toggleRowHeaderOption)
     const toggleColHeaderOption = this.container.querySelector("." + CSS.toggleColHeaderOption)
     const { top, right } = iconBox.getBoundingClientRect()
+    const scrollY = Math.floor(window.scrollY)
     const isMergePossible = this.table.checkIfMergePossible.call(this.table)
     const isCurrentCellMerged =
       this.table.selectedCell.colSpan > 1 || this.table.selectedCell.rowSpan > 1
@@ -301,7 +305,7 @@ export class CellMenu {
 
     iconBox.classList.add("activated")
 
-    this.container.style.top = `${top}px`
+    this.container.style.top = `${Math.floor(top) + scrollY}px`
     this.container.style.left = `${right + 4}px`
     this.container.style.visibility = "visible"
 
@@ -365,11 +369,15 @@ export class CellMenu {
     this.colorPalette.addEventListener("click", this._changeCellColor.bind(this))
     this.colorPalette.addEventListener("mouseenter", this._showColorPalette.bind(this))
     this.colorPalette.addEventListener("mouseleave", this._hideColorPalette.bind(this))
+
+    document.body.appendChild(cellMenu)
+    document.body.appendChild(colorPalette)
+    document.addEventListener("click", this._hideCellMenu.bind(this))
   }
 
   _catchClickEventDelegation(event) {
     if (event.target.classList.contains(CSS.option)) {
-      this.hideCellMenu()
+      this._hideCellMenu(event)
     }
   }
 }
@@ -383,7 +391,7 @@ export const CSS = {
   mergeOption: "merge-option",
   unmergeOption: "unmerge-option",
   colorOption: "color-option",
-  colorPalette: "color-palette",
+  colorPalette: "tc-table__color-palette",
   colorBlock: "color-block",
   toggleRowHeaderOption: "toggle-row-header-option",
   toggleColHeaderOption: "toggle-col-header-option",
