@@ -10,7 +10,6 @@ import {
 import { Resize } from "./resize"
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine"
 import { CreateLine } from "./createLine"
-import { ImageUpload, CSS as imageUploadCSS } from "./imageUpload"
 import "./styles/table.scss"
 import { CellMenu, CSS as CellMenuCSS } from "./cellMenu"
 import { Shortcuts } from "./shortcuts"
@@ -55,7 +54,6 @@ export class Table {
     this.resize = new Resize(this)
     this.selectLine = new SelectLine(this)
     this.createLine = new CreateLine(this)
-    this.imageUpload = new ImageUpload(this)
     this.cellMenu = new CellMenu(this, config, api)
     this.shortcuts = new Shortcuts(this, api)
 
@@ -841,7 +839,6 @@ export class Table {
     const optionButton = this.selectedCell.querySelector("." + CellMenuCSS.openCellMenuButton)
 
     optionButton.style.visibility = "visible"
-    // this.imageUpload.onToggle(true);
   }
 
   /**
@@ -857,8 +854,6 @@ export class Table {
     const optionButton = lastSelectedCell.querySelector("." + CellMenuCSS.openCellMenuButton)
 
     optionButton.style.visibility = "hidden"
-
-    // this.imageUpload.onToggle(false);
   }
 
   /**
