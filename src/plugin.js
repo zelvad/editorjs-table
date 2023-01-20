@@ -1,7 +1,6 @@
 const TableConstructor = require("./tableConstructor").TableConstructor
 const svgIcon = require("./img/toolboxIcon.svg")
 const borderIcon = require("./img/border.svg")
-const { CSS: imageCSS } = require("./imageUpload")
 
 /**
  *  Tool for table's creating
