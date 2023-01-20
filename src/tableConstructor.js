@@ -1,6 +1,7 @@
 import "./styles/table-constructor.scss"
 import { create } from "./documentUtils"
-import { Table, CSS as TableCSS } from "./table"
+import { Table } from "./table"
+import { AddLine } from "./addLine"
 
 /**
  * Entry point. Controls table and give API to user
@@ -26,25 +27,19 @@ export class TableConstructor {
 
     try {
       this._table = new Table(config, api, readOnly)
+      this._addLine = new AddLine(this._table)
       this._drawTable(data, config)
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
 
-    /** creating container around table */
     this._container = create("div", [this._CSS.editor, api.styles.block], null, [
       this._table.htmlElement,
     ])
 
-    /** Создаем кнопку для загрузки изображения */
-    this._table.imageUpload.createElem(this._container)
-
-    /** Activated elements */
-    this._hoveredCell = null
-    this._hoveredCellSide = null
-
     if (!this.readOnly) {
-      this._attachAddRowColumnButton()
+      this._container.appendChild(this._addLine.createAddRowButton())
+      this._container.appendChild(this._addLine.createAddColButton())
     }
   }
 
@@ -96,24 +91,5 @@ export class TableConstructor {
       rows: rows,
       cols: cols,
     }
-  }
-
-  _attachAddRowColumnButton() {
-    const addRowButton = create("div", [TableCSS.addRowButton])
-    const addColumnButton = create("div", [TableCSS.addColumnButton])
-
-    addRowButton.addEventListener(
-      "click",
-      () => this._table.addColumn(this._table._numberOfColumns),
-      true
-    )
-    addColumnButton.addEventListener(
-      "click",
-      () => this._table.addRow(this._table._numberOfRows),
-      true
-    )
-
-    this._container.appendChild(addRowButton)
-    this._container.appendChild(addColumnButton)
   }
 }

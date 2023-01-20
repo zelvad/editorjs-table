@@ -25,8 +25,6 @@ export const CSS = {
   area: "tc-table__area",
   addColumn: "tc-table__add_column",
   addRow: "tc-table__add_row",
-  addColumnButton: "tc-table__add_column_button",
-  addRowButton: "tc-table__add_row_button",
   selected: "selected",
 }
 
