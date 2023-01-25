@@ -1,7 +1,7 @@
 {
   "name": "@medistream/editorjs-table",
   "description": "Resizable table for Editor.js",
-  "version": "0.1.22",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "./dist/bundle.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "build:dev": "webpack serve --mode development",
     "lint": "./node_modules/.bin/eslint"
   },
-  "repository": "https://github.com/8ui/table",
+  "repository": "https://github.com/medistream-team/editorjs-table",
   "author": {
     "name": "Andrew Sokolov",
     "email": "webdeveloper@my.com"
