@@ -12,8 +12,9 @@ export class Shortcuts {
    * @param {KeyboardEvent} event
    */
   handleEnterKeyPress(event) {
-    this._guardEventDelegation(event)
     event.stopPropagation()
+
+    if (this._isComposingKorean(event)) return
 
     document.execCommand("insertLineBreak")
     event.preventDefault()
@@ -24,7 +25,6 @@ export class Shortcuts {
    * @param {KeyboardEvent} event
    */
   handleTabKeyPress(event) {
-    this._guardEventDelegation(event)
     event.stopPropagation()
   }
 
@@ -33,9 +33,10 @@ export class Shortcuts {
    * @param {KeyboardEvent} event
    */
   handleShiftTabKeyPress(event) {
-    this._guardEventDelegation(event)
     event.stopPropagation()
     event.preventDefault()
+
+    if (this._isComposingKorean(event)) return
 
     const table = this.table.body
     const selectedCell = this.table.selectedCell
@@ -72,7 +73,6 @@ export class Shortcuts {
    * @param {KeyboardEvent} event
    */
   handleArrowUpKeyPress(event) {
-    this._guardEventDelegation(event)
     event.stopPropagation()
 
     const table = this.table.body
@@ -108,8 +108,9 @@ export class Shortcuts {
    * @param {KeyboardEvent} event
    */
   handleArrowDownKeyPress(event) {
-    this._guardEventDelegation(event)
     event.stopPropagation()
+
+    if (this._isComposingKorean(event)) return
 
     const table = this.table.body
     const selectedCell = this.table.selectedCell
@@ -142,12 +143,13 @@ export class Shortcuts {
   }
 
   /**
+   * 한글을 입력중일때 커서를 옮기면 다음 셀에 입력하고 있던 글자가 복사되는 버그를 해결합니다.
+   * https://velog.io/@corinthionia/JS-keydown에서-한글-입력-시-마지막-음절이-중복-입력되는-경우-함수가-두-번-실행되는-경우
+   *
    * @private
    * @param {KeyboardEvent} event
    */
-  _guardEventDelegation(event) {
-    if (!event.target.classList.contains(CSS.inputField)) {
-      return
-    }
+  _isComposingKorean(event) {
+    return event.isComposing
   }
 }
