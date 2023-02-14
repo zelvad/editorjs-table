@@ -31,6 +31,9 @@ export class CellMenu {
     this._colors = config.colors || COLORS
     this.api = api
 
+    /**
+     * FIXME: 테이블 셀 메뉴와 컬러 팔레트가 무한 생성되는 현상을 수정해야 합니다.
+     */
     this._init()
     this._fillCellMenu()
   }

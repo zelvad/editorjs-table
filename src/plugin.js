@@ -3,7 +3,7 @@ const svgIcon = require("./img/toolboxIcon.svg")
 const borderIcon = require("./img/border.svg")
 
 /**
- *  Tool for table's creating
+ *  테이블 플러그인 클래스
  *
  *  @typedef {object} TableData - object with the data transferred to form a table
  *  @property {string[][]} content - two-dimensional array which contains table content
