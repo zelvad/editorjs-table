@@ -440,7 +440,17 @@ export class Table {
         }
       }
 
-      this._table.rows[i].deleteCell(colIndex)
+      if (colIndex == 1) {
+        console.log(123)
+
+        window.tes = this._table.rows[i]
+      }
+
+      Array
+          .from(this._table.rows[i].cells)
+          .filter((cell) => cell.style.display !== 'none')
+          [colIndex]
+          .remove()
     }
 
     this._numberOfColumns--
