@@ -393,12 +393,12 @@ export class Table {
       let cellInColumn = row.cells[index]
       const colIndex = getIndex(row.cells, index);
 
-      if (! cellInColumn) {
+      if (! cellInColumn || cellInColumn.style.display === 'none') {
         cellInColumn = row.cells[colIndex]
       }
 
       if (cellInColumn.colSpan > 1) {
-        row.cells[row.cells.length - 1].colSpan = row.cells[row.cells.length - 1].colSpan - 1
+        cellInColumn.colSpan = cellInColumn.colSpan - 1
 
         continue
       }

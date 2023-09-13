@@ -180,6 +180,8 @@ export const getIndex = (cells, index) => {
     cells = Array.from(cells);
   }
 
+  cells = cells.filter((cell) => cell.style.display !== 'none')
+
   cells.forEach((cell) => {
     if (cell.colSpan > 1) {
       colSpanCount += cell.colSpan;
