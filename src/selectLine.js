@@ -44,9 +44,10 @@ export class SelectLine {
    * @param {Number[]} colIndexes
    */
   highlightColSelectLines(colIndexes) {
-    const colSelectLines = Array.from(this.table.body.rows[0].cells)
-      .filter((cell) => colIndexes.includes(cell.cellIndex))
-      .map((cell) => cell.querySelector("." + CSS.selectLineCol))
+    const colSelectLines = Array
+        .from(this.table.body.rows[0].cells)
+        .filter((cell) => colIndexes.includes(cell.cellIndex))
+        .map((cell) => cell.querySelector("." + CSS.selectLineCol))
 
     colSelectLines.forEach((button) => {
       button.classList.add(CSS.selected)
@@ -185,9 +186,12 @@ export class SelectLine {
       const selectedLines = []
 
       rows.forEach((row) => {
-        const selectedLine = row.cells[0].querySelector("." + CSS.selected)
-        if (selectedLine) {
-          selectedLines.push(selectedLine)
+        if (row.cells.length !== 0) {
+          const selectedLine = row.cells[0].querySelector("." + CSS.selected)
+
+          if (selectedLine) {
+            selectedLines.push(selectedLine)
+          }
         }
       })
 

@@ -61,7 +61,6 @@ class Table {
    * @param {boolean} readOnly - read-only mode flag
    */
   constructor({ data, config, api, readOnly }) {
-    console.log(data)
     this.api = api
     this.readOnly = readOnly
 
@@ -79,7 +78,9 @@ class Table {
 
     this.borderActive = data.settings?.withBorder
 
-    window.tester = this._tableConstructor;
+    document.addEventListener('paste', (event) => {
+      window.clipText = event.clipboardData.getData('text/html')
+    })
   }
 
   /**
@@ -89,10 +90,6 @@ class Table {
    * @public
    */
   render() {
-    document.addEventListener('paste', (event) => {
-      window.clipText = event.clipboardData.getData('text/html');
-    });
-
     return this._tableConstructor.htmlElement
   }
 
@@ -130,12 +127,14 @@ class Table {
       rows.push(rowData)
     }
 
-    table.querySelectorAll("col").forEach((col) => {
-      colgroup.push({
-        span: col.span,
-        width: col.style.width,
-      })
-    })
+    table
+        .querySelectorAll("col")
+        .forEach((col) => {
+          colgroup.push({
+            span: col.span,
+            width: col.style.width,
+          })
+        })
 
     return {
       rows,
@@ -224,9 +223,6 @@ class Table {
       if (window.hasOwnProperty('clipText')) {
         const table = tableDraw.querySelector('table');
 
-        /** Check if the first row is a header */
-        const firstRowHeading = table.querySelector(':scope > thead, tr:first-of-type th');
-
         /** Get all rows from the table */
         const rows = Array.from(table.querySelectorAll('tr'));
 
@@ -253,11 +249,41 @@ class Table {
               rowspan: 1,
             };
           });
-        });
+        })
+            .filter((row) => row.length)
+            .map((row) => {
+              if (row.length >= cellsLenght) {
+                return row;
+              }
+
+              let colSpanTotal = 0;
+
+              row.forEach((cell) => {
+                colSpanTotal += cell.colspan;
+              });
+
+              if (colSpanTotal >= cellsLenght) {
+                return row;
+              }
+
+              for (let i = row.length; i < cellsLenght; i++) {
+                row.push({
+                  alignment: 'left',
+                  bgColor: '',
+                  colspan: 1,
+                  content: '',
+                  display: true,
+                  isHeader: false,
+                  rowspan: 1,
+                });
+              }
+
+              return row;
+            })
 
         const colgroup = Array
             .from(table.querySelectorAll('col'))
-            .map((col) => {
+            .map(() => {
               return {
                 span: 1,
                 width: '', // col.getAttribute('width') || '',

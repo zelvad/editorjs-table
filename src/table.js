@@ -5,7 +5,7 @@ import {
   turnTdIntoTh,
   turnThIntoTd,
   hideCell,
-  showHiddenCell,
+  showHiddenCell, getIndex,
 } from "./documentUtils"
 import { Resize } from "./resize"
 import { SelectLine, CSS as CSSSelectLine } from "./selectLine"
@@ -141,8 +141,6 @@ export class Table {
     const table = this._table
     const { rows, colgroup } = data
 
-    console.log(rows)
-
     rows.forEach((row, i) => {
       const newRow = table.insertRow(i)
       const isFirstRow = i === 0
@@ -202,8 +200,23 @@ export class Table {
     const table = this._table
 
     for (let i = 0; i < table.rows.length; i++) {
-      const cell = table.rows[i].cells[index]
-      cell.classList.add(CSS.selected)
+      let celSpanCount = 0;
+
+      for (let o = 0; o < table.rows[i].cells.length; o++) {
+        if (table.rows[i].cells[o].colSpan > 1) {
+          celSpanCount += table.rows[i].cells[o].colSpan;
+        }
+      }
+
+      if (celSpanCount > 1) {
+        celSpanCount -= 1;
+      }
+
+      const cell = table.rows[i].cells[index - celSpanCount]
+
+      if (cell) {
+        cell.classList.add(CSS.selected)
+      }
     }
   }
 
@@ -231,11 +244,16 @@ export class Table {
     }
 
     this.insertCol(index)
+
     for (let i = 0; i < rows.length; i++) {
-      const cell = rows[i].insertCell(index)
-      cell.colSpan = 1
-      cell.rowSpan = 1
-      this._fillCell(cell)
+      if (index > rows[i].cells.length) {
+        rows[0].cells[rows[0].cells.length - 1].colSpan = index + 1
+      } else {
+        const cell = rows[i].insertCell(index)
+        cell.colSpan = 1
+        cell.rowSpan = 1
+        this._fillCell(cell)
+      }
     }
 
     if (!this.readOnly) {
@@ -371,7 +389,18 @@ export class Table {
 
     for (let i = 0; i < table.rows.length; i++) {
       const row = table.rows[i]
-      const cellInColumn = row.cells[index]
+      let cellInColumn = row.cells[index]
+      const colIndex = getIndex(row.cells, index);
+
+      if (! cellInColumn) {
+        cellInColumn = row.cells[colIndex]
+      }
+
+      if (cellInColumn.colSpan > 1) {
+        row.cells[row.cells.length - 1].colSpan = row.cells[row.cells.length - 1].colSpan - 1
+
+        continue
+      }
 
       // 현재 셀이 합쳐진 셀의 본체라면, 셀의 colspan, rowspan 만큼의 범위를 순회하며 거치는 모든 셀을 해방합니다.
       // 그리고 인덱스에 해당하는 셀을 삭제합니다.
@@ -410,7 +439,7 @@ export class Table {
         }
       }
 
-      this._table.rows[i].deleteCell(index)
+      this._table.rows[i].deleteCell(colIndex)
     }
 
     this._numberOfColumns--

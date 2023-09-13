@@ -172,3 +172,27 @@ export function getCaretCharacterOffsetWithin(element) {
   }
   return caretOffset
 }
+
+export const getIndex = (cells, index) => {
+  let colSpanCount = 0;
+
+  if (cells instanceof HTMLCollection) {
+    cells = Array.from(cells);
+  }
+
+  cells.forEach((cell) => {
+    if (cell.colSpan > 1) {
+      colSpanCount += cell.colSpan;
+    }
+  });
+
+  if (colSpanCount > 1) {
+    colSpanCount -= 1;
+  }
+
+  if (index < colSpanCount) {
+    return 0;
+  }
+
+  return index - colSpanCount;
+};
