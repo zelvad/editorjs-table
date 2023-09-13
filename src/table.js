@@ -440,12 +440,6 @@ export class Table {
         }
       }
 
-      if (colIndex == 1) {
-        console.log(123)
-
-        window.tes = this._table.rows[i]
-      }
-
       Array
           .from(this._table.rows[i].cells)
           .filter((cell) => cell.style.display !== 'none')
