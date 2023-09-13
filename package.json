@@ -1,24 +1,27 @@
 {
-  "name": "@medistream/editorjs-table",
-  "description": "Resizable table for Editor.js",
+  "name": "@everzel/editorjs-table",
+  "description": "Resizable table for Editor.js with import from Spreadsheets/Excel and text alignment",
   "version": "0.1.2",
   "license": "MIT",
   "main": "./dist/bundle.js",
   "scripts": {
     "build": "webpack --mode production",
-    "build:dev": "webpack serve --mode development",
+    "build:dev": "webpack serve --mode development --port=9001",
     "lint": "./node_modules/.bin/eslint"
   },
-  "repository": "https://github.com/medistream-team/editorjs-table",
+  "repository": "https://github.com/zelvad/editorjs-table",
   "author": {
-    "name": "medistream.team",
-    "email": "medistream.team@gmail.com"
+    "name": "Vladyslav Zeleniuk",
+    "email": "vladislav.zelenyk@scalemeup.com"
   },
   "keywords": [
     "table",
     "resize table",
     "editor.js",
-    "editorjs"
+    "editorjs",
+    "import from spreadsheets",
+    "import from excel",
+    "text alignment"
   ],
   "devDependencies": {
     "@babel/core": "^7.14.0",

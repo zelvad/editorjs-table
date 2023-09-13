@@ -260,26 +260,120 @@ export class CellMenu {
     return option
   }
 
-  _fillCellMenu() {
-    const colorPickerButton = this._createColorPickerButton()
-    const toggleFirstRowHeaderButton = this._createToggleFirstRowHeaderButton.call(this.table)
-    const toggleFirstColHeaderButton = this._createToggleFirstColHeaderButton.call(this.table)
-    const addColumnOnRightButton = this._createAddColumnOnRightButton.call(this.table)
-    const addRowBelowButton = this._createAddRowBelow.call(this.table)
-    const mergeButton = this._createMergeButton.call(this.table)
-    const unmergeButton = this._createUnmergeButton.call(this.table)
-    const rowRemoveButton = this._createRowRemoveButton.call(this.table)
-    const colRemoveButton = this._createColRemoveButton.call(this.table)
+  _createAlignmentCenterButton() {
+    const block = document.createElement("button")
 
-    this._cellMenuInner.appendChild(colorPickerButton)
-    this._cellMenuInner.appendChild(toggleFirstRowHeaderButton)
-    this._cellMenuInner.appendChild(toggleFirstColHeaderButton)
-    this._cellMenuInner.appendChild(addColumnOnRightButton)
-    this._cellMenuInner.appendChild(addRowBelowButton)
-    this._cellMenuInner.appendChild(mergeButton)
-    this._cellMenuInner.appendChild(unmergeButton)
-    this._cellMenuInner.appendChild(rowRemoveButton)
-    this._cellMenuInner.appendChild(colRemoveButton)
+    block.textContent = this.api.i18n.t("Text Center")
+
+    block.classList.add(CSS.option)
+    block.classList.add(CSS.toggleColHeaderOption)
+
+    block.addEventListener("click", () => {
+      this._setAlignment('center')
+    })
+
+    return block
+  }
+
+  _createAlignmentLeftButton() {
+    const block = document.createElement("button")
+
+    block.textContent = this.api.i18n.t("Text left")
+
+    block.classList.add(CSS.option)
+    block.classList.add(CSS.toggleColHeaderOption)
+
+    block.addEventListener("click", () => {
+      this._setAlignment('left');
+    })
+
+    return block
+  }
+
+  _createAlignmentRightButton() {
+    const block = document.createElement("button")
+
+    block.textContent = this.api.i18n.t("Text right")
+
+    block.classList.add(CSS.option)
+    block.classList.add(CSS.toggleColHeaderOption)
+
+    block.addEventListener("click", () => {
+      this._setAlignment('right');
+    })
+
+    return block
+  }
+
+  _setAlignment(align) {
+    const selectedRows = this.table.selectedRows
+    const selectedCols = this.table.selectedCols
+    const selectedCell = this.table.selectedCell
+
+    if (! selectedRows.length && ! selectedCols.length) {
+      selectedCell.style.textAlign = align
+      this.table.deselectCells()
+      return
+    }
+
+    for (let i = selectedRows[0]; i <= selectedRows[selectedRows.length - 1]; i++) {
+      for (let j = selectedCols[0]; j <= selectedCols[selectedCols.length - 1]; j++) {
+        this
+            .table
+            .body
+            .rows[i]
+            .cells[j]
+            .style
+            .textAlign = align
+      }
+    }
+  }
+
+  _createCellGroup(name, blocks) {
+    const groupBlock = document.createElement('div')
+    const nameBlock = document.createElement('span')
+
+    groupBlock.classList.add(CSS.group)
+    nameBlock.innerText = name
+
+    groupBlock.appendChild(nameBlock)
+
+    blocks.forEach((block) => {
+      groupBlock.appendChild(block)
+    })
+
+    return groupBlock
+  }
+
+  _fillCellMenu() {
+    const headerGroup = this._createCellGroup(this.api.i18n.t('Header'), [
+      this._createToggleFirstRowHeaderButton.call(this.table),
+      this._createToggleFirstColHeaderButton.call(this.table),
+    ]);
+
+    const manageGroup = this._createCellGroup(this.api.i18n.t('Manage'), [
+      this._createAddColumnOnRightButton.call(this.table),
+      this._createAddRowBelow.call(this.table),
+      this._createMergeButton.call(this.table),
+      this._createUnmergeButton.call(this.table),
+      this._createRowRemoveButton.call(this.table),
+      this._createColRemoveButton.call(this.table),
+    ])
+
+    const styleGroup= this._createCellGroup(this.api.i18n.t('Style'), [
+      this._createColorPickerButton(),
+    ])
+
+    const alignmentGroup= this._createCellGroup(this.api.i18n.t('Alignment'), [
+        this._createAlignmentCenterButton(),
+        this._createAlignmentLeftButton(),
+        this._createAlignmentRightButton(),
+    ])
+
+    this._cellMenuInner.appendChild(headerGroup)
+    this._cellMenuInner.appendChild(manageGroup)
+    this._cellMenuInner.appendChild(styleGroup)
+    this._cellMenuInner.appendChild(alignmentGroup)
   }
 
   /**
@@ -308,9 +402,20 @@ export class CellMenu {
 
     iconBox.classList.add("activated")
 
-    this.container.style.top = `${Math.floor(top) + scrollY}px`
-    this.container.style.left = `${right + 4}px`
-    this.container.style.visibility = "visible"
+    const menuWidth = this.container.offsetWidth;
+    const windowWidth = window.innerWidth;
+
+    iconBox.classList.add("activated");
+
+    this.container.style.top = `${Math.floor(top) + scrollY}px`;
+
+    if (right + menuWidth > windowWidth) {
+      this.container.style.left = `${iconBox.getBoundingClientRect().left - menuWidth - 4}px`;
+    } else {
+      this.container.style.left = `${right + 4}px`;
+    }
+
+    this.container.style.visibility = "visible";
 
     if (isToggleRowHeaderPossible) {
       toggleRowHeaderOption.style.display = "flex"
@@ -400,4 +505,5 @@ export const CSS = {
   toggleColHeaderOption: "toggle-col-header-option",
   rowHeaderOn: "row-header-on",
   colHeaderOn: "col-header-on",
+  group: 'table_cell_group'
 }

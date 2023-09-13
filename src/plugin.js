@@ -61,6 +61,11 @@ class Table {
    * @param {boolean} readOnly - read-only mode flag
    */
   constructor({ data, config, api, readOnly }) {
+    console.log(data)
+    this.api = api
+    this.readOnly = readOnly
+
+    this.config = config
     this.api = api
     this.readOnly = readOnly
 
@@ -73,6 +78,8 @@ class Table {
     }
 
     this.borderActive = data.settings?.withBorder
+
+    window.tester = this._tableConstructor;
   }
 
   /**
@@ -82,6 +89,10 @@ class Table {
    * @public
    */
   render() {
+    document.addEventListener('paste', (event) => {
+      window.clipText = event.clipboardData.getData('text/html');
+    });
+
     return this._tableConstructor.htmlElement
   }
 
@@ -110,6 +121,7 @@ class Table {
           display: cell.style.display === "none" ? false : true,
           bgColor: cell.style.backgroundColor,
           isHeader: cell.tagName === "TH",
+          alignment: cell.style.textAlign || 'left',
         }
 
         rowData.push(data)
@@ -198,6 +210,78 @@ class Table {
 
     return holder
   }
+
+  static get pasteConfig() {
+    return { tags: ['TABLE', 'TR', 'TH', 'TD'] };
+  }
+
+  onPaste(event) {
+    setTimeout(() => {
+      const tableDraw = document.createElement('div');
+
+      tableDraw.innerHTML = window.clipText;
+
+      if (window.hasOwnProperty('clipText')) {
+        const table = tableDraw.querySelector('table');
+
+        /** Check if the first row is a header */
+        const firstRowHeading = table.querySelector(':scope > thead, tr:first-of-type th');
+
+        /** Get all rows from the table */
+        const rows = Array.from(table.querySelectorAll('tr'));
+
+        let cellsLenght = 0;
+
+        /** Generate a content matrix */
+        const content = rows.map((row) => {
+          /** Get cells from row */
+          const cells = Array.from(row.querySelectorAll('th, td'))
+
+          if (cells.length > cellsLenght) {
+            cellsLenght = cells.length
+          }
+
+          /** Return cells content */
+          return cells.map((cell) => {
+            return {
+              alignment: 'left',
+              bgColor: cell.style.backgroundColor || '',
+              colspan: 1,
+              content: cell.innerHTML,
+              display: true,
+              isHeader: cell.tagName === 'TH',
+              rowspan: 1,
+            };
+          });
+        });
+
+        const colgroup = Array
+            .from(table.querySelectorAll('col'))
+            .map((col) => {
+              return {
+                span: 1,
+                width: '', // col.getAttribute('width') || '',
+              }
+            })
+
+        const newConstructor = new TableConstructor({
+          colgroup: colgroup,
+          rows: content
+        }, this.config, this.api, this.readOnly)
+
+        /** Update table block */
+        this._tableConstructor._container.replaceWith(newConstructor.htmlElement)
+        this._tableConstructor = newConstructor
+      }
+    }, 100)
+  }
+
+  stringToHtml(str) {
+    let dom = document.createElement('div');
+    dom.innerHTML = str;
+
+    return dom;
+  };
 }
 
 module.exports = Table

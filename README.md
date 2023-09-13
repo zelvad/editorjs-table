@@ -6,6 +6,11 @@ Resizable Table Block for the [Editor.js](https://editorjs.io).
 
 ![](https://user-images.githubusercontent.com/108341074/213103362-1f730708-94b8-4504-8c0f-84ce52c410af.png)
 
+## Additional functions
+
+- Import from Spreadsheets
+- Text alignment
+
 ## Installation
 
 ### Install via NPM or Yarn

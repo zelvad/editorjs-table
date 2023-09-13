@@ -156,7 +156,7 @@ export class Table {
         this.isColHeaderOn = true
       }
 
-      row.forEach(({ content, bgColor, colspan, rowspan, display, isHeader }, i) => {
+      row.forEach(({ content, bgColor, alignment, colspan, rowspan, display, isHeader }, i) => {
         const newCell = newRow.insertCell(i)
 
         this._fillCell(newCell)
@@ -164,6 +164,7 @@ export class Table {
         newCell.colSpan = colspan
         newCell.rowSpan = rowspan
         newCell.style.backgroundColor = bgColor
+        newCell.style.textAlign = alignment
         newCell.querySelector("." + CSS.inputField).innerHTML = content
 
         if (isHeader) {
@@ -189,7 +190,7 @@ export class Table {
       this.insertCol(i)
       this.updateButtons()
 
-      this.colgroup.children[i].style.width = width
+      this.colgroup.children[i].width = width
       this.colgroup.children[i].span = span
     })
   }
