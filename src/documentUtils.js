@@ -127,11 +127,12 @@ export function turnThIntoTd(cell) {
 }
 
 export function hideCell(cell) {
-  cell.colSpan = 1
-  cell.rowSpan = 1
-  cell.style.display = "none"
-  cell.setAttribute("data-visibility", "hidden")
-  cell.querySelector("." + TableCSS.inputField).contentEditable = false
+  cell.remove();
+  //cell.colSpan = 1
+  //cell.rowSpan = 1
+  //cell.style.display = "none"
+  //cell.setAttribute("data-visibility", "hidden")
+  //cell.querySelector("." + TableCSS.inputField).contentEditable = false
 }
 
 export function showHiddenCell(cell) {
