@@ -280,6 +280,31 @@ class Table {
 
               return row;
             })
+            .map((row) => {
+              let colSpanTotal = 0;
+
+              row.forEach((cell) => {
+                colSpanTotal += parseInt(cell.colspan);
+              });
+
+              if (row.length < colSpanTotal) {
+                const append = colSpanTotal - row.length;
+
+                for (let i = 0; i < append; i++) {
+                  row.push({
+                    alignment: 'left',
+                    bgColor: '',
+                    colspan: 1,
+                    content: '',
+                    display: false,
+                    isHeader: false,
+                    rowspan: 1,
+                  });
+                }
+              }
+
+              return row;
+            })
 
         const colgroup = Array
             .from(table.querySelectorAll('col'))

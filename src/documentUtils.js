@@ -98,7 +98,7 @@ export function turnTdIntoTh(cell) {
   th.setAttribute("rowspan", cell.rowSpan)
   th.setAttribute("colspan", cell.colSpan)
   th.setAttribute("class", cell.className)
-  th.style.setProperty("display", cell.style.display === "none" ? "none" : null)
+  th.style.display = cell.style.display === "none" ? "none" : null
 
   while (cell.firstChild) {
     th.appendChild(cell.firstChild)
@@ -127,12 +127,11 @@ export function turnThIntoTd(cell) {
 }
 
 export function hideCell(cell) {
-  cell.remove();
-  //cell.colSpan = 1
-  //cell.rowSpan = 1
-  //cell.style.display = "none"
-  //cell.setAttribute("data-visibility", "hidden")
-  //cell.querySelector("." + TableCSS.inputField).contentEditable = false
+  cell.colSpan = 1
+  cell.rowSpan = 1
+  cell.style.display = "none"
+  cell.setAttribute("data-visibility", "hidden")
+  cell.querySelector("." + TableCSS.inputField).contentEditable = false
 }
 
 export function showHiddenCell(cell) {

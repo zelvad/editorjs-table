@@ -146,10 +146,10 @@ export class Table {
       const isFirstRow = i === 0
       const isSecondRow = i === 1
 
-
       if (isFirstRow) {
         this.removeButtons(0)
       }
+
       if (isFirstRow && row[1] && row[1].isHeader) {
         this.isRowHeaderOn = true
       }
@@ -168,13 +168,14 @@ export class Table {
         newCell.style.textAlign = alignment
         newCell.querySelector("." + CSS.inputField).innerHTML = content
 
-        if (isHeader) {
-          turnTdIntoTh(newCell)
-        }
         if (display === false) {
           newCell.style.display = "none"
           newCell.setAttribute("data-visibility", "hidden")
           newCell.querySelector("." + CSS.inputField).contentEditable = false
+        }
+
+        if (isHeader) {
+          turnTdIntoTh(newCell)
         }
       })
 
