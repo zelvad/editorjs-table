@@ -109,6 +109,8 @@ export class SelectLine {
    */
   _createLineRemoveButton() {
     const lineRemoveButton = create("button", [CSS.removeButton])
+    lineRemoveButton.setAttribute('type', 'button');
+
     const iconContainer = create("div")
 
     const removeSelectedLines = (event) => {
