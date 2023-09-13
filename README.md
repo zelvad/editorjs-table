@@ -18,13 +18,13 @@ Resizable Table Block for the [Editor.js](https://editorjs.io).
 Get the package
 
 ```shell
-npm i --save-dev @zelvad/editorjs-table
+npm i --save-dev https://github.com/zelvad/editorjs-table.git#master
 ```
 
 or
 
 ```shell
-yarn add @zelvad/editorjs-table --dev
+yarn add https://github.com/zelvad/editorjs-table.git#master --dev
 ```
 
 Include module in your application
