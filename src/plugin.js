@@ -246,8 +246,8 @@ class Table {
             return {
               alignment: 'left',
               bgColor: cell.style.backgroundColor || '',
-              colspan: 1,
-              content: cell.innerHTML,
+              colspan: cell.getAttribute('colspan') || 1,
+              content: cell.innerText,
               display: true,
               isHeader: cell.tagName === 'TH',
               rowspan: 1,
@@ -263,6 +263,15 @@ class Table {
                 width: '', // col.getAttribute('width') || '',
               }
             })
+
+        if (! colgroup.length) {
+          for (let i = 0; i < cellsLenght; i++) {
+            colgroup.push({
+              span: 1,
+              width: '',
+            });
+          }
+        }
 
         const newConstructor = new TableConstructor({
           colgroup: colgroup,

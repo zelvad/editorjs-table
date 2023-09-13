@@ -141,18 +141,21 @@ export class Table {
     const table = this._table
     const { rows, colgroup } = data
 
+    console.log(rows)
+
     rows.forEach((row, i) => {
       const newRow = table.insertRow(i)
       const isFirstRow = i === 0
       const isSecondRow = i === 1
 
+
       if (isFirstRow) {
         this.removeButtons(0)
       }
-      if (isFirstRow && row[1].isHeader) {
+      if (isFirstRow && row[1] && row[1].isHeader) {
         this.isRowHeaderOn = true
       }
-      if (isSecondRow && row[0].isHeader) {
+      if (isSecondRow && row[0] && row[0].isHeader) {
         this.isColHeaderOn = true
       }
 
