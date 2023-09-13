@@ -1,5 +1,5 @@
 {
-  "name": "@everzel/editorjs-table",
+  "name": "@zelvad/editorjs-table",
   "description": "Resizable table for Editor.js with import from Spreadsheets/Excel and text alignment",
   "version": "0.1.2",
   "license": "MIT",
