@@ -63,10 +63,7 @@ class Table {
   constructor({ data, config, api, readOnly }) {
     this.api = api
     this.readOnly = readOnly
-
     this.config = config
-    this.api = api
-    this.readOnly = readOnly
 
     this._tableConstructor = new TableConstructor(data, config, api, readOnly)
 
@@ -335,13 +332,6 @@ class Table {
       }
     }, 100)
   }
-
-  stringToHtml(str) {
-    let dom = document.createElement('div');
-    dom.innerHTML = str;
-
-    return dom;
-  };
 }
 
 module.exports = Table
