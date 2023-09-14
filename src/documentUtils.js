@@ -99,6 +99,7 @@ export function turnTdIntoTh(cell) {
   th.setAttribute("colspan", cell.colSpan)
   th.setAttribute("class", cell.className)
   th.style.display = cell.style.display === "none" ? "none" : null
+  th.style.backgroundColor = cell.style.backgroundColor || null
 
   while (cell.firstChild) {
     th.appendChild(cell.firstChild)
@@ -117,7 +118,8 @@ export function turnThIntoTd(cell) {
   td.setAttribute("rowspan", cell.rowSpan)
   td.setAttribute("colspan", cell.colSpan)
   td.setAttribute("class", cell.className)
-  td.style.setProperty("display", cell.style.display === "none" ? "none" : null)
+  td.style.display = cell.style.display === "none" ? "none" : null
+  td.style.backgroundColor = cell.style.backgroundColor || null
 
   while (cell.firstChild) {
     td.appendChild(cell.firstChild)

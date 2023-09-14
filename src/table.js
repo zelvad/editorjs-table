@@ -175,6 +175,7 @@ export class Table {
         }
 
         if (isHeader) {
+          console.log(newCell)
           turnTdIntoTh(newCell)
         }
       })
